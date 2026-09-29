@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Play } from "lucide-react";
 import { gameAudio } from "./audio";
 import { CAMPAIGN } from "./campaign";
@@ -140,6 +140,11 @@ export function GameApp() {
   const [bootError, setBootError] = useState<string | null>(null);
   const [canvasBox, setCanvasBox] = useState({ w: 960, h: 720, lw: 960, lh: 720 });
   const [briefOpen, setBriefOpen] = useState(false);
+  const [pauseWeapon, setPauseWeapon] = useState<WeaponId | null>(null);
+
+  useEffect(() => {
+    if (screen !== "paused") setPauseWeapon(null);
+  }, [screen]);
 
   useEffect(() => {
     input.bind();
@@ -295,16 +300,7 @@ export function GameApp() {
                 width={canvasBox.lw}
                 height={canvasBox.lh}
               />
-              {inPlay && hud.radio && (
-                <div className="pointer-events-none absolute inset-x-3 top-2 z-10 flex justify-center">
-                  <p className="hud-radio max-w-[92%] truncate rounded-full border border-white/10 bg-[#0a0614cc] px-3 py-1.5 text-center text-[10px] sm:text-[11px]">
-                    <span className="font-bold uppercase tracking-wide text-primary">
-                      {parseRadio(hud.radio).who}
-                    </span>
-                    <span className="text-accent/90"> · {parseRadio(hud.radio).text}</span>
-                  </p>
-                </div>
-              )}
+              <RadioPill radio={inPlay ? hud.radio : ""} />
             </div>
           </div>
         </div>
@@ -416,7 +412,17 @@ export function GameApp() {
                 },
               },
             ]}
-          />
+          >
+            <PauseKit
+              hud={hud}
+              weapon={pauseWeapon ?? hud.weapon}
+              onWeapon={(id) => {
+                setPauseWeapon(id);
+                input.setTouch({ weaponPick: id });
+                gameAudio.play("select", { volume: 0.45 });
+              }}
+            />
+          </OverlayCard>
         </FullOverlay>
       )}
       {screen === "dead" && (
@@ -533,7 +539,6 @@ function HudBar({
             <span className="font-semibold text-fg">
               {hud.character === "grok" ? "Grok" : "Goblin"} · Op {hud.operation} · L{hud.level}
             </span>
-            <span className="text-warn">★ {hud.score.toLocaleString()}</span>
             {hud.activeBuffs.length > 0 && (
               <span className="text-primary">{hud.activeBuffs.join(" · ")}</span>
             )}
@@ -1134,15 +1139,18 @@ function OverlayCard({
   title,
   body,
   actions,
+  children,
 }: {
   title: string;
   body: string;
   actions: { label: string; onClick: () => void; primary?: boolean }[];
+  children?: ReactNode;
 }) {
   return (
-    <div className="w-full max-w-sm rounded-2xl border border-border bg-surface p-6 text-center shadow-[0_0_40px_#00f0ff33]">
+    <div className="w-full max-w-sm rounded-2xl border border-border bg-surface p-5 text-center shadow-[0_0_40px_#00f0ff33]">
       <h3 className="mb-2 text-2xl font-black">{title}</h3>
-      <p className="mb-5 text-sm text-muted">{body}</p>
+      <p className="mb-3 text-sm text-muted">{body}</p>
+      {children}
       <div className="flex flex-col gap-2">
         {actions.map((a) => (
           <button
@@ -1158,6 +1166,68 @@ function OverlayCard({
             {a.label}
           </button>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function RadioPill({ radio }: { radio: string }) {
+  const [shown, setShown] = useState("");
+  useEffect(() => {
+    if (!radio) {
+      setShown("");
+      return;
+    }
+    setShown(radio);
+    const t = window.setTimeout(() => setShown(""), 2000);
+    return () => window.clearTimeout(t);
+  }, [radio]);
+  if (!shown) return null;
+  const line = parseRadio(shown);
+  return (
+    <div className="pointer-events-none absolute inset-x-3 top-2 z-10 flex justify-center">
+      <p className="hud-radio max-w-[92%] truncate rounded-full border border-white/10 bg-[#0a0614cc] px-3 py-1.5 text-center text-[10px] sm:text-[11px]">
+        <span className="font-bold uppercase tracking-wide text-primary">{line.who}</span>
+        <span className="text-accent/90"> · {line.text}</span>
+      </p>
+    </div>
+  );
+}
+
+function PauseKit({
+  hud,
+  weapon,
+  onWeapon,
+}: {
+  hud: HudState;
+  weapon: WeaponId;
+  onWeapon: (id: WeaponId) => void;
+}) {
+  return (
+    <div className="mb-4 text-left">
+      <p className="mb-2 text-center text-sm font-semibold text-warn">
+        ★ {hud.score.toLocaleString()} · {hud.coins} coins · {hud.lives} lives
+      </p>
+      <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-muted">Powers</p>
+      <PowerRow unlocked={hud.unlockedPowers} />
+      <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-muted">Weapons</p>
+      <div className="grid grid-cols-4 gap-1">
+        {WEAPON_RAIL.map((id) => {
+          const on = id === weapon;
+          const th = WEAPON_THEME[id];
+          return (
+            <button
+              key={id}
+              type="button"
+              className={`min-h-9 rounded-lg border px-1 py-1 text-[9px] font-black uppercase ${
+                on ? `${th.border} ${th.bg} ${th.text} ${th.glow}` : "border-border bg-surface-2 text-muted"
+              }`}
+              onClick={() => onWeapon(id)}
+            >
+              {WEAPON_LABEL[id]}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -1236,7 +1306,7 @@ function MobileControls({
                 <button
                   key={id + "-side"}
                   type="button"
-                  className={`flex min-h-[2.45rem] min-w-0 flex-[0.85] items-center justify-center rounded-xl border px-1 text-[10px] font-black uppercase leading-none opacity-55 ${th.border} bg-surface-2 ${th.text}`}
+                  className={`weapon-neighbor flex min-h-[2.45rem] min-w-0 flex-[0.85] items-center justify-center rounded-xl border px-1 text-[10px] font-black uppercase leading-none ${th.border} bg-surface-2 ${th.text}`}
                   style={{ touchAction: "none" }}
                   onPointerDown={(e) => {
                     e.preventDefault();
@@ -1254,7 +1324,7 @@ function MobileControls({
                 {side(prev)}
                 <button
                   type="button"
-                  className={`flex min-h-[2.55rem] min-w-0 flex-[1.5] items-center justify-center rounded-xl border px-2 text-[12px] font-black uppercase tracking-wide ${th.border} ${th.bg} ${th.text} ${th.glow}`}
+                  className={`weapon-selected flex min-h-[2.55rem] min-w-0 flex-[1.5] items-center justify-center rounded-xl border px-2 text-[12px] font-black uppercase tracking-wide ${th.border} ${th.bg} ${th.text} ${th.glow}`}
                   style={{ touchAction: "none" }}
                   onPointerDown={(e) => {
                     e.preventDefault();
@@ -1270,10 +1340,7 @@ function MobileControls({
         </div>
 
         <div className="flex items-stretch justify-between gap-3">
-          <div className="flex items-stretch gap-3">
-            <Pad label="◀" move {...axisPress("left")} />
-            <Pad label="▶" move {...axisPress("right")} />
-          </div>
+          <MovePlate />
 
           <button
             type="button"
@@ -1322,6 +1389,81 @@ function MobileControls({
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function MovePlate() {
+  const plateRef = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ id: number; x0: number; slide: boolean } | null>(null);
+  const [knob, setKnob] = useState(50);
+  const [home, setHome] = useState(true);
+
+  const ratio = (clientX: number) => {
+    const el = plateRef.current;
+    if (!el) return 0.5;
+    const r = el.getBoundingClientRect();
+    return Math.max(0, Math.min(1, (clientX - r.left) / Math.max(1, r.width)));
+  };
+
+  const applyZone = (pointerId: number, t: number) => {
+    input.holdTouch("left", pointerId, t < 0.45);
+    input.holdTouch("right", pointerId, t > 0.55);
+  };
+
+  const end = (pointerId: number) => {
+    const d = drag.current;
+    if (!d || d.id !== pointerId) return;
+    input.holdTouch("left", pointerId, false);
+    input.holdTouch("right", pointerId, false);
+    drag.current = null;
+    setHome(true);
+    setKnob(50);
+  };
+
+  return (
+    <div
+      ref={plateRef}
+      className="move-plate"
+      style={{ touchAction: "none" }}
+      onPointerDown={(e) => {
+        if (drag.current) return;
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+          (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+        } catch {
+          /* synthetic pointer */
+        }
+        const t = ratio(e.clientX);
+        drag.current = { id: e.pointerId, x0: e.clientX, slide: false };
+        setHome(false);
+        setKnob(Math.max(18, Math.min(82, t * 100)));
+        applyZone(e.pointerId, t);
+      }}
+      onPointerMove={(e) => {
+        const d = drag.current;
+        if (!d || d.id !== e.pointerId) return;
+        if (!d.slide && Math.abs(e.clientX - d.x0) > 12) d.slide = true;
+        if (!d.slide) return;
+        const t = ratio(e.clientX);
+        setKnob(Math.max(18, Math.min(82, t * 100)));
+        applyZone(e.pointerId, t);
+      }}
+      onPointerUp={(e) => end(e.pointerId)}
+      onPointerCancel={(e) => end(e.pointerId)}
+      onLostPointerCapture={(e) => end(e.pointerId)}
+    >
+      <div className="move-lobe move-lobe-l" />
+      <div className="move-lobe move-lobe-r" />
+      <div className="move-rail" />
+      <div className={`move-knob${home ? " is-home" : ""}`} style={{ left: `${knob}%` }} />
+      <span className="move-chev move-chev-l" aria-hidden>
+        ◀
+      </span>
+      <span className="move-chev move-chev-r" aria-hidden>
+        ▶
+      </span>
     </div>
   );
 }

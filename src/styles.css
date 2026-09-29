@@ -342,6 +342,80 @@
 .fire-btn {
   min-height: 4.85rem;
 }
+.move-plate {
+  position: relative;
+  width: calc(4.85rem * 2 + 0.75rem);
+  height: 4.85rem;
+  flex: none;
+  touch-action: none;
+  user-select: none;
+}
+.move-lobe {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: calc(50% - 0.28rem);
+  border-radius: 1rem;
+  pointer-events: none;
+  background: linear-gradient(180deg, #7ef9ff 0%, #00e0f0 45%, #00b8d4 100%);
+  border: 2px solid #e8ffff;
+  box-shadow:
+    0 0 0 2px #00f0ffaa,
+    0 0 24px #00f0ffcc,
+    inset 0 1px 0 #ffffffcc;
+}
+.move-lobe-l {
+  left: 0;
+}
+.move-lobe-r {
+  right: 0;
+}
+.move-rail {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 50%;
+  height: 3px;
+  transform: translateY(-50%);
+  border-radius: 99px;
+  background: #04101866;
+  pointer-events: none;
+  z-index: 1;
+}
+.move-knob {
+  position: absolute;
+  top: 14%;
+  height: 72%;
+  width: 14px;
+  border-radius: 8px;
+  transform: translateX(-50%);
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(180deg, #ffffff 0%, #7ef9ff 28%, #00c8e0 100%);
+  box-shadow:
+    0 0 12px #00f0ffcc,
+    inset 0 2px 0 #ffffffee;
+}
+.move-knob.is-home {
+  transition: left 120ms ease-out;
+}
+.move-chev {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  transform: translateY(-50%);
+  color: #041018;
+  font-size: 1.35rem;
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
+}
+.move-chev-l {
+  left: 0.65rem;
+}
+.move-chev-r {
+  right: 0.65rem;
+}
 .hud-track {
   min-height: 14px;
 }
@@ -350,6 +424,12 @@
 }
 .weapon-carousel button {
   -webkit-tap-highlight-color: transparent;
+}
+.weapon-carousel .weapon-neighbor {
+  opacity: 0.35;
+}
+.weapon-carousel .weapon-selected {
+  opacity: 1;
 }
 
 @media (orientation: landscape) and (max-height: 500px) {
@@ -379,6 +459,16 @@
     width: 3.25rem;
     height: 3.25rem;
     font-size: 0.75rem;
+  }
+  .move-plate {
+    width: calc(3.25rem * 2 + 0.75rem);
+    height: 3.25rem;
+  }
+  .move-chev {
+    font-size: 1rem;
+  }
+  .move-knob {
+    width: 10px;
   }
   .fire-btn {
     min-height: 3.25rem;
