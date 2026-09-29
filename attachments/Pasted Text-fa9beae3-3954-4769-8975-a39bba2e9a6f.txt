@@ -1,0 +1,151 @@
+BUILD MODE HANDOFF — Bird Mafia Madness
+Do not start a new app. Do not scaffold. This tree IS the live game.
+
+You are Grok Build inside the existing Bird Mafia Madness workspace. Keep the live preview on 0.0.0.0:8080. Auth/db stay OFF. Do not wipe /workspace and rebuild from a template.
+
+============================================================
+WHERE THE CODE LIVES
+============================================================
+Live game (edit this):
+  /workspace  OR  artifacts/Bird_Mafia_Madness/
+
+Source of truth docs:
+  artifacts/Bird_Mafia_Madness_Design_Bible.docx
+  artifacts/Bird_Mafia_Madness_Vertical_Slice_Plan.docx   ← current punch list
+
+Key source:
+  src/game/engine.ts          gameplay + draw + disasters + stamp
+  src/game/GameApp.tsx        HUD, menus, briefing, stage fill
+  src/game/types.ts           Bird / HazardEvent / LevelDef
+  src/game/progression.ts     10 Operations, 9 powers, 10 chaos seeds
+  src/game/narrative.ts       100 radio beats, briefs, win copy
+  src/game/levelGen.ts        100-level campaign + Op 1 signature maps
+  src/game/particles.ts       juice
+  public/sprites/             characters, bird, don-corvone, story, skies
+
+Stamp check (bottom-left of playfield):
+  MUST read  “ART v9 · stagefill”
+  If it says ART v8 / thumbdeck, you are on a stale sandbox. Restore from
+  artifacts/Bird_Mafia_Madness before touching anything.
+
+If the workspace was wiped: copy artifacts/Bird_Mafia_Madness into /workspace,
+keep public/sprites, run startup.sh, confirm ART v9, then continue.
+
+============================================================
+WHAT THIS GAME IS
+============================================================
+Neon canyon platformer. Grok-9 + Chaos Goblin extract Honey Bun AI from the
+Bird Mafia. Honey Bun is a rejected Grok 4.4 baked into a sunglass pastry.
+Every gift is real help. Every pin is also a trap.
+Core question: “Is Honey Bun helping us… or farming us?”
+
+10 Operations × 10 levels = 100. Op 1 is the vertical slice.
+Op 1 boss = Don Corvone (3-phase fedora raven). Chaos Seed = Crimson.
+
+============================================================
+LOCKED DECISIONS — DO NOT REOPEN
+============================================================
+- Vertical slice = Operation 1, levels 1–10, Don Corvone. Finish this first.
+- Honey Bun as a visible body in the nest is PARKED until the slice feels ~90%.
+- All 7 projectile weapons stay unlocked for testing. Spread across levels LATER.
+- No new attack mechanisms. Combat = projectile weapons + Zapper Shield only.
+- Before slice is called complete: refine projectile patterns, angles, look,
+  physics. NOT THIS SPRINT. Do that after flock roles / telegraphs / L5 dump.
+- NO flood, rain, or any water-event disasters. Narrative conflict. Do not
+  discuss it. Disaster pool is: sandstorm, quake, meteor, LIGHTNING.
+- Playfield must FILL the column between HUD and thumb deck. No 4:3 letterbox.
+  Internal view stays 960 wide; height follows stage aspect (GameApp fit +
+  engine.syncView). That was the biggest feel problem.
+- Goal is an oval portal ring + beacon. No rectangular stroke around a flag.
+- Do not add melee, ground-pound, mounts, crafting, or a second resource.
+- Do not rename the project. Do not turn auth/db on.
+- Keep editing THIS project. Never “make a fresh Build Mode app.”
+
+============================================================
+ALREADY SHIPPED (do not redo)
+============================================================
+Systems: 9 Power-Up types, per-Op inventory HUD row, boss-arena seeds only
+if unlocked, Chaos Seeds + passives, 100-level campaign shells, Op 1 authored
+maps (L1 dune-rises, L2 caves, L5 Belt Run conveyor, L7 descender, L8 Hardpan),
+Don Corvone 3-phase, 7 weapons, Grok jetpack / Goblin multi-jump, Android thumb
+deck (7-weapon rail, no SWAP), Phase 3+4 juice, briefing overlay + 100 radio
+lines, intro 5-beat cutscene.
+
+This lock turn (ART v9):
+  - flashflood removed; lightning strikes with warn-column then bolt
+  - goal box removed; portal ring
+  - stage fill / taller view (postage stamp fix)
+
+============================================================
+VERTICAL SLICE — REMAINING BUILD ORDER
+============================================================
+Do these in order. One beat per turn when possible. Verify in the live preview.
+
+1. BIRD SILHOUETTE
+   Current sheet reads as a pale streak at play size.
+   Darker body, hotter eye, 3px near-black outline at the size they actually
+   draw. Same sheet is fine.
+
+2. FLOCK ROLES ON THE EXISTING BIRD SHEET (no new weapons)
+   Add a role field on Bird. Same sprite budget, different brains + chrome:
+     Swooper       L1–L3   current hover + weak shot
+     Diver         L3–L7   telegraph pose + red eye, THEN commit down
+     PerchShooter  L4,L6,L9  sits on a ledge, leads shots down-angle
+     BeltMagpie    L5 only  walks the green conveyor, pecks if you share it
+     ColumnGuard   L6–L7   owns one vertical shaft (patrol Y, not whole map)
+     CapoScout     L8–L9   fat HP, fedora silhouette, Don preview
+   Mix cap:
+     L1–2 Swoopers only
+     L3–4 Swooper + Diver
+     L5   BeltMagpie + Diver
+     L6–7 Column + Perch + Diver
+     L8–9 Capo + mix
+     L10  Don + unlocked seeds, almost no trash flock
+   Role chrome at 40px: color band / hat / talon glint so Diver ≠ Shooter.
+
+3. DIVE TELEGRAPH
+   Windup already exists (~0.45s) but it just starts falling.
+   Hold pose, flash beak/eye, downward chevron + red contact ghost, THEN dive.
+
+4. NEST PERCH + SMASH
+   One smashable twig-bowl nest per mid/late Op 1 level.
+   Holds a PerchShooter. Smash → coins + shooter leaves.
+   Gives the gun a job besides “shoot the oval.”
+
+5. DISASTER + METEOR READ
+   Lightning is in. Meteor still looks like weather art.
+   Meteor = falling ember + ground X before hurt.
+   One disaster per slice level max.
+
+6. L5 BELT DUMP
+   Green belt stays. Add a red “dump” conveyor segment that throws you.
+   One authored “ride + jump the mix” beat and one “belt into a Diver” beat.
+
+7. GOAL + SEED PING
+   Portal is in; turn the beacon up so you can see it from a screen away.
+   When that level’s Power-Up seed is on-screen, one-beat HUD arrow.
+
+8. BOSS FIRST-DROP
+   First unlocked seed in Don’s arena after phase 1 must be huge, labeled,
+   and late enough that the inventory row clearly paid off.
+
+9. CAPO SCOUT on L8–L9 if not already done in step 2.
+
+10. PROJECTILE FEEL PASS (last systems beat before Honey Bun)
+    Patterns, angles, appearance, physics of the 7 guns. Still no new attacks.
+
+11. ONLY THEN: Honey Bun walks into the nest (cage / float / crumb-spelling).
+
+============================================================
+HOW TO WORK IN THIS CHAT
+============================================================
+- Change engine.ts / GameApp.tsx / types.ts / levelGen.ts in place.
+- After each beat: confirm the live preview, look for ART v9 · stagefill.
+- If preview dies, run startup.sh and leave the dev server up.
+- Do not invent a parallel folder. Do not export a blank remix.
+- When you finish a beat, say what changed and what the next beat is.
+- If you are unsure whether a file is stale, read engine.ts stamp first.
+
+START NOW WITH BEAT 1 + 2 if you can do both cleanly: bird silhouette read
++ Diver / PerchShooter / BeltMagpie role field wired into Op 1 spawns.
+Leave Honey Bun parked. Leave all 7 weapons on.

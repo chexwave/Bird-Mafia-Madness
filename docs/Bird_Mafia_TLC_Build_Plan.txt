@@ -1,0 +1,94 @@
+BIRD MAFIA MADNESS — Refined TLC × Build Mode Plan
+Grok & Goblin: The Honey Bun Extraction
+2026-09-06
+
+WORKFLOW LOCK (Android)
+Plan here in Expert. Build only in the existing Build Mode conversation so the
+same grok.me preview updates. Expert sandboxes do not publish to that link.
+Never mint a second Build Mode app to "fix" a dead preview — that creates a
+new URL and the phone stays on the old one. If the preview looks stale:
+close tab → reopen the SAME link → pull-to-refresh. If it still shows ART v8
+or tuxedo Grok, restore the live tree inside that same Build chat.
+
+HOW I FEEL ABOUT THE SPEC
+The outsider spec is the right document. It does not invent systems. It names
+the three comments that still make the game look like a prototype:
+
+  1. Sky layer seam / sticker sun
+  2. Goblin portrait cheaper than Grok (and cheaper than the title card)
+  3. HUD + chrome stacked like a debug build (two pauses, mute on combat,
+     seven equal guns, buried hook)
+
+Ship that before more content. A new flock role on a playfield that still
+prints “ART v9 · stagefill” will not change what a cold viewer says.
+
+THREE REFINEMENTS BEFORE BUILD MODE TOUCHES CODE
+
+1. Invisible seam, not perimeter fanfic.
+   The spec’s “authored Bird Mafia containment beam” is a good joke only if
+   we are willing to give it collision, a toast, and anchors. That is new
+   content. Out of scope for TLC. Blend the skies. Park the sun in the
+   gradient. Delete the hairline.
+
+2. Keep a debug-gated stamp.
+   The live stamp is how we know the sandbox is not a stale ART v8 restore.
+   Production: no watermark. ?debug=1 or localStorage.bmmDebug=1: “ART v10 · tlc”.
+
+3. Park the remaining vertical-slice combat beats until P0–P3 land.
+   Flock roles, dive telegraph, nest smash, L5 dump, projectile feel, Honey
+   Bun body stay on the old punch list. Do not open them in the TLC Build
+   Mode chat. Two goals in one prompt is how Build Mode forgets the HUD.
+
+WHAT IS ALREADY TRUE IN THE TREE (so the plan is not generic)
+
+Playfield
+  engine.ts drawThemedParallax draws a night→sunset gradient, then the
+  per-level far plate (l1–l9-far.jpg) starting around 22% view height, then
+  fog, then mid mesas, THEN the sun at 78% x / 20% y. That stacking is the
+  sticker. drawGridFloor paints a solid earth band from 70% view height plus
+  a neon perspective grid — the cream table.
+
+HUD
+  HudBar = identity ticker + radio line + PowerRow (all 9 shorts) + HP/STM/
+  AMMO/SHD + Mute + Pause.
+  MobileControls = 7 equal weapon pills + FIRE + JUMP + shield + ❚❚.
+  Two pauses. Mute on combat. Flavor line stays parked.
+
+Runner
+  /sprites/grok.png = full-front product shot, fills the plate.
+  /sprites/goblin.png = small side-profile cousin on black (13KB vs 32KB).
+  Title-art.jpg Goblin is the finished face. CharCard selected glow is cyan
+  for both cards.
+
+Title
+  Hook is the last clause of TITLE_BLURB. WASD legend is printed on a mobile
+  poster. Key art is capped at ~11rem / 420px.
+
+Tokens
+  styles.css already has the brand pair (#00f0ff / #ff2bd6), two radii, bar
+  language. Do not fork the spec’s #00D4E8 / #C84B9A into a second palette.
+
+BUILD MODE SPRINT MAP
+
+Paste: artifacts/Bird_Mafia_BuildMode_TLC_Handoff.txt
+
+Beat A  P0   seams, stamp gate, one Pause, Mute-in-pause, floor fade
+Beat B  P1   title-card Goblin plate, twin glow, READY, voice lines
+Beat C  P2   HUD diet, ghosted weapon neighbors, 2s radio toast, safe-area
+Beat D  P3   title copy stack, bigger key art, ? for keys, Pause inventory
+Beat E  P4   9-dot seed tracker only if A–D are clean
+
+After Beat D, switch chats or paste the older vertical-slice handoff
+(artifacts/Bird_Mafia_BuildMode_Handoff_Prompt.txt) and resume flock roles.
+
+PORTRAIT RULE FOR BUILD MODE
+Do not call Imagine for a third Goblin. Crop the title-art panel or
+background-position that panel into .char-art. Grok stays the product-shot
+bot. Contrast is the joke only if both plates look finished.
+
+SUCCESS
+Cold viewer, 30 seconds, three screens:
+  Title  → name + hook
+  Select → neither card looks cheaper
+  Play   → no band, no watermark, no double pause, FIRE/JUMP/HP obvious
+)

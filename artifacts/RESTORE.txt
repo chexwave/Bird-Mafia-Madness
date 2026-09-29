@@ -1,0 +1,37 @@
+BIRD MAFIA MADNESS — CLEAN SOURCE BACKUP
+Packed: 2026-09-08
+Archive: Full_Backup_9-8.zip
+
+WHAT THIS IS
+  One restore pack of every file needed to run and keep building the game.
+  The previous chat named this zip then died before the file landed.
+  This is that pack.
+
+INSIDE
+  Bird_Mafia_Madness/     live web game (src + public + config)
+  docs/                   locked design + handoff papers
+  RESTORE.txt             this file
+  MANIFEST.txt            file list + what is clutter outside this zip
+
+NOT INSIDE (on purpose)
+  node_modules            run npm install after restore
+  imagine_images/         scratch Imagine outputs
+  old overlay / sprite experiment zips (see MANIFEST)
+
+RESTORE INTO BUILD MODE
+  1. Do NOT mint a new app. This tree IS the game.
+  2. Copy Bird_Mafia_Madness/* into the live workspace root (/workspace).
+  3. Keep public/sprites. Do not delete title-art.jpg.
+  4. Auth/db stay OFF.
+  5. npm install && sh startup.sh
+  6. Preview must stay on 0.0.0.0:8080
+  7. Stamp behind ?debug=1 should read ART v10 · tlc (Beat A).
+     If you see ART v8 / tuxedo Grok, you restored a stale overlay by mistake.
+
+PHONE CACHE
+  Close the preview tab, reopen the SAME grok.me link, pull-to-refresh once.
+  Do not send a second URL.
+
+LOCKED (do not reopen)
+  Finish Operation 1 first. No water disasters. No new attack types.
+  Honey Bun body parked. Do not rename the project.

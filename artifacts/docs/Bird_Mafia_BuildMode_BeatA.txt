@@ -1,0 +1,13 @@
+Keep editing THIS Bird Mafia Madness app. Do not start a new app, remix, or wipe the workspace. Preview stays on :8080. Auth/db stay OFF.
+
+Do Beat A only. Stop when it is visible on the phone.
+
+1. Hide the “ART v9 · stagefill” stamp on the playfield. Keep it only if ?debug=1, then it should say “ART v10 · tlc”.
+2. Soften the sky join in drawThemedParallax. Draw the sun in the sky with a corona so it is not sitting on a plate edge. No new perimeter-beam object.
+3. Fade the cream floor band in drawGridFloor so the stage sits in the canyon, not on a table.
+4. Delete the bottom-right ❚❚ pause. Keep one Pause, top-right.
+5. Move Mute off the combat HUD into the Pause menu.
+
+Do not Imagine new characters. Do not add weapons, birds, levels, or Honey Bun. Do not change the preview URL.
+
+When done, tell me what I should see on Android after I close the preview tab and reopen the same link.

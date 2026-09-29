@@ -1,0 +1,29 @@
+Bird Mafia Madness — unseen-screen audit.
+
+Do not start a new app. Do not write code unless I ask. I am on Android. I will attach screenshots from the live preview:
+code-wild.hades-www.grok-sandbox.com
+
+Already seen and graded. Do not re-litigate these:
+- Title stack is good (name, Honey Bun Extraction, hook, Play, ? for keys).
+- Pause is good (score/coins/lives, powers, full weapons, Mute, Resume).
+- Mission brief is good.
+- Live HUD diet is good (identity, 9-dot tracker, 3 bars, one Pause, selected gun + ghost neighbors, FIRE/JUMP).
+- Still broken on those shots: Choose Runner Goblin is the small side-portrait, not the title-card face. Playfield has two suns + a cyan join.
+
+I need you to check only what those shots did not show. I will send screens. For each, say pass / fail / not enough info. One sentence why. No essays.
+
+Unseen list:
+1. Intro cutscene — 5 beats, Skip/Next, last beat goes to Choose Runner.
+2. Operations / level select — Op tabs, L1–L10 names, Drop In.
+3. Choose Runner with Goblin selected — magenta READY, plate mass vs Grok.
+4. Grok in-world sprite vs his runner plate — same character at play size?
+5. Death screen and win screen.
+6. Radio toast — does the cave-mouth line leave after ~2s or stay parked?
+7. L2 cave, L5 Belt Run, L7 descender, L8 Hardpan — sky join and floor on those plates, not just L1.
+8. Goal — oval portal only, or is the old flag still there?
+9. Power-Up seed on the ground — readable disc + label, pickup toast.
+10. Don Corvone L10 — fedora raven, not a scaled grunt. First unlocked seed labeled.
+11. Mute from Pause actually silences audio.
+12. Notch / status bar — HUD not under the clock. Gesture bar not eating FIRE/JUMP.
+
+If a shot is missing, tell me exactly which screen to capture next. Do not invent flock-role or Honey Bun-body work. Do not open a second Build app.

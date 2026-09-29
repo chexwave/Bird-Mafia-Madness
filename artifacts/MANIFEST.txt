@@ -1,0 +1,55 @@
+BIRD MAFIA MADNESS — CLEAN PACK MANIFEST
+2026-09-08
+
+NECESSARY (in this zip)
+  Game tree
+    src/game/engine.ts GameApp.tsx types.ts levelGen.ts levels.ts
+    src/game/progression.ts narrative.ts particles.ts audio.ts input.ts campaign.ts
+    src/styles.css src/routes/* src/router.tsx src/routeTree.gen.ts
+    src/components/* src/lib/* (auth/db scaffolding kept OFF at runtime)
+    public/sprites/          characters, bird, don-corvone, story, skies, title-art
+    public/audio/            music + sfx
+    public/og.jpg x-banner.jpg favicon.svg
+    public/__grok/           host chrome (needed by preview)
+    package.json package-lock.json tsconfig.json vite.config.ts
+    eslint.config.mjs .prettierrc startup.sh
+    scripts/ server/ migrations/
+    README.md AGENTS.md GODOT_HANDOFF_Bird_Mafia_Madness.txt
+
+  Docs
+    Bird_Mafia_Madness_Design_Bible.docx
+    Bird_Mafia_Madness_Vertical_Slice_Plan.docx
+    Bird_Mafia_BuildMode_Handoff_Prompt.txt
+    Bird_Mafia_BuildMode_TLC_Handoff.txt
+    Bird_Mafia_TLC_Build_Plan.txt
+    Bird_Mafia_BuildMode_BeatA.txt
+    Bird_Mafia_Unseen_Audit_Prompt.txt
+
+CLUTTER you can delete AFTER this zip downloads
+  These are superseded experiment / overlay packs. The live tree already
+  contains the art and code they once carried.
+
+    Bird_Mafia_Madness.zip                  (2026-08-10 original dump)
+    Bird_Mafia_Madness_ARTv7_Rebuild.zip    (2026-08-30, older than live tree + Beat A)
+    Bird_Mafia_ARTv7_Overlay.zip
+    Bird_Mafia_ARTv8_Controls.zip
+    Bird_Mafia_Grok_CleanSprites.zip
+    Bird_Mafia_New_Character_Sprites.zip
+    Bird_Mafia_Sprites_BoldOutline.zip
+    Bird_Mafia_TitleMatched_Sprites.zip
+    Bird_Mafia_Phase3_Juice.zip
+    imagine_images/                         (scratch generations)
+
+KEEP EVEN AFTER CLEANUP
+    Full_Backup_9-8.zip                     this pack
+    Bird_Mafia_Madness/                     live working tree
+    the docs listed above (also copied into docs/ inside the zip)
+
+DO NOT DELETE FROM THE LIVE TREE
+    public/sprites/title-art.jpg
+    public/sprites/grok.png
+    public/sprites/characters/*
+    public/sprites/don-corvone.png
+    public/sprites/story/*
+    public/sprites/bg/*
+    src/game/*

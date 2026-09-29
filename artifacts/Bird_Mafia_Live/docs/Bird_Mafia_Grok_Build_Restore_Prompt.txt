@@ -1,0 +1,123 @@
+GROK BUILD RESTORE — Bird Mafia Madness (live snapshot, ART v10 + cinematic title)
+
+Paste this whole prompt into a NEW Grok Build chat on this same project.
+Do not start a new app. Do not scaffold. This tree IS the live game.
+
+You are Grok Build inside the existing Bird Mafia Madness workspace.
+Keep the live preview on 0.0.0.0:8080. Auth/db stay OFF.
+Do not wipe /workspace and rebuild from a template.
+Do not rename the project. Do not turn auth/db on.
+Keep editing THIS project. Never “make a fresh Build Mode app.”
+
+============================================================
+1. FIND THE SNAPSHOT
+============================================================
+Project files persist at /workspace/artifacts.
+
+Preferred restore pack (this snapshot):
+  /workspace/artifacts/Bird_Mafia_Live_9-9.zip
+  /workspace/artifacts/Bird_Mafia_Live/          ← unpacked copy if present
+
+Fallback if that zip is missing:
+  /workspace/artifacts/Full_Backup_9-8.zip
+
+If /workspace/src/game/engine.ts already exists and the stamp in-engine
+reads “ART v10 · tlc”, the live tree may already be current — still overlay
+the zip so title-hero art, sprites, and GameApp match this snapshot.
+
+============================================================
+2. RESTORE WITHOUT CLOBBERING THE PLATFORM
+============================================================
+Unpack the zip, then copy GAME files over the live tree.
+
+KEEP these (never overwrite from the zip):
+  vite.config.ts
+  tsconfig.json
+  startup.sh
+  package.json / package-lock.json   (unless a game import is missing)
+  public/__grok/
+  server/
+  scripts/                           (except do not delete grok-pwa / preview)
+  src/lib/auth/  src/lib/db.ts  src/lib/app-data/  src/lib/multiplayer/
+  src/components/preview-host-bridge.tsx
+  src/router.tsx                     (keep getRouter + AppErrorComponent)
+
+OVERWRITE / copy these from the zip onto /workspace:
+  src/game/                          entire folder
+  src/styles.css
+  src/routes/index.tsx
+  src/routes/__root.tsx              (keep AuthProvider + PreviewHostBridge + HeadContent;
+                                      it is OK to keep the Bebas Neue font link and APP_NAME)
+  src/lib/og/site.json
+  public/sprites/                    entire folder (title-hero.jpg, title-hero-portrait.jpg,
+                                      grok/goblin/bird sheets, skies, story, title-art.jpg)
+  public/og.jpg
+  public/x-banner.jpg
+  public/favicon.svg
+  public/audio/
+  docs/
+
+If lucide-react is not in package.json, npm install lucide-react.
+Auth/db remain OFF. No migrations. No login routes.
+
+Then:
+  sh /workspace/startup.sh
+  Confirm the preview serves the title screen (not a blank scaffold).
+
+Stamp check (add ?debug=1, bottom-left of playfield):
+  MUST read  “ART v10 · tlc”
+  If it says ART v8 / thumbdeck / ART v9, you restored the wrong pack.
+
+============================================================
+3. WHAT THIS GAME IS
+============================================================
+Neon canyon platformer. Grok-9 + Chaos Goblin extract Honey Bun AI from the
+Bird Mafia. Honey Bun is a rejected Grok 4.4 baked into a sunglass pastry.
+Every gift is real help. Every pin is also a trap.
+Core question: “Is Honey Bun helping us… or farming us?”
+
+10 Operations × 10 levels = 100. Op 1 is the vertical slice.
+Op 1 boss = Don Corvone (3-phase fedora raven). Chaos Seed = Crimson.
+
+Characters in-game (must match poster, not old white-hair Grok / goggle Goblin):
+  Grok   = black-helmet android, one cyan visor slit, white/silver armor, XAI/GROK
+  Goblin = green skin, pointed ears, spiky green-cyan-magenta hair, magenta-cyan hoodie
+  Birds  = black ravens with hot amber eyes, 2px hard rim, not pale smears
+
+============================================================
+4. LOCKED DECISIONS — DO NOT REOPEN
+============================================================
+- Vertical slice = Operation 1, levels 1–10, Don Corvone. Finish this first.
+- Honey Bun as a visible body in the nest is PARKED until the slice feels ~90%.
+- All 7 projectile weapons stay unlocked for testing.
+- No new attack mechanisms. Combat = projectile weapons + Zapper Shield only.
+- NO flood, rain, or water-event disasters. Pool: sandstorm, quake, meteor, lightning.
+- Playfield FILLS the column between HUD and thumb deck. No 4:3 letterbox.
+- Goal is an oval portal ring + beacon. No rectangular flag box.
+- Android thumb deck: 7-weapon rail (Homing/Pulse/Beam/Spread/Charge/Nova/Prism), auto-aim.
+- Do not add melee, ground-pound, mounts, crafting, or a second resource.
+- Share cards (public/og.jpg + x-banner.jpg) use the user poster unless they attach a new one.
+- Title screen is cinematic full-bleed (title-hero.jpg / title-hero-portrait.jpg) with a CSS
+  Bebas Neue lockup and Drop In. Do not revert to the framed-poster title card.
+
+============================================================
+5. ALREADY SHIPPED (do not redo)
+============================================================
+Systems: 9 Power-Up types, per-Op inventory HUD row, Chaos Seeds + passives,
+100-level campaign shells, Op 1 authored maps (L1 dune-rises, L2 caves,
+L5 Belt Run conveyor, L7 descender, L8 Hardpan), Don Corvone 3-phase,
+7 weapons, Grok jetpack / Goblin multi-jump, Android thumb deck, Phase 3+4
+juice, briefing overlay + 100 radio lines, intro 5-beat cutscene,
+ART v10 sprites (Grok visor android, hoodie Goblin, raven sheet),
+cinematic title screen (this snapshot).
+
+============================================================
+6. AFTER RESTORE
+============================================================
+1. Title: full-bleed canyon, Grok + Goblin + Honey Bun + van, stacked
+   BIRD MAFIA / MADNESS lockup, Drop In at the bottom.
+2. Play → intro → Choose Runner shows visor Grok and hoodie Goblin plates.
+3. Drop In on L1: ravens read as birds, playfield fills HUD-to-thumbdeck.
+4. Phone: weapon rail + auto-aim. Keyboard: WASD / Space / J / Q-E / L.
+
+Then wait for the user’s next beat. Do not invent a new game.

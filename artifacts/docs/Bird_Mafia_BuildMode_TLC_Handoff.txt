@@ -1,0 +1,264 @@
+BUILD MODE HANDOFF — Bird Mafia Madness · ART v10 TLC
+Do not start a new app. Do not scaffold. This tree IS the live game.
+
+You are Grok Build inside the EXISTING Bird Mafia Madness workspace.
+The player reviews on Android. The only picture they have is THIS conversation's
+preview link (*.grok.me). Expert-mode sandboxes cannot update that link.
+If you mint a new app, remix, or blank template, their phone goes dark.
+
+Keep the live preview on 0.0.0.0:8080. Auth/db stay OFF.
+Do not wipe /workspace and rebuild from a template.
+
+============================================================
+PREVIEW LINK SURVIVAL — READ BEFORE TOUCHING FILES
+============================================================
+The Android preview dies when any of these happen. Do not do them.
+
+  FORBIDDEN
+  - "Create a new Build Mode app"
+  - Remix / export into a fresh workspace
+  - Wipe /workspace and scaffold Vite/React from a template
+  - Change the project name, package name, or publish target
+  - Bind the preview to :8081 or a built-output static server
+  - Turn auth/db ON (login wall = "the game is broken" on phone)
+  - Replace public/sprites or delete title-art.jpg
+
+  REQUIRED
+  - Edit files in the live tree (src/game/*, src/styles.css, public/sprites/goblin.png)
+  - If preview dies: run startup.sh, leave `npm run dev --host 0.0.0.0 --port 8080` up
+  - After each beat, tell the player the visible check they can do on the phone
+    without a desktop (example: "Pause is only top-right now. Bottom-right ❚❚ is gone.")
+  - Cache on Android is sticky. Tell them: close the preview tab, reopen the
+    SAME grok.me link, pull-to-refresh once. Do not send them a second URL.
+
+  PHONE SANITY CHECKS (player is on Android)
+  Before Beat A lands they should still see ART v9 · stagefill bottom-left in play.
+  After Beat A they should see NO watermark, ONE Pause (top-right), no ❚❚.
+  If they still see ART v8 / thumbdeck / tuxedo Grok, you are on a stale
+  workspace — restore from artifacts/Bird_Mafia_Madness, then continue.
+  Never "fix" a stale preview by starting over.
+
+============================================================
+WHERE THE CODE LIVES
+============================================================
+Live game (edit this):
+  /workspace  OR  artifacts/Bird_Mafia_Madness/
+
+Source of truth:
+  artifacts/Bird_Mafia_Madness_Design_Bible.docx
+  artifacts/Bird_Mafia_Madness_Vertical_Slice_Plan.docx
+  artifacts/Bird_Mafia_Madness_TLC_Implementation_Spec.docx   ← outsider polish spec
+  THIS FILE                                              ← what you execute now
+
+Key source:
+  src/game/engine.ts          drawThemedParallax, drawGridFloor, stamp, seeds
+  src/game/GameApp.tsx        TitleScreen, CharacterSelect, HudBar, MobileControls, Pause
+  src/game/narrative.ts       TITLE_TAG / TITLE_BLURB / CORE_QUESTION
+  src/styles.css              .title-art .char-art tokens
+  public/sprites/title-art.jpg          LOCK key art
+  public/sprites/grok.png               LOCK Grok portrait
+  public/sprites/goblin.png             REPLACE (too small, side-profile cousin)
+  public/sprites/characters/            in-world sheets — do not restyle
+
+Stamp check (bottom-left of playfield, DEV ONLY after this sprint):
+  Current prod stamp is “ART v9 · stagefill”
+  After this sprint the PLAYFIELD must NOT show a watermark.
+  Keep the string behind a debug flag (localStorage.bmmDebug === "1" or ?debug=1).
+  When the flag is on, stamp must read “ART v10 · tlc”
+  If you see ART v8 / thumbdeck, restore from artifacts/Bird_Mafia_Madness first.
+
+============================================================
+WHAT THIS SPRINT IS
+============================================================
+End-game TLC. Visual consistency. HUD diet. Character lock.
+
+Goal: first-time players comment on the bit, not the seams.
+“They stole Honey Bun AI and you extract it with a Tesla bot or a skyhopping goblin?”
+NOT “why is there a neon band on the sky / why is Goblin cheaper / double pause.”
+
+This sprint does NOT add weapons, operations, level gen, audio, melee, water, or Honey Bun body.
+
+Personality stays loud. Production tells go quiet.
+
+============================================================
+LOCKED DECISIONS — DO NOT REOPEN
+============================================================
+- Keep editing THIS project. Never “make a fresh Build Mode app.”
+- Vertical slice content (flock roles, nests, L5 dump, projectile feel) is PARKED
+  until P0–P3 of this TLC sprint land. Do not start those beats in this chat.
+- Title-card Goblin is the face lock. Do NOT Imagine a new Goblin. Do NOT restyle
+  Grok toward cartoon. Crop / plate / CSS only.
+- Grok cyan #00f0ff / Goblin magenta #ff2bd6 is the existing brand pair.
+  Spec hex #00D4E8 / #C84B9A is directional — MAP onto existing tokens, do not fork a second palette.
+- FIRE and JUMP stay the largest thumb targets. Do not shrink them to make room for pills.
+- Playfield still FILLS the column between HUD and thumb deck. No 4:3 letterbox.
+- All 7 weapons stay unlocked for testing. Combat still projectile + Zapper Shield.
+- No flood / rain / water disasters.
+- Do not rename the project. Auth/db stay OFF.
+- Charm is copy and world rules, not watermarks.
+
+============================================================
+PREFERRED FIXES (do these, not the alternate fanfic)
+============================================================
+Sky seam: INVISIBLE SEAM. Blend night gradient into sunset / far plate.
+  Do NOT invent a “Bird Mafia Perimeter beam” this sprint. That is extra content.
+  Move the sun into the sky gradient with a soft corona. It must not sit on a 1px stroke.
+
+Seed widget: compact 9-dot HUD tracker under identity. Do NOT build a new shrine mesh.
+
+Floor strip: soften drawGridFloor so the cream/horizon band is a fade into canyon,
+  not a table the stage sits on. Keep platform contrast.
+
+Birds: silhouette / trim only if you still have budget AFTER P0–P3.
+  Full flock-role brains stay on the parked vertical-slice list.
+
+============================================================
+FILE-ACCURATE CURRENT STATE (so you do not hunt)
+============================================================
+PLAYFIELD
+- engine.ts drawThemedParallax(): gradient sky + stars + lN-far.jpg plate at h*0.22
+  + fog + mid plate/mesas + sun at (w*0.78, h*0.2) drawn AFTER plates.
+  That is the sticker-sun / cyan join the spec saw.
+- engine.ts drawGridFloor(): solid earth band from VIEW_H*0.7 + neon perspective grid.
+  That is the cream table under platforms.
+- engine.ts ~line 1943: always draws “ART v9 · stagefill”. Gate it.
+- GameApp HudBar: identity ticker + radio line + PowerRow pills + 3–4 bars + Mute + Pause.
+- GameApp MobileControls: 7 equal weapon pills + FIRE + JUMP + shield + ❚❚ pause.
+  Two pauses exist. Mute lives on combat HUD.
+
+CHOOSE RUNNER
+- CharCard uses /sprites/grok.png (full-front product shot) and /sprites/goblin.png
+  (tiny side-profile on black). Selected glow is ALWAYS cyan (#00f0ff), even for Goblin.
+- .char-art height 8rem. Cards float in a max-w-xl column with leftover night.
+
+TITLE
+- TitleScreen: title-art.jpg max 420px / .title-art height 11rem.
+- Stack is title + TITLE_TAG + TITLE_BLURB + CORE_QUESTION + Play + audio hint + WASD legend.
+- Hook “Every gift is real. Every gift is a trap.” is buried inside TITLE_BLURB.
+
+PAUSE
+- OverlayCard: Resume / Restart / Level Select. No Mute. No weapon list. No score.
+
+============================================================
+SHIP ORDER — ONE BEAT PER TURN WHEN POSSIBLE
+============================================================
+
+BEAT A — P0 seams + debug + duplicate chrome
+Files: engine.ts, GameApp.tsx
+1. Gate the ART stamp. Production playfield has no watermark.
+2. Blend sky join in drawThemedParallax:
+   - Draw sun + corona in the SKY (after gradient, before or softly into far plate),
+     not parked on a plate edge.
+   - Add a short vertical dither/fog across the plate top so night→sunset is one sky.
+   - If a far plate still prints a hard cyan hairline, crop/draw it 8–16px taller
+     and let the gradient eat the edge. Do not stroke the join.
+3. Soften drawGridFloor horizon: fade the earth band and drop grid alpha near the
+   join so the floor belongs to the canyon.
+4. Remove the ❚❚ button from MobileControls. Keep one Pause, top-right HudBar.
+5. Move Mute off HudBar into the Pause overlay (add Mute / Unmute action).
+Done when: no watermark, one Pause, Mute not on live HUD, no sticker horizon.
+
+BEAT B — P1 runner parity
+Files: public/sprites/goblin.png (replace), GameApp.tsx CharCard, styles.css
+1. Promote title-card Goblin to portrait lock.
+   HOW: crop the title-art.jpg Goblin panel (front, hoodie, grin, hair) onto a
+   transparent or matched-studio plate the SAME frame as grok.png.
+   Do not generate a cousin. Do not use the side-profile sticker as canon.
+   If you cannot crop cleanly in this environment, CSS-crop title-art as the
+   Goblin plate background-position until a real PNG lands — still no Imagine reroll.
+2. Shared plate rules in CharCard:
+   - Equal card height, equal .char-art box, head-near-top / feet-near-bottom.
+   - Goblin selected glow = magenta token. Grok selected glow = cyan token.
+     Same blur / border weight / READY chip language.
+   - Add READY chip on the selected card.
+3. Voice lines under kits (replace current blurbs):
+   Grok    Jetpack Bot   “Thrusters are rated. The canyon is not.”
+   Goblin  Skyhopper     “Jumps are free. Gravity is a suggestion.”
+4. Center the pair vertically. Footer Back + Continue stay equal width.
+Done when: a cold viewer does not say one portrait looks cheaper.
+
+BEAT C — P2 HUD diet
+Files: GameApp.tsx HudBar, MobileControls, styles.css
+Live playfield keeps:
+  - Identity chip: GROK · OP 1 · L2
+  - HP / STM / AMMO as one compact cluster (same bar height)
+  - Boss / charge bars only while relevant
+  - Active weapon chip (HOMING 1/7) near controls or in the identity row
+  - Flavor / radio as a 2-second toast, then gone (do not leave the cave-mouth line parked)
+  - Move + FIRE + JUMP
+  - Shield / jetpack hint only as the existing hold-shield bar
+  - Pause top-right
+Leaves the live HUD:
+  - PowerRow pill strip (SHD HOM OVR RPD ZAP SLOW) → Pause + pickup toast
+  - Score / eyes / lives ticker → Pause
+  - Mute
+  - Second pause
+  - Permanent radio subtitle
+Weapon rail:
+  - Selected weapon large. Left/right neighbors visible but ghosted (opacity ~0.35).
+  - Other four collapse or hide. Tap neighbor still picks. Q/E still cycle.
+  - Full seven-pack lives in Pause.
+  - Selected color follows runner (cyan Grok / magenta Goblin) plus weapon identity.
+Safe area:
+  - HUD root padding-top: env(safe-area-inset-top)
+  - Title / select / pause footers already need to clear Android gesture bar
+    (thumb deck already uses safe-area-inset-bottom — keep it).
+Done when: FIRE, JUMP, and HP are findable without searching and unused guns are not a settings menu on the playfield.
+
+BEAT D — P3 one UI kit + title stack
+Files: GameApp.tsx TitleScreen / overlays, narrative.ts, styles.css
+Title copy stack (replace current):
+  Title      Bird Mafia Madness
+  Subtitle   The Honey Bun Extraction
+  Hook       Every gift is real. Every gift is a trap.
+  Objective  Hunt 9 Power-Up seeds each Operation. Crack the boss. Stack Colored Chaos Seeds to Level 100.
+  CTA        Play
+  Small      Tap Play to unlock audio
+WASD / J / Q / E / L legend moves behind a “?” control or into Pause / first-run overlay.
+Enlarge key art: .title-art should own the screen (target ~min(52vh, 560px) on portrait,
+not 11rem floating in night). Play is the only primary button.
+Shared tokens already in styles.css — do not invent a third radius family.
+Pause overlay gains: Mute, score/coins/lives, unlocked power chips, full weapon list.
+Done when: title reads name + hook in 5 seconds and no keyboard poster on mobile.
+
+BEAT E — P4 leftovers only if A–D are clean
+- Seed tracker = 9 dots under identity (filled = unlocked this Operation).
+- Soft floor already in Beat A. Revisit only if it still reads as a table.
+- Bird silhouette/trim ONLY if play still looks like clipart at 40px. No new sheets.
+
+============================================================
+ACCEPTANCE — 30 SECOND OUTSIDER TEST
+============================================================
+- Title 5s: they can say the name and the hook.
+- Runner 5s: they do not say one portrait looks cheaper.
+- Play 20s: they do not mention a neon band, watermark, or double pause.
+- They can find FIRE, JUMP, and HP without searching.
+
+Production checklist:
+  [ ] No ART / stage / version watermark in prod
+  [ ] One Pause control (top-right)
+  [ ] Mute only inside Pause
+  [ ] No raw layer seam at sky join
+  [ ] Sun not resting on a 1px stroke
+  [ ] Grok and Goblin plates equal mass
+  [ ] Both selected states use the same chrome language (color follows runner)
+  [ ] Live HUD has no unused-weapon grid of seven equals
+  [ ] Flavor text toasts, then leaves
+  [ ] Safe area clears system status and gesture bar
+  [ ] Title does not print full keyboard map
+  [ ] Key art is the visual hero of the title screen
+  [ ] Debug stamp ART v10 · tlc only with ?debug=1
+
+============================================================
+HOW TO WORK IN THIS CHAT
+============================================================
+- Change engine.ts / GameApp.tsx / narrative.ts / styles.css / goblin.png in place.
+- After each beat: confirm live preview. Prod playfield has no watermark.
+- If preview dies, run startup.sh and leave the dev server up.
+- Do not invent a parallel folder. Do not export a blank remix.
+- When you finish a beat, say what changed and what the next beat is.
+- After Beat D, STOP and wait. Do not start flock roles in the same turn.
+
+START NOW WITH BEAT A.
+Stamp gate + sky blend + sun corona + floor fade + single Pause + Mute-in-pause.
+)

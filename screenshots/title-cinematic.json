@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Bird Mafia Madness — The Honey Bun Extraction",
+      "hasCanvas": true,
+      "bodyTextLen": 212,
+      "bodyTextHash": "5b01f3a9a582e9fd36e7ee41beab5206da9d673330e66b45154fd8b032a8d83e",
+      "bodyTextPrefix": "OPERATION 1 · CANYON DROP BIRD MAFIA MADNESS Grok & Goblin: The ",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/title-cinematic.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Bird Mafia Madness — The Honey Bun Extraction",
+      "hasCanvas": true,
+      "bodyTextLen": 212,
+      "bodyTextHash": "5b01f3a9a582e9fd36e7ee41beab5206da9d673330e66b45154fd8b032a8d83e",
+      "bodyTextPrefix": "OPERATION 1 · CANYON DROP BIRD MAFIA MADNESS Grok & Goblin: The ",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/title-cinematic-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/title-cinematic.json"
+}
