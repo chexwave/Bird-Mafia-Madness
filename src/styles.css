@@ -319,6 +319,9 @@
 }
 .char-art {
   height: 8rem;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 .pad-lg {
   width: 4.85rem;

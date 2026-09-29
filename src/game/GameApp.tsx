@@ -830,16 +830,18 @@ function CharacterSelect({
         <CharCard
           name="Grok"
           tag="Jetpack Bot"
-          blurb="Jetpack bot. “He's still on our side. The crumbs prove it.”"
+          blurb="“Thrusters are rated. The canyon is not.”"
           selected={selected === "grok"}
+          runner="grok"
           img="/sprites/grok.png?v=art10"
           onClick={() => onSelect("grok")}
         />
         <CharCard
           name="Goblin"
           tag="Skyhopper"
-          blurb="Skyhopper. “The crumbs prove something. That's the problem.”"
+          blurb="“Jumps are free. Gravity is a suggestion.”"
           selected={selected === "goblin"}
+          runner="goblin"
           img="/sprites/goblin.png?v=art10"
           onClick={() => onSelect("goblin")}
         />
@@ -869,6 +871,7 @@ function CharCard({
   tag,
   blurb,
   selected,
+  runner,
   img,
   onClick,
 }: {
@@ -876,23 +879,40 @@ function CharCard({
   tag: string;
   blurb: string;
   selected: boolean;
+  runner: "grok" | "goblin";
   img: string;
   onClick: () => void;
 }) {
+  const goblin = runner === "goblin";
   return (
     <button
       type="button"
       onClick={onClick}
       className={`rounded-2xl border p-3 text-left transition ${
         selected
-          ? "border-accent bg-accent/15 shadow-[0_0_20px_#00f0ff44]"
+          ? goblin
+            ? "border-primary bg-primary/15 shadow-[0_0_20px_#ff2bd644]"
+            : "border-accent bg-accent/15 shadow-[0_0_20px_#00f0ff44]"
           : "border-border bg-surface"
       }`}
     >
-      <div
-        className="char-art mb-2 flex items-end justify-center rounded-xl bg-bg/60 bg-contain bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${img})` }}
-      />
+      <div className="relative mb-2">
+        <div
+          className="char-art flex items-end justify-center rounded-xl bg-bg/60 bg-contain bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${img})` }}
+        />
+        {selected && (
+          <span
+            className={`absolute right-1.5 top-1.5 rounded border px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${
+              goblin
+                ? "border-primary bg-primary/20 text-primary"
+                : "border-accent bg-accent/20 text-accent"
+            }`}
+          >
+            READY
+          </span>
+        )}
+      </div>
       <div className="text-lg font-bold">{name}</div>
       <div className="text-xs font-semibold text-primary">{tag}</div>
       <div className="mt-1 text-[11px] text-muted">{blurb}</div>
