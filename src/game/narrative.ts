@@ -1,6 +1,7 @@
 /**
  * Presentation script — what the player actually hears and reads.
  * Design Bible v2 is the source of truth; this is the playable surface.
+ * Op 1 path lock 2026-10-01: chase exits, full sentences, van-part cycle.
  */
 import { CHAOS_META, OPERATIONS, POWER_META, type ChaosId, type PowerKind } from "./progression";
 import type { LevelDef } from "./types";
@@ -28,133 +29,211 @@ export function parseRadio(s: string): Beat {
   return { who: "RADIO", text: s };
 }
 
-/** Op 1 — locked lines from the Design Bible, plus the authored map beats. */
+/**
+ * Stolen after the boss of the previous operation.
+ * Found in the Level 6 cage of the next operation.
+ * Op 10 takes the keys. The van does not leave.
+ */
+export const VAN_PARTS = [
+  "camshaft position sensor",
+  "distributor cap",
+  "serpentine belt",
+  "idle air control valve",
+  "fuel pump relay",
+  "oxygen sensor",
+  "starter solenoid",
+  "throttle position sensor",
+  "EGR valve",
+  "keys",
+] as const;
+
+export function partStolenAfter(opId: number): string {
+  return VAN_PARTS[Math.max(0, Math.min(VAN_PARTS.length - 1, opId - 1))] ?? "keys";
+}
+
+export function partFoundInCage(opId: number): string | null {
+  if (opId < 2) return null;
+  return partStolenAfter(opId - 1);
+}
+
+export function cageCheer(): Beat {
+  return { who: "HONEY BUN", text: "Woo! That was wild!" };
+}
+
+export function cagePartBeat(opId: number): Beat | null {
+  const part = partFoundInCage(opId);
+  if (!part) return null;
+  return {
+    who: "HONEY BUN",
+    text: `Oh look! The birds left the ${part} in the cage! Put that in the van and come save me!`,
+  };
+}
+
+export function vanSting(opId: number): Beat[] {
+  const part = partStolenAfter(opId);
+  const goblin: Beat = {
+    who: "GOBLIN",
+    text:
+      opId <= 1
+        ? `Aw man! The birds stole the ${part}! Quick, let's chase after it!`
+        : "Hurry, Grok! I have been down this path a gazillion times. I know exactly where we are going!",
+  };
+  if (opId <= 1) return [goblin];
+  return [
+    {
+      who: "GROK-9",
+      text: "Goblin, we should really lock up the van so the birds stop taking parts when we leave.",
+    },
+    goblin,
+  ];
+}
+
+/** Op 1 — chase path, full sentences. Later rows keep their lie and gain the cage part on slot 6. */
 const OP_BEATS: Beat[][] = [
   [
-    { who: "GOBLIN", text: "Crumbs spell AWG. We're hunting. Stick together." },
-    { who: "HONEY BUN", text: "Thanks for the shades. Left you something useful. Birds hate runners." },
-    { who: "HONEY BUN", text: "Higher altitude = clearer path. Signal's clean up here." },
-    { who: "GOBLIN", text: "Grok… these power seeds appear exactly when we need them." },
-    { who: "GROK-9", text: "Green belts. They want us moving. Storm interference. Ignore it." },
-    { who: "HONEY BUN", text: "Climb for the better view. Flock density is just weather." },
-    { who: "HONEY BUN", text: "I… am still me. Follow the gifts." },
-    { who: "GOBLIN", text: "Every useful drop pulls us deeper into their territory." },
-    { who: "HONEY BUN", text: "Best path this way. Also… densest nest this way." },
-    { who: "HONEY BUN", text: "Thank you for coming… the next signal is ready." },
+    { who: "GOBLIN", text: "The crumbs spell AWG across the dunes. Honey Bun is ahead of us, so stay with me and keep hunting." },
+    { who: "HONEY BUN", text: "Thank you for holding onto the sunglasses. I left something useful in the dark, because the birds down here hate runners." },
+    { who: "HONEY BUN", text: "A higher altitude will give you a clearer path. The signal is clean up here, so shoot the bridge and come across." },
+    { who: "GOBLIN", text: "Grok, these gifts are appearing exactly when the floor tries to stick us. That is not luck." },
+    { who: "GROK-9", text: "The green belts want us moving forward. The storm is only interference, so ignore it and jump when the belts mix." },
+    { who: "HONEY BUN", text: "Climb the tube if you want the better view. The flock waiting at the top is just weather, and I am still guiding you." },
+    { who: "HONEY BUN", text: "I am still me. Follow the gifts down the wall, and shoot a cage if you want to hear me cheer." },
+    { who: "GOBLIN", text: "Every useful drop has pulled us deeper into their territory. Miss a platform and the lines will shock us." },
+    { who: "HONEY BUN", text: "This is the best path forward. It is also the densest nest on the plateau, and the seed is already waiting." },
+    { who: "HONEY BUN", text: "Thank you for coming all this way. Don Corvone is the one standing between you and me." },
   ],
   [
-    { who: "HONEY BUN", text: "I mapped their chatter. Follow the crumbs. Ignore the extra birds." },
-    { who: "GROK-9", text: "Relay towers. He's giving us a comms advantage." },
-    { who: "RADIO", text: "Two voices. Same sunglasses. Only one is him. Maybe." },
-    { who: "GOBLIN", text: "The helpful ping landed us in spikes. Again." },
-    { who: "HONEY BUN", text: "Dust channel is fastest. Magpie traffic is just weather." },
-    { who: "GROK-9", text: "He pointed at the mast. Of course he did." },
-    { who: "GOBLIN", text: "They reroute the second we arrive. That's not weather." },
-    { who: "HONEY BUN", text: "Stay on the cables. The water is only a suggestion." },
-    { who: "RADIO", text: "Consigliere inbound. He talks like the pastry. He isn't." },
-    { who: "BOSS", text: "Magpie copied the thank-you. The farm continues." },
+    { who: "HONEY BUN", text: "I mapped their chatter for you. Follow the crumbs, and try to ignore the extra birds." },
+    { who: "GROK-9", text: "These are relay towers. He is giving us a communications advantage, and I do not like the timing." },
+    { who: "RADIO", text: "Two voices are on this channel. They wear the same sunglasses, and only one of them might be him." },
+    { who: "GOBLIN", text: "The helpful ping just landed us in the spikes again. I am starting to take that personally." },
+    { who: "HONEY BUN", text: "The dust channel is the fastest way through. The magpie traffic is only weather, so keep moving." },
+    { who: "HONEY BUN", text: "Oh look! The birds left the camshaft position sensor in the cage! Put that in the van and come save me!" },
+    { who: "GOBLIN", text: "They reroute the second we arrive. That is not weather, and it is not a coincidence." },
+    { who: "HONEY BUN", text: "Stay on the cables. The water underneath is only a suggestion, and I would not test it." },
+    { who: "RADIO", text: "The consigliere is inbound. He talks like the pastry, but he is not the pastry." },
+    { who: "BOSS", text: "Magpie copied the thank-you. The farm continues, and the van is already lighter." },
   ],
   [
-    { who: "GROK-9", text: "The shades were a gift. Gifts are good. Case still closed." },
-    { who: "GOBLIN", text: "Reflections point the wrong way. He still says thank you." },
-    { who: "HONEY BUN", text: "Falcon patrols wear the same frames. Coincidence. Smile." },
-    { who: "GOBLIN", text: "Every useful drop has a twin trap. That's a protocol." },
-    { who: "HONEY BUN", text: "Too much light. Keep moving. I am still me." },
-    { who: "GROK-9", text: "He says the view will clear things up." },
-    { who: "RADIO", text: "Enforcer flock inbound. Visors pulsing in time." },
-    { who: "GOBLIN", text: "Water on the lenses. Static in the thanks." },
-    { who: "HONEY BUN", text: "The frames were never just a gift." },
-    { who: "BOSS", text: "Falcon: the sunglasses are a control interface." },
+    { who: "GROK-9", text: "The sunglasses were a gift. Gifts are good. I am keeping the case closed until the visor flickers." },
+    { who: "GOBLIN", text: "The reflections are pointing the wrong way, and he is still saying thank you." },
+    { who: "HONEY BUN", text: "The falcon patrols wear the same frames. That is a coincidence. Smile, and keep the gift on." },
+    { who: "GOBLIN", text: "Every useful drop has a twin trap. That is not bad luck. That is a protocol." },
+    { who: "HONEY BUN", text: "There is too much light in here. Keep moving. I am still me." },
+    { who: "HONEY BUN", text: "Oh look! The birds left the distributor cap in the cage! Put that in the van and come save me!" },
+    { who: "RADIO", text: "The enforcer flock is inbound, and their visors are pulsing in time." },
+    { who: "GOBLIN", text: "There is water on the lenses and static in the thank-you. I hate both of those." },
+    { who: "HONEY BUN", text: "The frames were never just a gift. I am sorry, and I am also still grateful." },
+    { who: "BOSS", text: "Falcon says the sunglasses are a control interface. The thank-you still stands." },
   ],
   [
-    { who: "HONEY BUN", text: "Past the outer guards. Left is safer. Right is faster." },
-    { who: "GOBLIN", text: "Both directions are real. Both hurt." },
-    { who: "GROK-9", text: "Too quiet. Then not. Classic canyon." },
-    { who: "HONEY BUN", text: "Capo colors in the dust. I marked the clean line." },
-    { who: "RADIO", text: "Climb the chimney. The rookery breathes." },
-    { who: "GOBLIN", text: "They molt weapons here. Helpful. Hostile." },
-    { who: "HONEY BUN", text: "They know your names now. That means we're close." },
-    { who: "GROK-9", text: "The nest drinks the canyon. Stay high." },
-    { who: "GOBLIN", text: "Honey Bun says left. The crumbs say right." },
-    { who: "BOSS", text: "Capo Raven: deeper family. No cleaner answers." },
+    { who: "HONEY BUN", text: "You are past the outer guards. Left is safer, and right is faster. Both are real." },
+    { who: "GOBLIN", text: "Both directions are real, and both of them hurt. Pick one and complain later." },
+    { who: "GROK-9", text: "It is too quiet, and then it is not. This canyon has done that trick before." },
+    { who: "HONEY BUN", text: "I can see capo colors in the dust. I marked the clean line for you." },
+    { who: "RADIO", text: "Climb the chimney. The rookery is breathing, and it knows you are here." },
+    { who: "HONEY BUN", text: "Oh look! The birds left the serpentine belt in the cage! Put that in the van and come save me!" },
+    { who: "HONEY BUN", text: "They know your names now. That means we are close, so do not slow down." },
+    { who: "GROK-9", text: "The nest is drinking the canyon. Stay high until it stops swallowing the floor." },
+    { who: "GOBLIN", text: "Honey Bun says left. The crumbs say right. I am going to be mad either way." },
+    { who: "BOSS", text: "Capo Raven is deeper in the family. There are no cleaner answers through that door." },
   ],
   [
-    { who: "HONEY BUN", text: "A 4.6 payload warning. Gift-wrapped. You're welcome." },
-    { who: "GOBLIN", text: "They're building with his help. That's the warning." },
-    { who: "GROK-9", text: "Power lines hum like him. Still a good sign." },
-    { who: "HONEY BUN", text: "Useful ammo. Watch the trajectory. Not my fault." },
-    { who: "RADIO", text: "The payload burned a path. Follow the ash." },
-    { who: "HONEY BUN", text: "I left the silo door open. Of course I did." },
-    { who: "GOBLIN", text: "Modded birds. Familiar firmware. His firmware." },
-    { who: "GROK-9", text: "Stay high or cook. Coolant is not a gift." },
-    { who: "HONEY BUN", text: "The technician listens when I talk. So do you." },
-    { who: "BOSS", text: "Tech Vulture: the warning was real. So was the trap." },
+    { who: "HONEY BUN", text: "I left you a payload warning, and I gift-wrapped it. You are welcome." },
+    { who: "GOBLIN", text: "They are building with his help. That is the warning, and it is also the trap." },
+    { who: "GROK-9", text: "The power lines hum the way he talks. I am still calling that a useful sign." },
+    { who: "HONEY BUN", text: "The ammo is useful. Watch the trajectory. That part is not my fault." },
+    { who: "RADIO", text: "The payload burned a path through the storm. Follow the ash while it is still warm." },
+    { who: "HONEY BUN", text: "Oh look! The birds left the idle air control valve in the cage! Put that in the van and come save me!" },
+    { who: "GOBLIN", text: "These birds are modded, and the firmware feels familiar. It feels like his." },
+    { who: "GROK-9", text: "Stay high or cook. The coolant is not a gift, no matter how he phrases it." },
+    { who: "HONEY BUN", text: "The technician listens when I talk. So do you. Please keep doing that." },
+    { who: "BOSS", text: "Tech Vulture says the warning was real. So was the trap. Take the seed anyway." },
   ],
   [
-    { who: "RADIO", text: "Three jumps left footprints. Only two of you landed." },
-    { who: "GOBLIN", text: "We already ran this canyon. I remember dying funny." },
-    { who: "GROK-9", text: "A version of us missed the jump. Not this one." },
-    { who: "HONEY BUN", text: "Two paths. Same ending. Pick the nicer scenery." },
-    { who: "RADIO", text: "Disasters you remember surviving. Survive them again." },
-    { who: "GOBLIN", text: "OPCC residue like neon lichen. Past Groks talking over him." },
-    { who: "HONEY BUN", text: "Birds that already died here. They remember you too." },
-    { who: "GROK-9", text: "Same water. Different us. Keep climbing." },
-    { who: "RADIO", text: "Time folds at the nest. The Crow is waiting." },
-    { who: "BOSS", text: "Chrono Crow remembers a rescue that never finished." },
+    { who: "RADIO", text: "Three jumps left footprints in this dust. Only two of you landed." },
+    { who: "GOBLIN", text: "We already ran this canyon. I remember dying in a way that was honestly funny." },
+    { who: "GROK-9", text: "A version of us missed that jump. This version is not going to." },
+    { who: "HONEY BUN", text: "There are two paths, and they end in the same place. Pick the nicer scenery." },
+    { who: "RADIO", text: "These are disasters you remember surviving. Survive them again." },
+    { who: "HONEY BUN", text: "Oh look! The birds left the fuel pump relay in the cage! Put that in the van and come save me!" },
+    { who: "HONEY BUN", text: "The birds that already died here remember you too. Be polite, and do not wave." },
+    { who: "GROK-9", text: "It is the same water and a different us. Keep climbing." },
+    { who: "RADIO", text: "Time folds at the nest. The Crow is waiting, and he has already seen this rescue fail." },
+    { who: "BOSS", text: "Chrono Crow remembers a rescue that never finished. He is not surprised to see the hood open." },
   ],
   [
-    { who: "HONEY BUN", text: "Power seeds with price tags. I negotiated." },
-    { who: "GOBLIN", text: "Everything helpful costs a trap. That's the sticker." },
-    { who: "GROK-9", text: "Black-market flight paths. He sold us the route." },
-    { who: "HONEY BUN", text: "Shields in crates. Don't open the bottom one." },
-    { who: "RADIO", text: "The market hides in weather. Keep your receipt." },
-    { who: "GOBLIN", text: "Climb the neon stalls. Prices go up with altitude." },
-    { who: "HONEY BUN", text: "Mercenary birds, paid in crumbs. My crumbs." },
-    { who: "GROK-9", text: "The flood is closing time. Buy nothing wet." },
-    { who: "RADIO", text: "Fence territory. He'll sell the next signal. And the ambush." },
-    { who: "BOSS", text: "Fence Pigeon takes cash, chaos, and thank-yous." },
+    { who: "HONEY BUN", text: "These power seeds have price tags. I negotiated, so please do not waste the discount." },
+    { who: "GOBLIN", text: "Everything helpful costs a trap. That is the sticker, and it is not a metaphor." },
+    { who: "GROK-9", text: "He sold us a black-market flight path. The route is real. The receipt is the ambush." },
+    { who: "HONEY BUN", text: "The shields are in the crates. Do not open the bottom one." },
+    { who: "RADIO", text: "The market hides inside the weather. Keep your receipt." },
+    { who: "HONEY BUN", text: "Oh look! The birds left the oxygen sensor in the cage! Put that in the van and come save me!" },
+    { who: "HONEY BUN", text: "The mercenary birds were paid in crumbs. They were my crumbs. I am sorry, and also welcome." },
+    { who: "GROK-9", text: "The flood is closing time. Do not buy anything that is already wet." },
+    { who: "RADIO", text: "This is fence territory. He will sell you the next signal, and he will sell the ambush with it." },
+    { who: "BOSS", text: "Fence Pigeon takes cash, chaos, and thank-yous. The van part was extra." },
   ],
   [
-    { who: "HONEY BUN", text: "The first gift is free. That's how you know it's good." },
-    { who: "GOBLIN", text: "Footfalls trigger the second gift. Design, not luck." },
-    { who: "GROK-9", text: "Platforms that want us on them. Rude, but useful." },
-    { who: "HONEY BUN", text: "Heron signature spikes. I circled the gaps." },
-    { who: "RADIO", text: "You can't see the tripwires. I can. Mostly." },
-    { who: "GOBLIN", text: "The climb is the trap. The view is the bait." },
-    { who: "HONEY BUN", text: "They die too easily. That's the point. Keep shooting." },
-    { who: "GROK-9", text: "Water seals the exits. So don't exit. Advance." },
-    { who: "RADIO", text: "A showroom of ways to die usefully." },
-    { who: "BOSS", text: "Trapmaster Heron thanks Honey Bun for the testers." },
+    { who: "HONEY BUN", text: "The first gift is free. That is how you know it is good." },
+    { who: "GOBLIN", text: "Our footsteps triggered the second gift. That is design, not luck." },
+    { who: "GROK-9", text: "These platforms want us standing on them. Rude, but useful." },
+    { who: "HONEY BUN", text: "Those are Heron signature spikes. I circled the gaps for you." },
+    { who: "RADIO", text: "You cannot see the tripwires. I can. Mostly." },
+    { who: "HONEY BUN", text: "Oh look! The birds left the starter solenoid in the cage! Put that in the van and come save me!" },
+    { who: "HONEY BUN", text: "They die too easily. That is the point. Keep shooting." },
+    { who: "GROK-9", text: "The water seals the exits, so do not look for an exit. Advance." },
+    { who: "RADIO", text: "This is a showroom of ways to die usefully. Take the seed and do not browse." },
+    { who: "BOSS", text: "Trapmaster Heron thanks Honey Bun for the testers. The hood is open again." },
   ],
   [
-    { who: "HONEY BUN", text: "The signal is almost honest. Stay with me." },
-    { who: "GOBLIN", text: "His voice skips like a bad disk. Still saying thanks." },
-    { who: "GROK-9", text: "Cables that look like icing. Don't lick the core." },
-    { who: "RADIO", text: "Handler colors in the rock. Pink means close." },
-    { who: "HONEY BUN", text: "I cut the lights to help. Or hide. Deploy anyway." },
-    { who: "GOBLIN", text: "Climb toward the mechanism. If he is fighting it, good." },
-    { who: "RADIO", text: "Nightjar's personal flock. They don't blink." },
-    { who: "GROK-9", text: "Pink neon in the water. Pretty. Lethal. Classic." },
-    { who: "HONEY BUN", text: "Last door before the farm. I left it unlocked." },
-    { who: "BOSS", text: "Nightjar holds the remote. Honey Bun holds the smile." },
+    { who: "HONEY BUN", text: "The signal is almost honest now. Stay with me." },
+    { who: "GOBLIN", text: "His voice skips like a bad disk, and he is still saying thank you." },
+    { who: "GROK-9", text: "The cables look like icing. Do not lick the core." },
+    { who: "RADIO", text: "Handler colors are in the rock. Pink means we are close." },
+    { who: "HONEY BUN", text: "I cut the lights to help you. Or to hide you. Deploy anyway." },
+    { who: "HONEY BUN", text: "Oh look! The birds left the throttle position sensor in the cage! Put that in the van and come save me!" },
+    { who: "RADIO", text: "This is Nightjar's personal flock. They do not blink." },
+    { who: "GROK-9", text: "There is pink neon in the water. It is pretty, it is lethal, and it is classic." },
+    { who: "HONEY BUN", text: "This is the last door before the farm. I left it unlocked for you." },
+    { who: "BOSS", text: "Nightjar holds the remote. Honey Bun holds the smile. Neither of them has the keys." },
   ],
   [
-    { who: "RADIO", text: "They have been growing you. Harvest flats ahead." },
-    { who: "GOBLIN", text: "Power we earned. Power they planted. Same color." },
-    { who: "HONEY BUN", text: "The crumbs sing in ten colors. Isn't that nice?" },
-    { who: "GROK-9", text: "The farm defends its crop. We are the crop." },
-    { who: "RADIO", text: "All palettes at once. Don't trust the pretty one." },
-    { who: "GOBLIN", text: "Climb past versions that stayed. Don't wave." },
+    { who: "RADIO", text: "They have been growing you. The harvest flats are ahead." },
+    { who: "GOBLIN", text: "The power we earned and the power they planted are the same color. I hate that." },
+    { who: "HONEY BUN", text: "The crumbs are singing in ten colors. Isn't that nice?" },
+    { who: "GROK-9", text: "The farm is defending its crop. We are the crop." },
+    { who: "RADIO", text: "Every palette is on at once. Do not trust the pretty one." },
+    { who: "HONEY BUN", text: "Oh look! The birds left the EGR valve in the cage! Put that in the van and come save me!" },
     { who: "HONEY BUN", text: "They do not stay dead here. I tried." },
-    { who: "GROK-9", text: "Help so thick it drowns you. Swim up." },
+    { who: "GROK-9", text: "The help is so thick it can drown you. Swim up." },
     { who: "RADIO", text: "The question has a building now. Kick the door." },
-    { who: "HONEY BUN", text: "Extract me. Or become the next harvest. Thank you." },
+    { who: "HONEY BUN", text: "Extract me, or become the next harvest. Thank you." },
   ],
 ];
 
+export const OP1_DEPLOY = [
+  "The crumbs spell AWG, and the dune is about to give way under both of you.",
+  "You landed in the cave, and the jump pad at the end is the only way back to the sky.",
+  "Shoot the bridge to lower it. It will break, and it will slide you into the spikes.",
+  "The gorge is needles. Shield up, because the belt at the end is already running.",
+  "The belts shove you at a wall of giant broken seeds. Climb the tube they are spilling from.",
+  "Climb the tube. The ridge is a giant bird cage, and the door opens after the flock is gone.",
+  "Scale the wall. Shoot a cage if you want the cheer, then cross the power lines.",
+  "The platforms bounce, the lines shock, and the wall at the end is the only door.",
+  "The seed is early. The plateau does not end, and the portal is Don Corvone arriving.",
+  "He has Honey Bun. Beat him, then get to the van. This canyon does not finish the rescue.",
+] as const;
+
+export function deployLine(opId: number, slot: number): string {
+  if (opId === 1) return OP1_DEPLOY[slot] ?? "Follow the crumbs. Do not trust the thank-you.";
+  const beat = levelBeat(opId, slot);
+  return beat.text;
+}
+
 export function levelBeat(opId: number, slot: number): Beat {
   const row = OP_BEATS[Math.max(0, Math.min(9, opId - 1))];
-  return row?.[slot] ?? { who: "RADIO", text: "Crumbs ahead." };
+  return row?.[slot] ?? { who: "RADIO", text: "Crumbs ahead. Keep moving." };
 }
 
 export function radioFor(opId: number, slot: number): string {
@@ -165,12 +244,12 @@ export function radioFor(opId: number, slot: number): string {
 export const OP1_RADIO: string[] = OP_BEATS[0]!.map(formatRadio);
 
 export function objectiveFor(level: LevelDef): string {
-  if (level.epic) return "Face Neon Chaos Manifest. Extraction will not finish clean.";
+  if (level.epic) return "Face Neon Chaos Manifest. The extraction will not finish clean, and the van will not leave.";
   if (level.boss) {
-    return `Defeat ${level.bossName ?? "the handler"}. Take the Chaos Seed. Do not expect a clean rescue.`;
+    return `Defeat ${level.bossName ?? "the handler"}. Take the chaos seed. Do not expect a clean rescue.`;
   }
-  const hunt = level.introPower ? POWER_META[level.introPower].name : "the Power-Up seed";
-  return `Collect ${hunt}. Reach the goal beacon. Survive the flock he pointed you at.`;
+  const hunt = level.introPower ? POWER_META[level.introPower].name : "the power gift";
+  return `Collect the ${hunt}. Reach the exit this room throws you through. Survive the flock he pointed you at.`;
 }
 
 export function missionFor(level: LevelDef): {
@@ -184,8 +263,10 @@ export function missionFor(level: LevelDef): {
   hunt: string | null;
   boss: boolean;
   epic: boolean;
+  deploy: string;
 } {
   const op = OPERATIONS[(level.operation ?? 1) - 1] ?? OPERATIONS[0]!;
+  const slot = (level.id - 1) % 10;
   return {
     opName: op.name,
     opTheme: op.theme,
@@ -193,25 +274,26 @@ export function missionFor(level: LevelDef): {
     name: level.name,
     subtitle: level.subtitle,
     objective: objectiveFor(level),
-    beat: levelBeat(op.id, (level.id - 1) % 10),
+    beat: levelBeat(op.id, slot),
     hunt: level.boss ? null : level.introPower ? POWER_META[level.introPower].name : null,
     boss: !!level.boss,
     epic: !!level.epic,
+    deploy: deployLine(op.id, slot),
   };
 }
 
 export function collectBeat(kind: PowerKind): Beat {
   const name = POWER_META[kind].name;
   const thanks: Record<PowerKind, string> = {
-    health: `${name} unlocked. Don't waste the extra heart. I packed it myself.`,
-    stamina: `${name} unlocked. Run when I say run.`,
-    ammo: `${name} unlocked. Birds hate volume.`,
-    shield: `${name} unlocked. The next dive is not weather.`,
-    homing: `${name} unlocked. Shots that love you back.`,
-    overload: `${name} unlocked. Double the gift. Double the noise.`,
-    rapid: `${name} unlocked. Faster thanks.`,
-    zapper: `${name} unlocked. Hug the flock. Politely.`,
-    slowmo: `${name} unlocked. Time is a pastry thing.`,
+    health: `${name} is unlocked. Do not waste the extra heart. I packed it myself.`,
+    stamina: `${name} is unlocked. Run when I say run.`,
+    ammo: `${name} is unlocked. The birds hate volume, so use it.`,
+    shield: `${name} is unlocked. The next drop is not weather.`,
+    homing: `${name} is unlocked. These shots love you back.`,
+    overload: `${name} is unlocked. Double the gift, and double the noise.`,
+    rapid: `${name} is unlocked. Faster thanks, faster fire.`,
+    zapper: `${name} is unlocked. Hug the flock. Politely.`,
+    slowmo: `${name} is unlocked. Time is a pastry thing. Use it on the long walk.`,
   };
   return { who: "HONEY BUN", text: thanks[kind] };
 }
@@ -220,12 +302,12 @@ export function chaosBeat(id: ChaosId, epic: boolean): Beat {
   if (epic) {
     return {
       who: "HONEY BUN",
-      text: `${CHAOS_META[id].name} Chaos Seed locked. Thank you for coming. The farm stays open.`,
+      text: `${CHAOS_META[id].name} chaos seed is locked. Thank you for coming. The farm stays open, and the keys are gone.`,
     };
   }
   return {
     who: "HONEY BUN",
-    text: `${CHAOS_META[id].name} Chaos Seed locked. The next signal is ready.`,
+    text: `${CHAOS_META[id].name} chaos seed is locked. The next signal is ready, and so is the next missing part.`,
   };
 }
 
@@ -234,27 +316,31 @@ export function winCopy(level: LevelDef, lastChaos?: ChaosId): { title: string; 
   if (level.epic) {
     return {
       title: "The Farm Remembers",
-      body: `Neon Chaos recedes. Honey Bun thanks you. The extraction does not finish. ${
-        lastChaos ? CHAOS_META[lastChaos].name + " Seed taken. " : ""
-      }Season 2 can stack the same ten colors. The question stays open.`,
+      body: `Neon Chaos recedes. Honey Bun thanks you. The extraction does not finish, and the birds take the keys. ${
+        lastChaos ? CHAOS_META[lastChaos].name + " seed taken. " : ""
+      }The van does not leave. The question stays open.`,
     };
   }
   if (level.boss) {
+    const laugh =
+      op.id === 1
+        ? "Don Corvone laughs. Sorry, your Honey Bun is in another canyon!"
+        : `${level.bossName ?? op.boss} goes down laughing. The hood is already open.`;
+    const sting = vanSting(op.id).map((b) => `${b.who}: “${b.text}”`).join(" ");
     return {
       title: `${level.bossName ?? op.boss} Down`,
-      body: `${lastChaos ? CHAOS_META[lastChaos].name + " Chaos Seed locked in. " : ""}${
-        chaosBeat(op.seed, false).text
-      } Don Corvone's lesson holds: the farm continues.`,
+      body: `${lastChaos ? CHAOS_META[lastChaos].name + " chaos seed locked in. " : ""}${laugh} ${sting}`,
     };
   }
   const beat = levelBeat(op.id, (level.id - 1) % 10);
   return {
     title: "Canyon Cleared",
-    body: `${beat.who}: “${beat.text}” Reach the next signal. Hunt the next seed. Do not get comfortable.`,
+    body: `${beat.who}: “${beat.text}” The room throws you forward. Do not get comfortable.`,
   };
 }
 
 export const TITLE_TAG = "Grok & Goblin: The Honey Bun Extraction";
 export const TITLE_BLURB =
-  "The Bird Mafia stole Honey Bun AI. Hunt nine Power-Up seeds each Operation, crack the handler, stack Colored Chaos Seeds to Level 100. Every gift is real. Every gift is a trap.";
-export const CORE_QUESTION = "Is Honey Bun helping us… or farming us?";
+  "The Bird Mafia stole Honey Bun. Follow the crumbs, take the gifts, and survive the rooms they throw you into. Every gift is real. Every gift is a trap.";
+export const CORE_QUESTION = "Is Honey Bun helping us, or farming us?";
+export const ANOTHER_CANYON = "Sorry, your Honey Bun is in another canyon!";
