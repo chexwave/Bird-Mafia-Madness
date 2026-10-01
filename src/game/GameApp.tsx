@@ -20,7 +20,6 @@ import {
 } from "./progression";
 import {
   CORE_QUESTION,
-  TITLE_TAG,
   missionFor,
   parseRadio,
   winCopy,
@@ -138,6 +137,7 @@ export function GameApp() {
   const [muted, setMuted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [bootError, setBootError] = useState<string | null>(null);
+  const [showCliff, setShowCliff] = useState(false);
   const [canvasBox, setCanvasBox] = useState({ w: 960, h: 720, lw: 960, lh: 720 });
   const [briefOpen, setBriefOpen] = useState(false);
   const [pauseWeapon, setPauseWeapon] = useState<WeaponId | null>(null);
@@ -259,6 +259,31 @@ export function GameApp() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Cliff plate only. Full sprite boot stays off this path so the sting cannot stick.
+  useEffect(() => {
+    let stop = false;
+    const go = () => {
+      if (!stop) setShowCliff(true);
+    };
+    const img = new Image();
+    img.onload = go;
+    img.onerror = go;
+    img.src = "/sprites/title-hero-portrait.jpg?v=title3";
+    const cap = window.setTimeout(go, 2200);
+    return () => {
+      stop = true;
+      window.clearTimeout(cap);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!showCliff) return;
+    const id = requestAnimationFrame(() => {
+      void bootEngine();
+    });
+    return () => cancelAnimationFrame(id);
+  }, [showCliff, bootEngine]);
+
   const toggleMute = () => {
     const next = !muted;
     setMuted(next);
@@ -321,7 +346,13 @@ export function GameApp() {
 
       {screen === "title" && (
         <FullOverlay flush>
-          <TitleScreen onPlay={onTitlePlay} loading={loading} error={bootError} />
+          <TitleScreen
+            onPlay={onTitlePlay}
+            onSkip={() => setShowCliff(true)}
+            loading={loading}
+            error={bootError}
+            showCliff={showCliff}
+          />
         </FullOverlay>
       )}
       {screen === "intro" && (
@@ -763,54 +794,57 @@ function IntroCutscene({
 
 function TitleScreen({
   onPlay,
+  onSkip,
   loading,
   error,
+  showCliff,
 }: {
   onPlay: () => void;
   loading: boolean;
   error: string | null;
+  onSkip: () => void;
+  showCliff: boolean;
 }) {
+  if (!showCliff) {
+    return (
+      <button type="button" className="title-sting" onPointerUp={onSkip} aria-label="Continue">
+        <img src="/sprites/logo-sting.jpg?v=title3" alt="" />
+        <div className="sting-load">
+          <p className="sting-load-label">Loading</p>
+          <div className="sting-load-track">
+            <div className="sting-load-bar" />
+          </div>
+        </div>
+      </button>
+    );
+  }
+
   return (
-    <div className="title-stage">
+    <div className="title-stage cliff">
       <picture>
         <source
           media="(max-aspect-ratio: 4/5)"
-          srcSet="/sprites/title-hero-portrait.jpg?v=title2"
+          srcSet="/sprites/title-hero-portrait.jpg?v=title3"
         />
         <img
-          src="/sprites/title-hero.jpg?v=title2"
+          src="/sprites/title-hero.jpg?v=title3"
           alt=""
           className="title-hero"
         />
       </picture>
-      <div className="title-vignette" aria-hidden />
-      <div className="title-scan" aria-hidden />
       <div className="title-content">
-        <div className="title-top">
-          <p className="title-chip stagger-item">Operation 1 · Canyon Drop</p>
-          <h1 className="title-lockup stagger-item">
-            <span>Bird Mafia</span>
-            <span>Madness</span>
-          </h1>
-          <p className="title-tag stagger-item">{TITLE_TAG}</p>
-        </div>
         <div className="title-bottom">
-          <p className="title-q stagger-item">{CORE_QUESTION}</p>
           <button
             type="button"
             onClick={onPlay}
             disabled={loading}
             className="title-cta stagger-item"
-            style={{ pointerEvents: "auto", position: "relative", zIndex: 6 }}
           >
             <Play className="title-cta-icon" aria-hidden />
             {loading ? "Loading…" : "Drop In"}
           </button>
           {error && <p className="title-error stagger-item">{error}</p>}
           <p className="title-hint stagger-item">Tap Drop In to unlock audio</p>
-          <p className="title-keys stagger-item">
-            WASD · Space jump · J fire · Q/E weapons · L shield
-          </p>
         </div>
       </div>
     </div>
