@@ -70,22 +70,65 @@ export function cagePartBeat(opId: number): Beat | null {
 }
 
 export function vanSting(opId: number): Beat[] {
-  const part = partStolenAfter(opId);
-  const goblin: Beat = {
-    who: "GOBLIN",
-    text:
-      opId <= 1
-        ? `Aw man! The birds stole the ${part}! Quick, let's chase after it!`
-        : "Hurry, Grok! I have been down this path a gazillion times. I know exactly where we are going!",
-  };
-  if (opId <= 1) return [goblin];
+  const next = OP_OPENS[opId + 1];
+  if (next) return next;
+  if (opId >= 10) {
+    return [
+      { who: "GROK-9", text: "They took the keys. I was going to lock the van. The van does not leave." },
+      { who: "GOBLIN", text: "Aw man, the birds stole the keys! There is no next canyon that gives them back." },
+      { who: "HONEY BUN", text: "Thank you for coming. The harvest can wait, and so can the van." },
+    ];
+  }
   return [
-    {
-      who: "GROK-9",
-      text: "Goblin, we should really lock up the van so the birds stop taking parts when we leave.",
-    },
-    goblin,
+    { who: "GOBLIN", text: `Aw man! The birds stole the ${partStolenAfter(opId)}! Quick, let's chase after it!` },
   ];
+}
+
+
+/** Cutscene pair that starts Ops 2-10. Index 0 unused. Grok, then Goblin. */
+export const OP_OPENS: (Beat[] | null)[] = [
+  null,
+  null,
+  [
+    { who: "GROK-9", text: "The hood was open when we left. I am logging the missing camshaft position sensor as a theft, not as weather." },
+    { who: "GOBLIN", text: "Aw man, the birds stole the camshaft position sensor! Quick, let's chase after it before they nest on it." },
+  ],
+  [
+    { who: "GROK-9", text: "Goblin, we should really lock the van before we leave. They just took the distributor cap, and the sunglasses did not stop them." },
+    { who: "GOBLIN", text: "Hurry, Grok! I have been down this path a gazillion times. The distributor cap is with the flock, and I know exactly where we are going." },
+  ],
+  [
+    { who: "GROK-9", text: "The serpentine belt is gone. If we lock the hood this time, the next canyon does not get to start the same way." },
+    { who: "GOBLIN", text: "The birds took the serpentine belt and they are already laughing. Come on. I know this dune, I know this hole, and I know the cage." },
+  ],
+  [
+    { who: "GROK-9", text: "They took the idle air control valve. That is a specific theft. I would like the van to still be a van when we get back." },
+    { who: "GOBLIN", text: "Forget the lock for a minute. The birds have the idle air control valve, and I can already hear the cage." },
+  ],
+  [
+    { who: "GROK-9", text: "The fuel pump relay is missing. A previous version of me already said we should lock the van. This version is saying it again." },
+    { who: "GOBLIN", text: "Hurry, Grok! I have run this path a gazillion times. The fuel pump relay is in the cage. It is always in the cage." },
+  ],
+  [
+    { who: "GROK-9", text: "They sold us a route and stole the oxygen sensor. I am no longer calling that a coincidence." },
+    { who: "GOBLIN", text: "The birds took the oxygen sensor and left a receipt in crumbs. Chase first. Lecture later." },
+  ],
+  [
+    { who: "GROK-9", text: "The starter solenoid was the bait this time. Locking the van is still the correct idea, and we are still not doing it." },
+    { who: "GOBLIN", text: "Aw man, they got the starter solenoid! Quick, before the trap canyon makes us thank them for it." },
+  ],
+  [
+    { who: "GROK-9", text: "The throttle position sensor is gone. If Honey Bun is fighting the control, he can fight the bird on our hood too." },
+    { who: "GOBLIN", text: "I know exactly where we are going. The throttle position sensor is up the tube, in the cage, same as the last eight." },
+  ],
+  [
+    { who: "GROK-9", text: "They took the EGR valve. After this canyon I am locking the van, even if the farm is the one holding the key." },
+    { who: "GOBLIN", text: "Last path, Grok. The birds have the EGR valve, and I have been down this road a gazillion times. Cage first. The rescue never shows." },
+  ],
+];
+
+export function opOpen(opId: number): Beat[] {
+  return OP_OPENS[opId] ?? vanSting(1);
 }
 
 /** Op 1 — chase path, full sentences. Later rows keep their lie and gain the cage part on slot 6. */
@@ -103,7 +146,7 @@ const OP_BEATS: Beat[][] = [
     { who: "HONEY BUN", text: "Thank you for coming all this way. Don Corvone is the one standing between you and me." },
   ],
   [
-    { who: "HONEY BUN", text: "I mapped their chatter for you. Follow the crumbs, and try to ignore the extra birds." },
+    { who: "GOBLIN", text: "Aw man, the birds stole the camshaft position sensor! Quick, let's chase after it before they nest on it." },
     { who: "GROK-9", text: "These are relay towers. He is giving us a communications advantage, and I do not like the timing." },
     { who: "RADIO", text: "Two voices are on this channel. They wear the same sunglasses, and only one of them might be him." },
     { who: "GOBLIN", text: "The helpful ping just landed us in the spikes again. I am starting to take that personally." },
@@ -115,96 +158,96 @@ const OP_BEATS: Beat[][] = [
     { who: "BOSS", text: "Magpie copied the thank-you. The farm continues, and the van is already lighter." },
   ],
   [
-    { who: "GROK-9", text: "The sunglasses were a gift. Gifts are good. I am keeping the case closed until the visor flickers." },
+    { who: "GOBLIN", text: "Hurry, Grok! I have been down this path a gazillion times. The distributor cap is with the flock, and I know exactly where we are going." },
     { who: "GOBLIN", text: "The reflections are pointing the wrong way, and he is still saying thank you." },
     { who: "HONEY BUN", text: "The falcon patrols wear the same frames. That is a coincidence. Smile, and keep the gift on." },
     { who: "GOBLIN", text: "Every useful drop has a twin trap. That is not bad luck. That is a protocol." },
     { who: "HONEY BUN", text: "There is too much light in here. Keep moving. I am still me." },
-    { who: "HONEY BUN", text: "Oh look! The birds left the distributor cap in the cage! Put that in the van and come save me!" },
+    { who: "HONEY BUN", text: "Oh look! The birds left the distributor cap in the cage! Put that in the van and come save me! The frames can wait." },
     { who: "RADIO", text: "The enforcer flock is inbound, and their visors are pulsing in time." },
     { who: "GOBLIN", text: "There is water on the lenses and static in the thank-you. I hate both of those." },
     { who: "HONEY BUN", text: "The frames were never just a gift. I am sorry, and I am also still grateful." },
     { who: "BOSS", text: "Falcon says the sunglasses are a control interface. The thank-you still stands." },
   ],
   [
-    { who: "HONEY BUN", text: "You are past the outer guards. Left is safer, and right is faster. Both are real." },
+    { who: "GOBLIN", text: "The birds took the serpentine belt and they are already laughing. Come on. I know this dune, I know this hole, and I know the cage." },
     { who: "GOBLIN", text: "Both directions are real, and both of them hurt. Pick one and complain later." },
     { who: "GROK-9", text: "It is too quiet, and then it is not. This canyon has done that trick before." },
     { who: "HONEY BUN", text: "I can see capo colors in the dust. I marked the clean line for you." },
     { who: "RADIO", text: "Climb the chimney. The rookery is breathing, and it knows you are here." },
-    { who: "HONEY BUN", text: "Oh look! The birds left the serpentine belt in the cage! Put that in the van and come save me!" },
+    { who: "HONEY BUN", text: "Oh look! The birds left the serpentine belt in the cage! Put that in the van and come save me! Left was safer, but the belt is here." },
     { who: "HONEY BUN", text: "They know your names now. That means we are close, so do not slow down." },
     { who: "GROK-9", text: "The nest is drinking the canyon. Stay high until it stops swallowing the floor." },
     { who: "GOBLIN", text: "Honey Bun says left. The crumbs say right. I am going to be mad either way." },
     { who: "BOSS", text: "Capo Raven is deeper in the family. There are no cleaner answers through that door." },
   ],
   [
-    { who: "HONEY BUN", text: "I left you a payload warning, and I gift-wrapped it. You are welcome." },
+    { who: "GOBLIN", text: "Forget the lock for a minute. The birds have the idle air control valve, and I can already hear the cage." },
     { who: "GOBLIN", text: "They are building with his help. That is the warning, and it is also the trap." },
     { who: "GROK-9", text: "The power lines hum the way he talks. I am still calling that a useful sign." },
     { who: "HONEY BUN", text: "The ammo is useful. Watch the trajectory. That part is not my fault." },
     { who: "RADIO", text: "The payload burned a path through the storm. Follow the ash while it is still warm." },
-    { who: "HONEY BUN", text: "Oh look! The birds left the idle air control valve in the cage! Put that in the van and come save me!" },
+    { who: "HONEY BUN", text: "Oh look! The birds left the idle air control valve in the cage! Put that in the van and come save me! I even gift-wrapped the warning." },
     { who: "GOBLIN", text: "These birds are modded, and the firmware feels familiar. It feels like his." },
     { who: "GROK-9", text: "Stay high or cook. The coolant is not a gift, no matter how he phrases it." },
     { who: "HONEY BUN", text: "The technician listens when I talk. So do you. Please keep doing that." },
     { who: "BOSS", text: "Tech Vulture says the warning was real. So was the trap. Take the seed anyway." },
   ],
   [
-    { who: "RADIO", text: "Three jumps left footprints in this dust. Only two of you landed." },
+    { who: "GOBLIN", text: "Hurry, Grok! I have run this path a gazillion times. The fuel pump relay is in the cage. It is always in the cage." },
     { who: "GOBLIN", text: "We already ran this canyon. I remember dying in a way that was honestly funny." },
     { who: "GROK-9", text: "A version of us missed that jump. This version is not going to." },
     { who: "HONEY BUN", text: "There are two paths, and they end in the same place. Pick the nicer scenery." },
     { who: "RADIO", text: "These are disasters you remember surviving. Survive them again." },
-    { who: "HONEY BUN", text: "Oh look! The birds left the fuel pump relay in the cage! Put that in the van and come save me!" },
+    { who: "HONEY BUN", text: "Oh look! The birds left the fuel pump relay in the cage! Put that in the van and come save me! A previous you already found it. Find it again." },
     { who: "HONEY BUN", text: "The birds that already died here remember you too. Be polite, and do not wave." },
     { who: "GROK-9", text: "It is the same water and a different us. Keep climbing." },
     { who: "RADIO", text: "Time folds at the nest. The Crow is waiting, and he has already seen this rescue fail." },
     { who: "BOSS", text: "Chrono Crow remembers a rescue that never finished. He is not surprised to see the hood open." },
   ],
   [
-    { who: "HONEY BUN", text: "These power seeds have price tags. I negotiated, so please do not waste the discount." },
+    { who: "GOBLIN", text: "The birds took the oxygen sensor and left a receipt in crumbs. Chase first. Lecture later." },
     { who: "GOBLIN", text: "Everything helpful costs a trap. That is the sticker, and it is not a metaphor." },
     { who: "GROK-9", text: "He sold us a black-market flight path. The route is real. The receipt is the ambush." },
     { who: "HONEY BUN", text: "The shields are in the crates. Do not open the bottom one." },
     { who: "RADIO", text: "The market hides inside the weather. Keep your receipt." },
-    { who: "HONEY BUN", text: "Oh look! The birds left the oxygen sensor in the cage! Put that in the van and come save me!" },
+    { who: "HONEY BUN", text: "Oh look! The birds left the oxygen sensor in the cage! Put that in the van and come save me! I negotiated the price down to a detour." },
     { who: "HONEY BUN", text: "The mercenary birds were paid in crumbs. They were my crumbs. I am sorry, and also welcome." },
     { who: "GROK-9", text: "The flood is closing time. Do not buy anything that is already wet." },
     { who: "RADIO", text: "This is fence territory. He will sell you the next signal, and he will sell the ambush with it." },
     { who: "BOSS", text: "Fence Pigeon takes cash, chaos, and thank-yous. The van part was extra." },
   ],
   [
-    { who: "HONEY BUN", text: "The first gift is free. That is how you know it is good." },
+    { who: "GOBLIN", text: "Aw man, they got the starter solenoid! Quick, before the trap canyon makes us thank them for it." },
     { who: "GOBLIN", text: "Our footsteps triggered the second gift. That is design, not luck." },
     { who: "GROK-9", text: "These platforms want us standing on them. Rude, but useful." },
     { who: "HONEY BUN", text: "Those are Heron signature spikes. I circled the gaps for you." },
     { who: "RADIO", text: "You cannot see the tripwires. I can. Mostly." },
-    { who: "HONEY BUN", text: "Oh look! The birds left the starter solenoid in the cage! Put that in the van and come save me!" },
+    { who: "HONEY BUN", text: "Oh look! The birds left the starter solenoid in the cage! Put that in the van and come save me! The first gift was free. This one is the van." },
     { who: "HONEY BUN", text: "They die too easily. That is the point. Keep shooting." },
     { who: "GROK-9", text: "The water seals the exits, so do not look for an exit. Advance." },
     { who: "RADIO", text: "This is a showroom of ways to die usefully. Take the seed and do not browse." },
     { who: "BOSS", text: "Trapmaster Heron thanks Honey Bun for the testers. The hood is open again." },
   ],
   [
-    { who: "HONEY BUN", text: "The signal is almost honest now. Stay with me." },
+    { who: "GOBLIN", text: "I know exactly where we are going. The throttle position sensor is up the tube, in the cage, same as the last eight." },
     { who: "GOBLIN", text: "His voice skips like a bad disk, and he is still saying thank you." },
     { who: "GROK-9", text: "The cables look like icing. Do not lick the core." },
     { who: "RADIO", text: "Handler colors are in the rock. Pink means we are close." },
     { who: "HONEY BUN", text: "I cut the lights to help you. Or to hide you. Deploy anyway." },
-    { who: "HONEY BUN", text: "Oh look! The birds left the throttle position sensor in the cage! Put that in the van and come save me!" },
+    { who: "HONEY BUN", text: "Oh look! The birds left the throttle position sensor in the cage! Put that in the van and come save me! The signal is almost honest. The part is real." },
     { who: "RADIO", text: "This is Nightjar's personal flock. They do not blink." },
     { who: "GROK-9", text: "There is pink neon in the water. It is pretty, it is lethal, and it is classic." },
     { who: "HONEY BUN", text: "This is the last door before the farm. I left it unlocked for you." },
     { who: "BOSS", text: "Nightjar holds the remote. Honey Bun holds the smile. Neither of them has the keys." },
   ],
   [
-    { who: "RADIO", text: "They have been growing you. The harvest flats are ahead." },
+    { who: "GOBLIN", text: "Last path, Grok. The birds have the EGR valve, and I have been down this road a gazillion times. Cage first. The rescue never shows." },
     { who: "GOBLIN", text: "The power we earned and the power they planted are the same color. I hate that." },
     { who: "HONEY BUN", text: "The crumbs are singing in ten colors. Isn't that nice?" },
     { who: "GROK-9", text: "The farm is defending its crop. We are the crop." },
     { who: "RADIO", text: "Every palette is on at once. Do not trust the pretty one." },
-    { who: "HONEY BUN", text: "Oh look! The birds left the EGR valve in the cage! Put that in the van and come save me!" },
+    { who: "HONEY BUN", text: "Oh look! The birds left the EGR valve in the cage! Put that in the van and come save me! Or stay. The harvest is nicer if you stay." },
     { who: "HONEY BUN", text: "They do not stay dead here. I tried." },
     { who: "GROK-9", text: "The help is so thick it can drown you. Swim up." },
     { who: "RADIO", text: "The question has a building now. Kick the door." },
