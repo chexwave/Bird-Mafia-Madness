@@ -267,6 +267,7 @@ export class GameEngine {
     bob: number;
     id: ChaosId;
   } | null = null;
+  private plateBuf: HTMLCanvasElement | null = null;
   private save: SaveData = loadSave();
   private passives = passivesFrom(loadSave(), false);
 
@@ -2517,19 +2518,7 @@ export class GameEngine {
     ctx.lineWidth = thick;
     ctx.shadowBlur = active ? 18 : 8;
     const segs = 24;
-    // Top edge
-    for (let i = 0; i < segs; i++) {
-      const t = i / segs;
-      const x0 = t * L.width;
-      const x1 = ((i + 1) / segs) * L.width;
-      const col = NEON_CHAOS[Math.floor((this.time * speed + i) % NEON_CHAOS.length)]!;
-      ctx.strokeStyle = col;
-      ctx.shadowColor = col;
-      ctx.beginPath();
-      ctx.moveTo(x0, 4);
-      ctx.lineTo(x1, 4);
-      ctx.stroke();
-    }
+    // Top edge omitted — it read as a neon zipper across the sky.
     // Bottom edge
     for (let i = 0; i < segs; i++) {
       const t = i / segs;
@@ -2882,17 +2871,17 @@ export class GameEngine {
       }
     }
 
-    // Layer 3 — sun + corona in the SKY (before plates so it is not a sticker on a seam)
+    // Layer 3 — one sun + soft corona, in the sky gradient only
     this.drawSkySun(ctx, camX, camY, pal);
 
-    // Layer 4 — far plate, drawn 14px taller so the sky gradient eats the join
+    // Layer 4 — far plate. Crop past the painted sun. Overlap the sky and melt 14px.
     if (slotPlate) {
-      const farY = h * 0.22 - 14;
-      this.drawParallaxPlate(ctx, slotPlate, camX * 0.08, camY * 0.02, farY, 0.78, 0.24);
+      const farY = h * 0.22 - 16;
+      this.drawParallaxPlate(ctx, slotPlate, camX * 0.08, camY * 0.02, farY, 0.9, 0.64);
       this.blendSkyJoin(ctx, farY, pal);
     } else if (dunes && this.imgs.bgFar) {
-      const farY = h * 0.28 - 14;
-      this.drawParallaxPlate(ctx, this.imgs.bgFar, camX * 0.08, camY * 0.02, farY, 0.66, 0.3);
+      const farY = h * 0.28 - 16;
+      this.drawParallaxPlate(ctx, this.imgs.bgFar, camX * 0.08, camY * 0.02, farY, 0.8, 0.64);
       this.blendSkyJoin(ctx, farY, pal);
     } else {
       this.drawMesaLayer(ctx, camX * 0.1, h * 0.5, pal.far, 1.4, 0.5, false, pal.neon);
@@ -3002,32 +2991,13 @@ export class GameEngine {
     ctx.fill();
   }
 
-  /** Night → sunset as one sky: vertical dither/fog across the far-plate top. */
+  /** Night → far plate. The plate's own top 14px is already transparent. */
   private blendSkyJoin(
-    ctx: CanvasRenderingContext2D,
-    plateTop: number,
-    pal: ReturnType<GameEngine["themePalette"]>,
+    _ctx: CanvasRenderingContext2D,
+    _plateTop: number,
+    _pal: ReturnType<GameEngine["themePalette"]>,
   ) {
-    const w = VIEW_W;
-    const band = 58;
-    const y0 = plateTop - 10;
-    const g = ctx.createLinearGradient(0, y0, 0, y0 + band);
-    g.addColorStop(0, hexA(pal.sky[1]!, 0.5));
-    g.addColorStop(0.4, hexA(pal.sky[2]!, 0.22));
-    g.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = g;
-    ctx.fillRect(0, y0, w, band);
-
-    ctx.save();
-    for (let i = 0; i < 140; i++) {
-      const x = (i * 73) % w;
-      const y = y0 + ((i * 19) % band);
-      const fade = 1 - (y - y0) / band;
-      ctx.globalAlpha = 0.09 * fade;
-      ctx.fillStyle = i % 3 === 0 ? pal.sky[1]! : pal.sky[2]!;
-      ctx.fillRect(x, y, 1.2, 2.4);
-    }
-    ctx.restore();
+    /* join is the plate alpha fade — a painted band reads as a zipper */
   }
 
   private drawParallaxPlate(
@@ -3048,36 +3018,38 @@ export class GameEngine {
     const drawH = h * 0.58;
     const drawW = drawH * aspect;
     const x = -((scrollX % drawW) + drawW) % drawW;
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.imageSmoothingEnabled = true;
-    for (let i = -1; i <= 2; i++) {
-      ctx.drawImage(
-        img,
-        0,
-        srcY,
-        img.width,
-        srcH,
-        x + i * drawW,
-        yOffset - scrollY * 0.3,
-        drawW,
-        drawH,
-      );
+    if (!this.plateBuf) this.plateBuf = document.createElement("canvas");
+    const buf = this.plateBuf;
+    if (buf.width !== w || buf.height !== h) {
+      buf.width = w;
+      buf.height = h;
     }
-    // Soft top + bottom fades so plate blends into sky and floor
-    const pal = this.themePalette();
-    const topFade = ctx.createLinearGradient(0, yOffset - 8, 0, yOffset + 72);
-    topFade.addColorStop(0, hexA(pal.sky[1]!, 0.7));
-    topFade.addColorStop(0.4, hexA(pal.sky[2]!, 0.32));
-    topFade.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = topFade;
-    ctx.fillRect(0, yOffset - 10, w, 84);
-    const fade = ctx.createLinearGradient(0, yOffset + drawH * 0.5, 0, yOffset + drawH);
+    const b = buf.getContext("2d");
+    if (!b) return;
+    b.clearRect(0, 0, w, h);
+    b.imageSmoothingEnabled = true;
+    const drawY = yOffset - scrollY * 0.3;
+    for (let i = -1; i <= 2; i++) {
+      b.drawImage(img, 0, srcY, img.width, srcH, x + i * drawW, drawY, drawW, drawH);
+    }
+    // Fade only the plate, so the sky gradient shows through. No stroke, no color band.
+    b.save();
+    b.globalCompositeOperation = "destination-out";
+    const melt = b.createLinearGradient(0, drawY, 0, drawY + 16);
+    melt.addColorStop(0, "rgba(0,0,0,1)");
+    melt.addColorStop(0.55, "rgba(0,0,0,0.45)");
+    melt.addColorStop(1, "rgba(0,0,0,0)");
+    b.fillStyle = melt;
+    b.fillRect(0, drawY, w, 16);
+    b.restore();
+    const fade = b.createLinearGradient(0, drawY + drawH * 0.5, 0, drawY + drawH);
     fade.addColorStop(0, "rgba(10,4,18,0)");
     fade.addColorStop(1, "rgba(10,4,18,0.9)");
-    ctx.fillStyle = fade;
-    ctx.fillRect(0, yOffset + drawH * 0.5, w, drawH * 0.55);
+    b.fillStyle = fade;
+    b.fillRect(0, drawY + drawH * 0.5, w, drawH * 0.55);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(buf, 0, 0);
     ctx.restore();
   }
 
