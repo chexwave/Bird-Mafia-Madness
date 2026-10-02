@@ -139,12 +139,15 @@ export const OP_OPENS: (Beat[] | null)[] = [
     { who: "GOBLIN", text: "Aw man, they got the starter solenoid! Quick, before the trap canyon makes us thank them for it." },
   ],
   [
-    { who: "GROK-9", text: "The throttle position sensor is gone. If Honey Bun is fighting the control, he can fight the bird on our hood too." },
-    { who: "GOBLIN", text: "I know exactly where we are going. The throttle position sensor is up the tube, in the cage, same as the last eight." },
+    { who: "GROK-9", text: "Shield up. Neon synth-wave forcefield on the van. Nothing new comes off this hood." },
+    { who: "GOBLIN", text: "The catalytic converter is already gone. We get that back from the cage, and the birds get nothing else." },
   ],
   [
-    { who: "GROK-9", text: "They took the EGR valve. After this canyon I am locking the van, even if the farm is the one holding the key." },
-    { who: "GOBLIN", text: "Last path, Grok. The birds have the EGR valve, and I have been down this road a gazillion times. Cage first. The rescue never shows." },
+    { who: "GOBLIN", text: "Do you have the keys?" },
+    { who: "GROK-9", text: "Negative. You had the keys." },
+    { who: "GOBLIN", text: "Stupid Birds! They must have taken them during one of the other thievings... That's it..." },
+    { who: "GROK-9", text: "Hey Goblin, did you..." },
+    { who: "GOBLIN", text: "I'M COMING FOR YOU BIRD MAFIA!" },
   ],
 ];
 
