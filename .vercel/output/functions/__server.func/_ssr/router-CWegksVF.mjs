@@ -1,8 +1,8 @@
 import { n as __exportAll } from "../_runtime.mjs";
-import { _ as require_jsx_runtime, f as createRouter, g as createRootRoute, h as createFileRoute, l as Scripts, m as lazyRouteComponent, p as Outlet, u as HeadContent } from "../_libs/@tanstack/react-router+[...].mjs";
+import { _ as createFileRoute, d as Scripts, f as HeadContent, g as lazyRouteComponent, h as Outlet, m as createRouter, v as createRootRoute, y as require_jsx_runtime } from "../_libs/@tanstack/react-router+[...].mjs";
 import { t as TriangleAlert } from "../_libs/lucide-react.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/router-CarKNXaU.js
-var router_CarKNXaU_exports = /* @__PURE__ */ __exportAll({ getRouter: () => getRouter });
+//#region node_modules/.nitro/vite/services/ssr/assets/router-CWegksVF.js
+var router_CWegksVF_exports = /* @__PURE__ */ __exportAll({ getRouter: () => getRouter });
 var import_jsx_runtime = require_jsx_runtime();
 function AppErrorComponent({ error }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("main", {
@@ -44,7 +44,7 @@ function AuthProvider({ children }) {
 function PreviewHostBridge() {
 	return null;
 }
-var styles_default = "/assets/styles-CQVRnUuy.css";
+var styles_default = "/assets/styles-oDJp2WOM.css";
 var APP_NAME = "Bird Mafia Madness";
 var Route$1 = createRootRoute({
 	head: () => ({
@@ -109,7 +109,7 @@ var Route$1 = createRootRoute({
 		})]
 	})
 });
-var $$splitComponentImporter = () => import("./routes-Dm7p5B4U.mjs");
+var $$splitComponentImporter = () => import("./routes-BjzvdO6d.mjs");
 var rootRouteChildren = { IndexRoute: createFileRoute("/")({ component: lazyRouteComponent($$splitComponentImporter, "component") }).update({
 	id: "/",
 	path: "/",
@@ -123,4 +123,4 @@ function getRouter() {
 	});
 }
 //#endregion
-export { getRouter, router_CarKNXaU_exports as t };
+export { getRouter, router_CWegksVF_exports as t };

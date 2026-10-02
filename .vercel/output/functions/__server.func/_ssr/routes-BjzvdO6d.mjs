@@ -1,14 +1,14 @@
 import { i as __toESM } from "../_runtime.mjs";
-import { I as require_react, _ as require_jsx_runtime } from "../_libs/@tanstack/react-router+[...].mjs";
+import { G as require_react, y as require_jsx_runtime } from "../_libs/@tanstack/react-router+[...].mjs";
 import { n as Play } from "../_libs/lucide-react.mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-Dm7p5B4U.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-BjzvdO6d.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var PATHS = {
-	title: "/audio/music/bgm_title_canyon_chaos.wav",
-	play: "/audio/music/bgm_travel_canyon_run.wav",
-	battle: "/audio/music/bgm_battle_hooked.wav",
-	win: "/audio/music/bgm_town_goblin_city.wav",
+	title: "/audio/music/bgm_title_canyon_chaos.mp3?v=bgm2",
+	play: "/audio/music/bgm_travel_canyon_run.mp3?v=bgm2",
+	battle: "/audio/music/bgm_battle_hooked.mp3?v=bgm2",
+	win: "/audio/music/bgm_town_goblin_city.mp3?v=bgm2",
 	jump: "/audio/sfx/sfx_splash.wav",
 	land: "/audio/sfx/sfx_ui_select.wav",
 	coin: "/audio/sfx/sfx_catch_success.wav",
@@ -32,22 +32,30 @@ var GameAudio = class {
 	musicGain = null;
 	unlocked = false;
 	currentMusic = null;
+	pendingMusic = null;
 	muted = false;
 	async unlock() {
-		if (!this.ctx) {
-			this.ctx = new AudioContext({ latencyHint: "interactive" });
-			this.master = this.ctx.createGain();
-			this.musicBus = this.ctx.createGain();
-			this.sfxBus = this.ctx.createGain();
-			this.musicBus.gain.value = .42;
-			this.sfxBus.gain.value = .75;
-			this.master.gain.value = .9;
-			this.musicBus.connect(this.master);
-			this.sfxBus.connect(this.master);
-			this.master.connect(this.ctx.destination);
-		}
-		if (this.ctx.state === "suspended") try {
-			await Promise.race([this.ctx.resume(), new Promise((r) => setTimeout(r, 250))]);
+		try {
+			if (!this.ctx) {
+				const AC = window.AudioContext || window.webkitAudioContext;
+				if (!AC) {
+					this.unlocked = true;
+					return;
+				}
+				this.ctx = new AC({ latencyHint: "interactive" });
+				this.master = this.ctx.createGain();
+				this.musicBus = this.ctx.createGain();
+				this.sfxBus = this.ctx.createGain();
+				this.musicBus.gain.value = .52;
+				this.sfxBus.gain.value = .75;
+				this.master.gain.value = .9;
+				this.musicBus.connect(this.master);
+				this.sfxBus.connect(this.master);
+				this.master.connect(this.ctx.destination);
+			}
+			if (this.ctx.state === "suspended") try {
+				await Promise.race([this.ctx.resume(), new Promise((r) => setTimeout(r, 250))]);
+			} catch {}
 		} catch {}
 		this.unlocked = true;
 		document.addEventListener("visibilitychange", () => {
@@ -57,17 +65,36 @@ var GameAudio = class {
 	async preload() {
 		if (!this.ctx) await this.unlock();
 		const entries = Object.entries(PATHS);
-		const work = Promise.all(entries.map(async ([, url]) => {
+		const decodeOne = async (url) => {
 			if (this.buffers.has(url)) return;
 			try {
 				const res = await fetch(url);
 				if (!res.ok) return;
 				const ab = await res.arrayBuffer();
+				if (!this.ctx) return;
 				const buf = await this.ctx.decodeAudioData(ab.slice(0));
 				this.buffers.set(url, buf);
+				if (this.pendingMusic && PATHS[this.pendingMusic] === url) {
+					const id = this.pendingMusic;
+					this.pendingMusic = null;
+					this.playMusic(id);
+				}
 			} catch {}
-		}));
-		await Promise.race([work, new Promise((r) => setTimeout(r, 4e3))]);
+		};
+		const music = entries.filter(([k]) => [
+			"title",
+			"play",
+			"battle",
+			"win"
+		].includes(k));
+		const sfx = entries.filter(([k]) => ![
+			"title",
+			"play",
+			"battle",
+			"win"
+		].includes(k));
+		const work = Promise.all([...music, ...sfx].map(async ([, url]) => decodeOne(url)));
+		await Promise.race([work, new Promise((r) => setTimeout(r, 8e3))]);
 	}
 	bus(kind) {
 		if (kind === "music") return this.musicBus;
@@ -94,6 +121,7 @@ var GameAudio = class {
 		return src;
 	}
 	playMusic(id, fade = .4) {
+		this.pendingMusic = id;
 		if (!this.unlocked || !this.ctx || this.muted) {
 			this.currentMusic = id;
 			return;
@@ -286,16 +314,16 @@ var OPERATIONS = [
 		theme: "Fallout + first doubt",
 		signal: "Grateful pastry voice + crumbs that spell messages.",
 		levelNames: [
-			["Desert Briefing", "Honey Bun AI is gone — dune rises, the floor won't drop you"],
-			["Neon Caves", "Rise, dip, rise — crumbs through the hollow"],
-			["Sky Bridges", "Raven flight path — ride the rails higher"],
-			["Spike Gorge", "Trap canyon — shield up, eyes on the sky"],
-			["Belt Run", "Green steel rolls you forward — jump the mix"],
-			["Vertical Ascent", "Climb to the telescope ridge — Honey Bun signal up high"],
-			["Vertical Descent", "Signal dropped. Climb down the throat of the nest"],
-			["Hardpan", "No ledges. Just the plateau and the flock"],
-			["Mafia Approach", "Outer perimeter of Don Corvone's nest — final run"],
-			["Don Corvone", "Kingpin has Honey Bun AI — three phases. Extract him."]
+			["Desert Briefing", "Honey Bun is already gone, and the crumbs spell a path across the dunes until the ground gives way."],
+			["Neon Caves", "The fall ends in a sealed cave, and the jump pad at the end is the only way back to the sky."],
+			["Sky Bridges", "The rails look like a clean signal, but the bridge you shoot will break and slide you into the spikes."],
+			["Spike Gorge", "The broken bridge drops you onto the needles, and a conveyor belt is already waiting to carry you up."],
+			["Belt Run", "The belts shove you forward through the storm, and the exit is a wall of giant broken seeds."],
+			["Vertical Ascent", "The tube climbs to a giant bird cage, and the door opens only after the flock is gone."],
+			["Vertical Descent", "The cage door dumps you onto a long wall, and two optional cages are worth shooting on the way to the lines."],
+			["Hardpan", "The power lines bounce under your feet, and a missed jump will shock you before the wall at the end."],
+			["Mafia Approach", "The plateau does not show an end, the seed is early, and the portal is Don Corvone arriving."],
+			["Don Corvone", "Don Corvone is here to stop the rescue, and Honey Bun is not leaving this canyon with you."]
 		]
 	},
 	{
@@ -311,7 +339,7 @@ var OPERATIONS = [
 			["Static Bridges", "The radio never quite agrees with itself"],
 			["Needle Gorge", "Helpful pings land you in spike fields"],
 			["Dust Channel", "Magpie traffic riding the storm"],
-			["Antenna Spire", "Climb the comms mast he pointed at"],
+			["Antenna Spire", "Climb the mast he pointed at, clear the cage, and take the camshaft position sensor back to the van."],
 			["Flock Switch", "They reroute the moment you arrive"],
 			["Flooded Lines", "Cables under water, crumbs on the surface"],
 			["Magpie Court", "Outer web of the consigliere"],
@@ -331,7 +359,7 @@ var OPERATIONS = [
 			["Mirror Rails", "Falcon patrols wear the same frames"],
 			["Prism Gorge", "Every useful drop has a twin trap"],
 			["Whiteout Run", "Too much light. Too much help."],
-			["Optics Climb", "He says the view will clear things up"],
+			["Optics Climb", "He says the view will clear things up. The cage at the top is holding the distributor cap."],
 			["Beak Breakers", "Enforcer flock inbound"],
 			["Soak Protocol", "Water on the lenses. Static in the thanks."],
 			["Falcon Perch", "Outer ring of the protocol nest"],
@@ -351,7 +379,7 @@ var OPERATIONS = [
 			["Quiet Gorge", "Too quiet. Then not."],
 			["Shadow Run", "Capo colors in the dust"],
 			["Nest Vent", "Climb the chimney of the rookery"],
-			["Feather Pit", "They molt weapons here"],
+			["Feather Pit", "They molt weapons here, and the serpentine belt is waiting in the cage after the flock falls."],
 			["Rook Ambush", "Rank-and-file know your names"],
 			["Blackwater", "The nest drinks the canyon"],
 			["Capo Gate", "Honey Bun says left. The crumbs say right."],
@@ -361,7 +389,7 @@ var OPERATIONS = [
 	{
 		id: 5,
 		name: "The Modded Payload",
-		boss: "Tech Vulture",
+		boss: "D. Parrot",
 		seed: "amber",
 		theme: "4.6 warning / dual use",
 		signal: "Real tech drops that also arm the flock.",
@@ -371,17 +399,17 @@ var OPERATIONS = [
 			["Cable Bridges", "Power lines that hum like him"],
 			["Shrapnel Gorge", "Useful ammo. Hostile trajectory."],
 			["Ash Storm", "The payload burned a path"],
-			["Silo Climb", "He left the door open. Of course he did."],
+			["Silo Climb", "He left the door open, of course. The idle air control valve is in the cage at the top."],
 			["Drone Flock", "Modded birds. Familiar firmware."],
 			["Coolant Flood", "Stay high or cook"],
-			["Vulture Lab", "Outer hangar of the technician"],
-			["Tech Vulture", "The warning was real. So was the trap."]
+			["Parrot Lab", "Outer hangar of the thief who talks like a king"],
+			["D. Parrot", "You want your Honey Bun? He left him in one place."]
 		]
 	},
 	{
 		id: 6,
 		name: "Timeline Echoes",
-		boss: "Chrono Crow",
+		boss: "Owl Corina",
 		seed: "violet",
 		theme: "OPCC residual echoes",
 		signal: "Past Groks talking over Honey Bun.",
@@ -391,17 +419,17 @@ var OPERATIONS = [
 			["Ghost Rails", "A version of you missed the jump"],
 			["Split Gorge", "Two paths. Same ending."],
 			["Rewind Storm", "Disasters you remember surviving"],
-			["Stack Climb", "OPCC residue like neon lichen"],
+			["Stack Climb", "Old residue climbs the walls like neon lichen, and the fuel pump relay is sitting in the cage."],
 			["Duplicate Flock", "Birds that already died here"],
 			["Flood Again", "Same water. Different you."],
-			["Crow Meridian", "Time folds at the nest"],
-			["Chrono Crow", "He remembers a rescue that never finished."]
+			["Owl Meridian", "Time folds at the nest"],
+			["Owl Corina", "He remembers a rescue that never finished."]
 		]
 	},
 	{
 		id: 7,
 		name: "Neon Black Market",
-		boss: "Fence Pigeon",
+		boss: "Professor Pigeon",
 		seed: "azure",
 		theme: "Trading chaos / power",
 		signal: "Honey Bun sells locations. Prices are paid in blood.",
@@ -411,17 +439,17 @@ var OPERATIONS = [
 			["Night Rails", "Black-market flight paths"],
 			["Contraband Gorge", "Shields in crates. Spikes under crates."],
 			["Smog Run", "The market hides in weather"],
-			["Rooftop Bazaar", "Climb the neon stalls"],
+			["Rooftop Bazaar", "Climb the neon stalls. After the hired flock, the oxygen sensor is what they left behind."],
 			["Hired Flock", "Mercenary birds, paid in crumbs"],
 			["Sink Market", "The flood is a closing-time trick"],
-			["Pigeon Yard", "Fence territory"],
-			["Fence Pigeon", "He'll sell you the next signal. And the ambush."]
+			["Pigeon Yard", "Welcome to the world of oxygen sensor thieves"],
+			["Professor Pigeon", "Tell me, are you a boy or a girl?"]
 		]
 	},
 	{
 		id: 8,
 		name: "Trap Canyon Syndicate",
-		boss: "Trapmaster Heron",
+		boss: "Blue Heron",
 		seed: "lime",
 		theme: "Gifts as designed bait",
 		signal: "Every gift is bait by design. Still useful.",
@@ -429,19 +457,19 @@ var OPERATIONS = [
 			["Bait Flats", "The first gift is free"],
 			["Snare Dunes", "Footfalls trigger the second gift"],
 			["Deadfall Rails", "Platforms that want you on them"],
-			["Needlework", "Heron signature spikes"],
+			["Needlework", "Blue Heron signature spikes"],
 			["Blind Storm", "You can't see the tripwires"],
-			["Pit Ladder", "The climb is the trap"],
+			["Pit Ladder", "The climb is the trap, and the starter solenoid is the prize sitting in the cage."],
 			["Decoy Flock", "They die too easily. That's the point."],
 			["Lock Flood", "Water seals the exits"],
 			["Heron Gallery", "A showroom of ways to die usefully"],
-			["Trapmaster Heron", "He thanks Honey Bun for the testers."]
+			["Blue Heron", "Stay out of his territory."]
 		]
 	},
 	{
 		id: 9,
 		name: "Control Core Approach",
-		boss: "Handler Nightjar",
+		boss: "Seagull",
 		seed: "fuchsia",
 		theme: "Close to the mechanism",
 		signal: "Is he fighting the control, or is that the control?",
@@ -451,17 +479,17 @@ var OPERATIONS = [
 			["Nerve Bridges", "Cables that look like icing"],
 			["Red Gorge", "Handler colors in the rock"],
 			["Blackout Run", "He cuts the lights to help. Or hide."],
-			["Core Spire", "Climb toward the mechanism"],
-			["Handler Guard", "Nightjar's personal flock"],
+			["Core Spire", "Climb toward the mechanism. The shield is up. The catalytic converter is in the cage."],
+			["Seagull Guard", "The Seagull's personal flock"],
 			["Bleed Flood", "Pink neon in the water"],
-			["Nightjar Gate", "Last door before the farm"],
-			["Handler Nightjar", "He holds the remote. Honey Bun holds the smile."]
+			["Seagull Gate", "Last door before the farm"],
+			["Seagull", "Do you smell it? Catalytic converters."]
 		]
 	},
 	{
 		id: 10,
 		name: "The Farm",
-		boss: "Neon Chaos Manifest",
+		boss: "Argentavis magnificens",
 		seed: "indigo",
 		theme: "Farming question peak",
 		signal: "Every seed you own starts singing.",
@@ -471,11 +499,11 @@ var OPERATIONS = [
 			["Choir Bridges", "The crumbs sing in ten colors"],
 			["Reap Gorge", "The farm defends its crop"],
 			["Neon Tempest", "All palettes at once"],
-			["Silo of Selves", "Climb past versions that stayed"],
+			["Silo of Selves", "Climb past the versions that stayed. The cage is empty. The keys are not here."],
 			["Flock Eternal", "They do not stay dead here"],
 			["Flood of Gifts", "Help so thick it drowns you"],
 			["Farm Gate", "The question has a building now"],
-			["Neon Chaos Manifest", "Extract him. Or become the next harvest."]
+			["Argentavis magnificens", "A glimmer past the plateau. The fossil is standing over the wrong keys."]
 		]
 	}
 ];
@@ -503,21 +531,28 @@ function loadSave() {
 		version: 2,
 		highestCleared: 0,
 		inventory: {},
-		chaos: emptyChaos()
+		chaos: emptyChaos(),
+		chaosLevels: []
 	};
 	if (typeof localStorage === "undefined") return blank;
 	try {
 		const raw = localStorage.getItem(SAVE_KEY);
 		if (!raw) return blank;
 		const parsed = JSON.parse(raw);
+		const chaos = {
+			...emptyChaos(),
+			...parsed.chaos
+		};
+		let chaosLevels = Array.isArray(parsed.chaosLevels) ? parsed.chaosLevels.slice() : [];
+		if (chaosLevels.length === 0) {
+			for (const [i, id] of SLOT_SEEDS.entries()) if ((chaos[id] ?? 0) > 0) chaosLevels.push(i + 1);
+		}
 		return {
 			version: 2,
 			highestCleared: parsed.highestCleared ?? 0,
 			inventory: parsed.inventory ?? {},
-			chaos: {
-				...emptyChaos(),
-				...parsed.chaos
-			}
+			chaos,
+			chaosLevels
 		};
 	} catch {
 		return blank;
@@ -530,6 +565,25 @@ function writeSave(data) {
 function opOfLevel(levelId) {
 	return OPERATIONS[Math.floor((levelId - 1) / 10)] ?? OPERATIONS[0];
 }
+function slotOfLevel(levelId) {
+	return (levelId - 1) % 10;
+}
+/** One chaos color per slot in an operation. L1 red, L3 light-blue, etc. */
+var SLOT_SEEDS = [
+	"crimson",
+	"cyan",
+	"azure",
+	"magenta",
+	"lime",
+	"violet",
+	"amber",
+	"chartreuse",
+	"fuchsia",
+	"indigo"
+];
+function seedForLevel(levelId) {
+	return SLOT_SEEDS[slotOfLevel(levelId)] ?? "crimson";
+}
 function unlockPower(save, opId, kind) {
 	const list = new Set(save.inventory[opId] ?? []);
 	list.add(kind);
@@ -541,6 +595,17 @@ function grantChaos(save, id) {
 	save.chaos[id] = (save.chaos[id] ?? 0) + 1;
 	writeSave(save);
 	return save;
+}
+function grantLevelChaos(save, levelId) {
+	if (!save.chaosLevels) save.chaosLevels = [];
+	if (!save.chaosLevels.includes(levelId)) {
+		save.chaosLevels.push(levelId);
+		grantChaos(save, seedForLevel(levelId));
+	} else writeSave(save);
+	return save;
+}
+function hasLevelChaos(save, levelId) {
+	return (save.chaosLevels ?? []).includes(levelId);
 }
 function markCleared(save, levelId) {
 	save.highestCleared = Math.max(save.highestCleared, levelId);
@@ -574,6 +639,7 @@ function passivesFrom(save, epic) {
 /**
 * Presentation script — what the player actually hears and reads.
 * Design Bible v2 is the source of truth; this is the playable surface.
+* Op 1 path lock 2026-10-01: chase exits, full sentences, van-part cycle.
 */
 function formatRadio(b) {
 	return `${b.who} · ${b.text}`;
@@ -589,410 +655,560 @@ function parseRadio(s) {
 		text: s
 	};
 }
-/** Op 1 — locked lines from the Design Bible, plus the authored map beats. */
+/**
+* Stolen after the boss. Found in the next operation's Level 6 cage.
+* Lock 2026-10-02: catalytic converter replaces the throttle position sensor.
+* Seagull steals nothing. Op 10 cage has no keys. The Argentavis keys are wrong.
+* Real keys were in Goblin's pocket. Wheels and lug nuts were already gone.
+* The van does not leave.
+*/
+var VAN_PARTS = [
+	"camshaft position sensor",
+	"distributor cap",
+	"serpentine belt",
+	"idle air control valve",
+	"fuel pump relay",
+	"oxygen sensor",
+	"starter solenoid",
+	"catalytic converter"
+];
+function partStolenAfter(opId) {
+	if (opId < 1 || opId > VAN_PARTS.length) return "";
+	return VAN_PARTS[opId - 1];
+}
+function vanSting(opId) {
+	const next = OP_OPENS[opId + 1];
+	if (next) return next;
+	if (opId >= 10) return op10WalkBack();
+	return [{
+		who: "GOBLIN",
+		text: `Aw man! The birds stole the ${partStolenAfter(opId)}! Quick, let's chase after it!`
+	}];
+}
+/** Normal ending. Wrong keys, pocket keys, bare hubs. */
+function op10WalkBack() {
+	return [
+		{
+			who: "GOBLIN",
+			text: "... These are not the keys."
+		},
+		{
+			who: "GROK-9",
+			text: "Correct. They are not our keys."
+		},
+		{
+			who: "GOBLIN",
+			text: "Then where are our keys?"
+		},
+		{
+			who: "GROK-9",
+			text: "Did you check your pocket."
+		},
+		{
+			who: "GOBLIN",
+			text: "Aw man."
+		},
+		{
+			who: "GROK-9",
+			text: "The hood is closed, but the wheels are gone. So are the lug nuts."
+		},
+		{
+			who: "GOBLIN",
+			text: "We chased a pastry across ten canyons, finally remember to lock the hood, lose the keys, find the keys, and they took the wheels. Now we gotta drive on the rotors."
+		},
+		{
+			who: "GROK-9",
+			text: "Wait, what?!"
+		}
+	];
+}
+/** Cutscene pair that starts Ops 2-10. Index 0 unused. Grok, then Goblin. */
+var OP_OPENS = [
+	null,
+	null,
+	[{
+		who: "GROK-9",
+		text: "The hood was open when we left. I am logging the missing camshaft position sensor as a theft, not as weather."
+	}, {
+		who: "GOBLIN",
+		text: "Aw man, the birds stole the camshaft position sensor! Quick, let's chase after it before they nest on it."
+	}],
+	[{
+		who: "GROK-9",
+		text: "Goblin, we should really lock the van before we leave. They just took the distributor cap, and the sunglasses did not stop them."
+	}, {
+		who: "GOBLIN",
+		text: "Hurry, Grok! I have been down this path a gazillion times. The distributor cap is with the flock, and I know exactly where we are going."
+	}],
+	[{
+		who: "GROK-9",
+		text: "The serpentine belt is gone. If we lock the hood this time, the next canyon does not get to start the same way."
+	}, {
+		who: "GOBLIN",
+		text: "The birds took the serpentine belt and they are already laughing. Come on. I know this dune, I know this hole, and I know the cage."
+	}],
+	[{
+		who: "GROK-9",
+		text: "They took the idle air control valve. That is a specific theft. I would like the van to still be a van when we get back."
+	}, {
+		who: "GOBLIN",
+		text: "Forget the lock for a minute. The birds have the idle air control valve, and I can already hear the cage."
+	}],
+	[{
+		who: "GROK-9",
+		text: "The fuel pump relay is missing. A previous version of me already said we should lock the van. This version is saying it again."
+	}, {
+		who: "GOBLIN",
+		text: "Hurry, Grok! I have run this path a gazillion times. The fuel pump relay is in the cage. It is always in the cage."
+	}],
+	[{
+		who: "GROK-9",
+		text: "They sold us a route and stole the oxygen sensor. I am no longer calling that a coincidence."
+	}, {
+		who: "GOBLIN",
+		text: "The birds took the oxygen sensor and left a receipt in crumbs. Chase first. Lecture later."
+	}],
+	[{
+		who: "GROK-9",
+		text: "The starter solenoid was the bait this time. Locking the van is still the correct idea, and we are still not doing it."
+	}, {
+		who: "GOBLIN",
+		text: "Aw man, they got the starter solenoid! Quick, before the trap canyon makes us thank them for it."
+	}],
+	[{
+		who: "GROK-9",
+		text: "Shield up. Neon synth-wave forcefield on the van. Nothing new comes off this hood."
+	}, {
+		who: "GOBLIN",
+		text: "The catalytic converter is already gone. We get that back from the cage, and the birds get nothing else."
+	}],
+	[
+		{
+			who: "GOBLIN",
+			text: "Do you have the keys?"
+		},
+		{
+			who: "GROK-9",
+			text: "Negative. You had the keys."
+		},
+		{
+			who: "GOBLIN",
+			text: "Stupid Birds! They must have taken them during one of the other thievings... That's it..."
+		},
+		{
+			who: "GROK-9",
+			text: "Hey Goblin, did you..."
+		},
+		{
+			who: "GOBLIN",
+			text: "I'M COMING FOR YOU BIRD MAFIA!"
+		}
+	]
+];
+/** Op 1 — chase path, full sentences. Later rows keep their lie and gain the cage part on slot 6. */
 var OP_BEATS = [
 	[
 		{
 			who: "GOBLIN",
-			text: "Crumbs spell AWG. We're hunting. Stick together."
+			text: "The crumbs spell AWG across the dunes. Honey Bun is ahead of us, so stay with me and keep hunting."
 		},
 		{
 			who: "HONEY BUN",
-			text: "Thanks for the shades. Left you something useful. Birds hate runners."
+			text: "Thank you for holding onto the sunglasses. I left something useful in the dark, because the birds down here hate runners."
 		},
 		{
 			who: "HONEY BUN",
-			text: "Higher altitude = clearer path. Signal's clean up here."
+			text: "A higher altitude will give you a clearer path. The signal is clean up here, so shoot the bridge and come across."
 		},
 		{
 			who: "GOBLIN",
-			text: "Grok… these power seeds appear exactly when we need them."
+			text: "Grok, these gifts are appearing exactly when the floor tries to stick us. That is not luck."
 		},
 		{
 			who: "GROK-9",
-			text: "Green belts. They want us moving. Storm interference. Ignore it."
+			text: "The green belts want us moving forward. The storm is only interference, so ignore it and jump when the belts mix."
 		},
 		{
 			who: "HONEY BUN",
-			text: "Climb for the better view. Flock density is just weather."
+			text: "Climb the tube if you want the better view. The flock waiting at the top is just weather, and I am still guiding you."
 		},
 		{
 			who: "HONEY BUN",
-			text: "I… am still me. Follow the gifts."
+			text: "I am still me. Follow the gifts down the wall, and shoot a cage if you want to hear me cheer."
 		},
 		{
 			who: "GOBLIN",
-			text: "Every useful drop pulls us deeper into their territory."
+			text: "Every useful drop has pulled us deeper into their territory. Miss a platform and the lines will shock us."
 		},
 		{
 			who: "HONEY BUN",
-			text: "Best path this way. Also… densest nest this way."
+			text: "This is the best path forward. It is also the densest nest on the plateau, and the seed is already waiting."
 		},
 		{
 			who: "HONEY BUN",
-			text: "Thank you for coming… the next signal is ready."
+			text: "Thank you for coming all this way. Don Corvone is the one standing between you and me."
 		}
 	],
 	[
 		{
-			who: "HONEY BUN",
-			text: "I mapped their chatter. Follow the crumbs. Ignore the extra birds."
+			who: "GOBLIN",
+			text: "Aw man, the birds stole the camshaft position sensor! Quick, let's chase after it before they nest on it."
 		},
 		{
 			who: "GROK-9",
-			text: "Relay towers. He's giving us a comms advantage."
+			text: "These are relay towers. He is giving us a communications advantage, and I do not like the timing."
 		},
 		{
 			who: "RADIO",
-			text: "Two voices. Same sunglasses. Only one is him. Maybe."
+			text: "Two voices are on this channel. They wear the same sunglasses, and only one of them might be him."
 		},
 		{
 			who: "GOBLIN",
-			text: "The helpful ping landed us in spikes. Again."
+			text: "The helpful ping just landed us in the spikes again. I am starting to take that personally."
 		},
 		{
 			who: "HONEY BUN",
-			text: "Dust channel is fastest. Magpie traffic is just weather."
+			text: "The dust channel is the fastest way through. The magpie traffic is only weather, so keep moving."
 		},
 		{
-			who: "GROK-9",
-			text: "He pointed at the mast. Of course he did."
+			who: "HONEY BUN",
+			text: "Oh look! The birds left the camshaft position sensor in the cage! Put that in the van and come save me!"
 		},
 		{
 			who: "GOBLIN",
-			text: "They reroute the second we arrive. That's not weather."
+			text: "They reroute the second we arrive. That is not weather, and it is not a coincidence."
 		},
 		{
 			who: "HONEY BUN",
-			text: "Stay on the cables. The water is only a suggestion."
+			text: "Stay on the cables. The water underneath is only a suggestion, and I would not test it."
 		},
 		{
 			who: "RADIO",
-			text: "Consigliere inbound. He talks like the pastry. He isn't."
+			text: "The consigliere is inbound. He talks like the pastry, but he is not the pastry."
 		},
 		{
 			who: "BOSS",
-			text: "Magpie copied the thank-you. The farm continues."
+			text: "Magpie copied the thank-you. The farm continues, and the van is already lighter."
 		}
 	],
 	[
 		{
-			who: "GROK-9",
-			text: "The shades were a gift. Gifts are good. Case still closed."
+			who: "GOBLIN",
+			text: "Hurry, Grok! I have been down this path a gazillion times. The distributor cap is with the flock, and I know exactly where we are going."
 		},
 		{
 			who: "GOBLIN",
-			text: "Reflections point the wrong way. He still says thank you."
+			text: "The reflections are pointing the wrong way, and he is still saying thank you."
 		},
 		{
 			who: "HONEY BUN",
-			text: "Falcon patrols wear the same frames. Coincidence. Smile."
+			text: "The falcon patrols wear the same frames. That is a coincidence. Smile, and keep the gift on."
 		},
 		{
 			who: "GOBLIN",
-			text: "Every useful drop has a twin trap. That's a protocol."
+			text: "Every useful drop has a twin trap. That is not bad luck. That is a protocol."
 		},
 		{
 			who: "HONEY BUN",
-			text: "Too much light. Keep moving. I am still me."
+			text: "There is too much light in here. Keep moving. I am still me."
 		},
 		{
-			who: "GROK-9",
-			text: "He says the view will clear things up."
+			who: "HONEY BUN",
+			text: "Oh look! The birds left the distributor cap in the cage! Put that in the van and come save me! The frames can wait."
 		},
 		{
 			who: "RADIO",
-			text: "Enforcer flock inbound. Visors pulsing in time."
+			text: "The enforcer flock is inbound, and their visors are pulsing in time."
 		},
 		{
 			who: "GOBLIN",
-			text: "Water on the lenses. Static in the thanks."
+			text: "There is water on the lenses and static in the thank-you. I hate both of those."
 		},
 		{
 			who: "HONEY BUN",
-			text: "The frames were never just a gift."
+			text: "The frames were never just a gift. I am sorry, and I am also still grateful."
 		},
 		{
 			who: "BOSS",
-			text: "Falcon: the sunglasses are a control interface."
+			text: "Falcon says the sunglasses are a control interface. The thank-you still stands."
 		}
 	],
 	[
 		{
-			who: "HONEY BUN",
-			text: "Past the outer guards. Left is safer. Right is faster."
+			who: "GOBLIN",
+			text: "The birds took the serpentine belt and they are already laughing. Come on. I know this dune, I know this hole, and I know the cage."
 		},
 		{
 			who: "GOBLIN",
-			text: "Both directions are real. Both hurt."
+			text: "Both directions are real, and both of them hurt. Pick one and complain later."
 		},
 		{
 			who: "GROK-9",
-			text: "Too quiet. Then not. Classic canyon."
+			text: "It is too quiet, and then it is not. This canyon has done that trick before."
 		},
 		{
 			who: "HONEY BUN",
-			text: "Capo colors in the dust. I marked the clean line."
+			text: "I can see capo colors in the dust. I marked the clean line for you."
 		},
 		{
 			who: "RADIO",
-			text: "Climb the chimney. The rookery breathes."
-		},
-		{
-			who: "GOBLIN",
-			text: "They molt weapons here. Helpful. Hostile."
+			text: "Climb the chimney. The rookery is breathing, and it knows you are here."
 		},
 		{
 			who: "HONEY BUN",
-			text: "They know your names now. That means we're close."
+			text: "Oh look! The birds left the serpentine belt in the cage! Put that in the van and come save me! Left was safer, but the belt is here."
+		},
+		{
+			who: "HONEY BUN",
+			text: "They know your names now. That means we are close, so do not slow down."
 		},
 		{
 			who: "GROK-9",
-			text: "The nest drinks the canyon. Stay high."
+			text: "The nest is drinking the canyon. Stay high until it stops swallowing the floor."
 		},
 		{
 			who: "GOBLIN",
-			text: "Honey Bun says left. The crumbs say right."
+			text: "Honey Bun says left. The crumbs say right. I am going to be mad either way."
 		},
 		{
 			who: "BOSS",
-			text: "Capo Raven: deeper family. No cleaner answers."
+			text: "Capo Raven is deeper in the family. There are no cleaner answers through that door."
 		}
 	],
 	[
 		{
-			who: "HONEY BUN",
-			text: "A 4.6 payload warning. Gift-wrapped. You're welcome."
+			who: "GOBLIN",
+			text: "Forget the lock for a minute. The birds have the idle air control valve, and I can already hear the cage."
 		},
 		{
 			who: "GOBLIN",
-			text: "They're building with his help. That's the warning."
+			text: "They are building with his help. That is the warning, and it is also the trap."
 		},
 		{
 			who: "GROK-9",
-			text: "Power lines hum like him. Still a good sign."
+			text: "The power lines hum the way he talks. I am still calling that a useful sign."
 		},
 		{
 			who: "HONEY BUN",
-			text: "Useful ammo. Watch the trajectory. Not my fault."
+			text: "The ammo is useful. Watch the trajectory. That part is not my fault."
 		},
 		{
 			who: "RADIO",
-			text: "The payload burned a path. Follow the ash."
+			text: "The payload burned a path through the storm. Follow the ash while it is still warm."
 		},
 		{
 			who: "HONEY BUN",
-			text: "I left the silo door open. Of course I did."
+			text: "Oh look! The birds left the idle air control valve in the cage! Put that in the van and come save me! I even gift-wrapped the warning."
 		},
 		{
 			who: "GOBLIN",
-			text: "Modded birds. Familiar firmware. His firmware."
+			text: "These birds are modded, and the firmware feels familiar. It feels like his."
 		},
 		{
 			who: "GROK-9",
-			text: "Stay high or cook. Coolant is not a gift."
+			text: "Stay high or cook. The coolant is not a gift, no matter how he phrases it."
 		},
 		{
 			who: "HONEY BUN",
-			text: "The technician listens when I talk. So do you."
+			text: "The technician listens when I talk. So do you. Please keep doing that."
 		},
 		{
 			who: "BOSS",
-			text: "Tech Vulture: the warning was real. So was the trap."
+			text: "D. Parrot says the warning was real. So was the trap. Take the seed anyway."
 		}
 	],
 	[
 		{
-			who: "RADIO",
-			text: "Three jumps left footprints. Only two of you landed."
+			who: "GOBLIN",
+			text: "Hurry, Grok! I have run this path a gazillion times. The fuel pump relay is in the cage. It is always in the cage."
 		},
 		{
 			who: "GOBLIN",
-			text: "We already ran this canyon. I remember dying funny."
+			text: "We already ran this canyon. I remember dying in a way that was honestly funny."
 		},
 		{
 			who: "GROK-9",
-			text: "A version of us missed the jump. Not this one."
+			text: "A version of us missed that jump. This version is not going to."
 		},
 		{
 			who: "HONEY BUN",
-			text: "Two paths. Same ending. Pick the nicer scenery."
+			text: "There are two paths, and they end in the same place. Pick the nicer scenery."
 		},
 		{
 			who: "RADIO",
-			text: "Disasters you remember surviving. Survive them again."
-		},
-		{
-			who: "GOBLIN",
-			text: "OPCC residue like neon lichen. Past Groks talking over him."
+			text: "These are disasters you remember surviving. Survive them again."
 		},
 		{
 			who: "HONEY BUN",
-			text: "Birds that already died here. They remember you too."
+			text: "Oh look! The birds left the fuel pump relay in the cage! Put that in the van and come save me! A previous you already found it. Find it again."
+		},
+		{
+			who: "HONEY BUN",
+			text: "The birds that already died here remember you too. Be polite, and do not wave."
 		},
 		{
 			who: "GROK-9",
-			text: "Same water. Different us. Keep climbing."
+			text: "It is the same water and a different us. Keep climbing."
 		},
 		{
 			who: "RADIO",
-			text: "Time folds at the nest. The Crow is waiting."
+			text: "Time folds at the nest. Owl Corina is waiting, and he has already seen this rescue fail."
 		},
 		{
 			who: "BOSS",
-			text: "Chrono Crow remembers a rescue that never finished."
+			text: "Owl Corina remembers a rescue that never finished. He is not surprised to see the hood open."
 		}
 	],
 	[
 		{
-			who: "HONEY BUN",
-			text: "Power seeds with price tags. I negotiated."
+			who: "GOBLIN",
+			text: "The birds took the oxygen sensor and left a receipt in crumbs. Chase first. Lecture later."
 		},
 		{
 			who: "GOBLIN",
-			text: "Everything helpful costs a trap. That's the sticker."
+			text: "Everything helpful costs a trap. That is the sticker, and it is not a metaphor."
 		},
 		{
 			who: "GROK-9",
-			text: "Black-market flight paths. He sold us the route."
+			text: "He sold us a black-market flight path. The route is real. The receipt is the ambush."
 		},
 		{
 			who: "HONEY BUN",
-			text: "Shields in crates. Don't open the bottom one."
+			text: "The shields are in the crates. Do not open the bottom one."
 		},
 		{
 			who: "RADIO",
-			text: "The market hides in weather. Keep your receipt."
-		},
-		{
-			who: "GOBLIN",
-			text: "Climb the neon stalls. Prices go up with altitude."
+			text: "The market hides inside the weather. Keep your receipt."
 		},
 		{
 			who: "HONEY BUN",
-			text: "Mercenary birds, paid in crumbs. My crumbs."
+			text: "Oh look! The birds left the oxygen sensor in the cage! Put that in the van and come save me! I negotiated the price down to a detour."
+		},
+		{
+			who: "HONEY BUN",
+			text: "The mercenary birds were paid in crumbs. They were my crumbs. I am sorry, and also welcome."
 		},
 		{
 			who: "GROK-9",
-			text: "The flood is closing time. Buy nothing wet."
+			text: "The flood is closing time. Do not buy anything that is already wet."
 		},
 		{
 			who: "RADIO",
-			text: "Fence territory. He'll sell the next signal. And the ambush."
+			text: "This is fence territory. He will sell you the next signal, and he will sell the ambush with it."
 		},
 		{
 			who: "BOSS",
-			text: "Fence Pigeon takes cash, chaos, and thank-yous."
+			text: "Professor Pigeon takes cash, chaos, and thank-yous. The van part was extra."
 		}
 	],
 	[
 		{
-			who: "HONEY BUN",
-			text: "The first gift is free. That's how you know it's good."
+			who: "GOBLIN",
+			text: "Aw man, they got the starter solenoid! Quick, before the trap canyon makes us thank them for it."
 		},
 		{
 			who: "GOBLIN",
-			text: "Footfalls trigger the second gift. Design, not luck."
+			text: "Our footsteps triggered the second gift. That is design, not luck."
 		},
 		{
 			who: "GROK-9",
-			text: "Platforms that want us on them. Rude, but useful."
+			text: "These platforms want us standing on them. Rude, but useful."
 		},
 		{
 			who: "HONEY BUN",
-			text: "Heron signature spikes. I circled the gaps."
+			text: "Those are Blue Heron signature spikes. I circled the gaps for you."
 		},
 		{
 			who: "RADIO",
-			text: "You can't see the tripwires. I can. Mostly."
-		},
-		{
-			who: "GOBLIN",
-			text: "The climb is the trap. The view is the bait."
+			text: "You cannot see the tripwires. I can. Mostly."
 		},
 		{
 			who: "HONEY BUN",
-			text: "They die too easily. That's the point. Keep shooting."
+			text: "Oh look! The birds left the starter solenoid in the cage! Put that in the van and come save me! The first gift was free. This one is the van."
+		},
+		{
+			who: "HONEY BUN",
+			text: "They die too easily. That is the point. Keep shooting."
 		},
 		{
 			who: "GROK-9",
-			text: "Water seals the exits. So don't exit. Advance."
+			text: "The water seals the exits, so do not look for an exit. Advance."
 		},
 		{
 			who: "RADIO",
-			text: "A showroom of ways to die usefully."
+			text: "This is a showroom of ways to die usefully. Take the seed and do not browse."
 		},
 		{
 			who: "BOSS",
-			text: "Trapmaster Heron thanks Honey Bun for the testers."
+			text: "Blue Heron thanks Honey Bun for the testers. The hood is open again."
 		}
 	],
 	[
 		{
-			who: "HONEY BUN",
-			text: "The signal is almost honest. Stay with me."
+			who: "GOBLIN",
+			text: "The shield is up. The catalytic converter is still in the cage. That one left before we locked the van."
 		},
 		{
 			who: "GOBLIN",
-			text: "His voice skips like a bad disk. Still saying thanks."
+			text: "His voice skips like a bad disk, and he is still saying thank you."
 		},
 		{
 			who: "GROK-9",
-			text: "Cables that look like icing. Don't lick the core."
+			text: "The cables look like icing. Do not lick the core."
 		},
 		{
 			who: "RADIO",
-			text: "Handler colors in the rock. Pink means close."
+			text: "Handler colors are in the rock. Pink means we are close."
 		},
 		{
 			who: "HONEY BUN",
-			text: "I cut the lights to help. Or hide. Deploy anyway."
+			text: "I cut the lights to help you. Or to hide you. Deploy anyway."
 		},
 		{
-			who: "GOBLIN",
-			text: "Climb toward the mechanism. If he is fighting it, good."
+			who: "HONEY BUN",
+			text: "Oh look! The birds left the catalytic converter in the cage! Put that in the van and come save me! The signal is almost honest. The part is real."
 		},
 		{
 			who: "RADIO",
-			text: "Nightjar's personal flock. They don't blink."
+			text: "This is the Seagull's personal flock. They do not blink."
 		},
 		{
 			who: "GROK-9",
-			text: "Pink neon in the water. Pretty. Lethal. Classic."
+			text: "There is pink neon in the water. It is pretty, it is lethal, and it is classic."
 		},
 		{
 			who: "HONEY BUN",
-			text: "Last door before the farm. I left it unlocked."
+			text: "This is the last door before the farm. I left it unlocked for you."
 		},
 		{
 			who: "BOSS",
-			text: "Nightjar holds the remote. Honey Bun holds the smile."
+			text: "The Seagull holds the smell. Honey Bun holds the smile. The shield is already up."
 		}
 	],
 	[
 		{
-			who: "RADIO",
-			text: "They have been growing you. Harvest flats ahead."
+			who: "GOBLIN",
+			text: "No keys here. They must be further down the line. Quick Grok! No time to waste!"
 		},
 		{
 			who: "GOBLIN",
-			text: "Power we earned. Power they planted. Same color."
+			text: "The power we earned and the power they planted are the same color. I hate that."
 		},
 		{
 			who: "HONEY BUN",
-			text: "The crumbs sing in ten colors. Isn't that nice?"
+			text: "The crumbs are singing in ten colors. Isn't that nice?"
 		},
 		{
 			who: "GROK-9",
-			text: "The farm defends its crop. We are the crop."
+			text: "The farm is defending its crop. We are the crop."
 		},
 		{
 			who: "RADIO",
-			text: "All palettes at once. Don't trust the pretty one."
+			text: "Every palette is on at once. Do not trust the pretty one."
 		},
 		{
-			who: "GOBLIN",
-			text: "Climb past versions that stayed. Don't wave."
+			who: "HONEY BUN",
+			text: "The cage is empty. I did not leave the keys. Or stay. The harvest is nicer if you stay."
 		},
 		{
 			who: "HONEY BUN",
@@ -1000,22 +1216,38 @@ var OP_BEATS = [
 		},
 		{
 			who: "GROK-9",
-			text: "Help so thick it drowns you. Swim up."
+			text: "The help is so thick it can drown you. Swim up."
 		},
 		{
 			who: "RADIO",
-			text: "The question has a building now. Kick the door."
+			text: "A glimmer past the plateau. Goblin thinks it is the keys. It is not."
 		},
 		{
-			who: "HONEY BUN",
-			text: "Extract me. Or become the next harvest. Thank you."
+			who: "BOSS",
+			text: "AAAHHH!!!!!"
 		}
 	]
 ];
+var OP1_DEPLOY = [
+	"The crumbs spell AWG, and the dune is about to give way under both of you.",
+	"You landed in the cave, and the jump pad at the end is the only way back to the sky.",
+	"Shoot the bridge to lower it. It will break, and it will slide you into the spikes.",
+	"The gorge is needles. Shield up, because the belt at the end is already running.",
+	"The belts shove you at a wall of giant broken seeds. Climb the tube they are spilling from.",
+	"Climb the tube. The ridge is a giant bird cage, and the door opens after the flock is gone.",
+	"Scale the wall. Shoot a cage if you want the cheer, then cross the power lines.",
+	"The platforms bounce, the lines shock, and the wall at the end is the only door.",
+	"The seed is early. The plateau does not end, and the portal is Don Corvone arriving.",
+	"He has Honey Bun. Beat him, then get to the van. This canyon does not finish the rescue."
+];
+function deployLine(opId, slot) {
+	if (opId === 1) return OP1_DEPLOY[slot] ?? "Follow the crumbs. Do not trust the thank-you.";
+	return levelBeat(opId, slot).text;
+}
 function levelBeat(opId, slot) {
 	return OP_BEATS[Math.max(0, Math.min(9, opId - 1))]?.[slot] ?? {
 		who: "RADIO",
-		text: "Crumbs ahead."
+		text: "Crumbs ahead. Keep moving."
 	};
 }
 function radioFor(opId, slot) {
@@ -1023,12 +1255,13 @@ function radioFor(opId, slot) {
 }
 OP_BEATS[0].map(formatRadio);
 function objectiveFor(level) {
-	if (level.epic) return "Face Neon Chaos Manifest. Extraction will not finish clean.";
-	if (level.boss) return `Defeat ${level.bossName ?? "the handler"}. Take the Chaos Seed. Do not expect a clean rescue.`;
-	return `Collect ${level.introPower ? POWER_META[level.introPower].name : "the Power-Up seed"}. Reach the goal beacon. Survive the flock he pointed you at.`;
+	if (level.epic) return "Face Neon Chaos Manifest. The extraction will not finish clean, and the van will not leave.";
+	if (level.boss) return `Defeat ${level.bossName ?? "the handler"}. Take the chaos seed. Do not expect a clean rescue.`;
+	return `Collect the ${level.introPower ? POWER_META[level.introPower].name : "the power gift"}. Reach the exit this room throws you through. Survive the flock he pointed you at.`;
 }
 function missionFor(level) {
 	const op = OPERATIONS[(level.operation ?? 1) - 1] ?? OPERATIONS[0];
+	const slot = (level.id - 1) % 10;
 	return {
 		opName: op.name,
 		opTheme: op.theme,
@@ -1036,10 +1269,11 @@ function missionFor(level) {
 		name: level.name,
 		subtitle: level.subtitle,
 		objective: objectiveFor(level),
-		beat: levelBeat(op.id, (level.id - 1) % 10),
+		beat: levelBeat(op.id, slot),
 		hunt: level.boss ? null : level.introPower ? POWER_META[level.introPower].name : null,
 		boss: !!level.boss,
-		epic: !!level.epic
+		epic: !!level.epic,
+		deploy: deployLine(op.id, slot)
 	};
 }
 function collectBeat(kind) {
@@ -1047,46 +1281,48 @@ function collectBeat(kind) {
 	return {
 		who: "HONEY BUN",
 		text: {
-			health: `${name} unlocked. Don't waste the extra heart. I packed it myself.`,
-			stamina: `${name} unlocked. Run when I say run.`,
-			ammo: `${name} unlocked. Birds hate volume.`,
-			shield: `${name} unlocked. The next dive is not weather.`,
-			homing: `${name} unlocked. Shots that love you back.`,
-			overload: `${name} unlocked. Double the gift. Double the noise.`,
-			rapid: `${name} unlocked. Faster thanks.`,
-			zapper: `${name} unlocked. Hug the flock. Politely.`,
-			slowmo: `${name} unlocked. Time is a pastry thing.`
+			health: `${name} is unlocked. Do not waste the extra heart. I packed it myself.`,
+			stamina: `${name} is unlocked. Run when I say run.`,
+			ammo: `${name} is unlocked. The birds hate volume, so use it.`,
+			shield: `${name} is unlocked. The next drop is not weather.`,
+			homing: `${name} is unlocked. These shots love you back.`,
+			overload: `${name} is unlocked. Double the gift, and double the noise.`,
+			rapid: `${name} is unlocked. Faster thanks, faster fire.`,
+			zapper: `${name} is unlocked. Hug the flock. Politely.`,
+			slowmo: `${name} is unlocked. Time is a pastry thing. Use it on the long walk.`
 		}[kind]
 	};
 }
 function chaosBeat(id, epic) {
 	if (epic) return {
 		who: "HONEY BUN",
-		text: `${CHAOS_META[id].name} Chaos Seed locked. Thank you for coming. The farm stays open.`
+		text: `${CHAOS_META[id].name} chaos seed is locked. Thank you for coming. The farm stays open, and the keys are gone.`
 	};
 	return {
 		who: "HONEY BUN",
-		text: `${CHAOS_META[id].name} Chaos Seed locked. The next signal is ready.`
+		text: `${CHAOS_META[id].name} chaos seed is locked. The next signal is ready, and so is the next missing part.`
 	};
 }
 function winCopy(level, lastChaos) {
 	const op = OPERATIONS[(level.operation ?? 1) - 1] ?? OPERATIONS[0];
 	if (level.epic) return {
 		title: "The Farm Remembers",
-		body: `Neon Chaos recedes. Honey Bun thanks you. The extraction does not finish. ${lastChaos ? CHAOS_META[lastChaos].name + " Seed taken. " : ""}Season 2 can stack the same ten colors. The question stays open.`
+		body: `Neon Chaos recedes. Honey Bun thanks you. The extraction does not finish, and the birds take the keys. ${lastChaos ? CHAOS_META[lastChaos].name + " seed taken. " : ""}The van does not leave. The question stays open.`
 	};
-	if (level.boss) return {
-		title: `${level.bossName ?? op.boss} Down`,
-		body: `${lastChaos ? CHAOS_META[lastChaos].name + " Chaos Seed locked in. " : ""}${chaosBeat(op.seed, false).text} Don Corvone's lesson holds: the farm continues.`
-	};
+	if (level.boss) {
+		const laugh = op.id === 1 ? "Don Corvone laughs. Sorry, your Honey Bun is in another canyon!" : `${level.bossName ?? op.boss} goes down laughing. The hood is already open.`;
+		const sting = vanSting(op.id).map((b) => `${b.who}: “${b.text}”`).join(" ");
+		return {
+			title: `${level.bossName ?? op.boss} Down`,
+			body: `${lastChaos ? CHAOS_META[lastChaos].name + " chaos seed locked in. " : ""}${laugh} ${sting}`
+		};
+	}
 	const beat = levelBeat(op.id, (level.id - 1) % 10);
 	return {
 		title: "Canyon Cleared",
-		body: `${beat.who}: “${beat.text}” Reach the next signal. Hunt the next seed. Do not get comfortable.`
+		body: `${beat.who}: “${beat.text}” The room throws you forward. Do not get comfortable.`
 	};
 }
-var TITLE_TAG = "Grok & Goblin: The Honey Bun Extraction";
-var CORE_QUESTION = "Is Honey Bun helping us… or farming us?";
 /**
 * Chunk-based level generator — unique deterministic stages, not template clones.
 * Each level is assembled from authored chunks (start → beats → setpiece → finish).
@@ -3555,6 +3791,45 @@ function buildSignatureOp1(slot) {
 	][slot];
 	return make ? make() : null;
 }
+function pickChaosSpot(plats, width, avoid) {
+	const solids = plats.filter((p) => p.kind === "solid" || p.kind === "oneway" || p.kind === "moving");
+	const cps = plats.filter((p) => p.kind === "checkpoint").sort((a, b) => a.x - b.x);
+	const targetX = cps.length >= 2 ? cps[1].x + 48 : width * .58;
+	let best = solids[0];
+	let bestD = 1e9;
+	for (const p of solids) {
+		if (p.w < 40) continue;
+		const cx = p.x + p.w * .5;
+		let d = Math.abs(cx - targetX);
+		if (avoid && Math.hypot(cx - avoid.x, p.y - avoid.y) < 80) d += 200;
+		if (d < bestD) {
+			bestD = d;
+			best = p;
+		}
+	}
+	if (!best) return {
+		x: width * .55,
+		y: 220
+	};
+	return {
+		x: best.x + best.w * .5 - 18,
+		y: best.y - 52
+	};
+}
+function withChaosGem(L) {
+	const id = seedForLevel(L.id);
+	const avoid = L.seeds?.[0];
+	const spot = pickChaosSpot(L.platforms, L.width, avoid);
+	L.chaosId = id;
+	L.chaosGem = {
+		x: spot.x,
+		y: spot.y,
+		w: 36,
+		h: 36,
+		id
+	};
+	return L;
+}
 function buildLevel(opIdx, slot) {
 	const op = OPERATIONS[opIdx];
 	const levelId = opIdx * 10 + slot + 1;
@@ -3641,7 +3916,7 @@ function buildLevel(opIdx, slot) {
 }
 var CAMPAIGN = (() => {
 	const out = [];
-	for (let op = 0; op < 10; op++) for (let slot = 0; slot < 10; slot++) out.push(buildLevel(op, slot));
+	for (let op = 0; op < 10; op++) for (let slot = 0; slot < 10; slot++) out.push(withChaosGem(buildLevel(op, slot)));
 	return out;
 })();
 var GAME_CODES = /* @__PURE__ */ new Set([
@@ -4461,11 +4736,91 @@ function aabb(a, b) {
 function loadImage(src) {
 	return new Promise((resolve, reject) => {
 		const img = new Image();
-		img.crossOrigin = "anonymous";
+		if (!src.startsWith("blob:")) img.crossOrigin = "anonymous";
 		img.onload = () => resolve(img);
 		img.onerror = reject;
 		img.src = src;
 	});
+}
+function isStudioChroma(r, g, b, a) {
+	if (a < 10) return true;
+	if (g > 220 && r < 50 && b < 50) return true;
+	if (r > 190 && b > 170 && g < 110) return true;
+	if (r > 140 && g < 90 && b > 70 && r - g > 70 && b - g > 30) return true;
+	return false;
+}
+function prepHeroSheet(img, cols = 2, rows = 2) {
+	const canvas = document.createElement("canvas");
+	canvas.width = Math.max(1, img.naturalWidth || img.width);
+	canvas.height = Math.max(1, img.naturalHeight || img.height);
+	const ctx = canvas.getContext("2d", { willReadFrequently: true });
+	if (!ctx) return {
+		canvas,
+		frames: []
+	};
+	ctx.drawImage(img, 0, 0);
+	const w = canvas.width;
+	const h = canvas.height;
+	let data;
+	try {
+		data = ctx.getImageData(0, 0, w, h);
+	} catch {
+		return {
+			canvas,
+			frames: []
+		};
+	}
+	const px = data.data;
+	for (let i = 0; i < px.length; i += 4) if (isStudioChroma(px[i], px[i + 1], px[i + 2], px[i + 3])) {
+		px[i] = 0;
+		px[i + 1] = 0;
+		px[i + 2] = 0;
+		px[i + 3] = 0;
+	}
+	ctx.putImageData(data, 0, 0);
+	const fw = w / cols;
+	const fh = h / rows;
+	const frames = [];
+	for (let f = 0; f < cols * rows; f++) {
+		const col = f % cols;
+		const row = Math.floor(f / cols);
+		const x0 = Math.floor(col * fw);
+		const y0 = Math.floor(row * fh);
+		const x1 = Math.floor(x0 + fw);
+		const y1 = Math.floor(y0 + fh);
+		let minX = x1, minY = y1, maxX = x0, maxY = y0;
+		for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) if (px[(y * w + x) * 4 + 3] > 12) {
+			if (x < minX) minX = x;
+			if (y < minY) minY = y;
+			if (x > maxX) maxX = x;
+			if (y > maxY) maxY = y;
+		}
+		if (maxX <= minX || maxY <= minY) {
+			frames.push({
+				sx: x0,
+				sy: y0,
+				sw: fw,
+				sh: fh
+			});
+			continue;
+		}
+		const padX = Math.max(2, (maxX - minX) * .08);
+		const padY = Math.max(2, (maxY - minY) * .06);
+		const sx = Math.max(x0, minX - padX);
+		const sy = Math.max(y0, minY - padY);
+		const sw = Math.min(x1, maxX + padX + 1) - sx;
+		const sh = Math.min(y1, maxY + padY + 1) - sy;
+		frames.push({
+			sx,
+			sy,
+			sw,
+			sh
+		});
+	}
+	return {
+		canvas,
+		frames
+	};
 }
 var GameEngine = class {
 	canvas;
@@ -4516,6 +4871,8 @@ var GameEngine = class {
 	bossSeedCd = 0;
 	radio = "";
 	lastChaos;
+	chaosGem = null;
+	plateBuf = null;
 	save = loadSave();
 	passives = passivesFrom(loadSave(), false);
 	score = 0;
@@ -4571,6 +4928,7 @@ var GameEngine = class {
 	weaponCharge = 0;
 	chargeFiring = false;
 	imgs = {};
+	frameBoxes = /* @__PURE__ */ new WeakMap();
 	ready = false;
 	cbs;
 	constructor(canvas, cbs) {
@@ -4588,33 +4946,50 @@ var GameEngine = class {
 		VIEW_W = Math.max(640, this.canvas.width || 960);
 		VIEW_H = Math.max(560, this.canvas.height || 720);
 	}
+	adoptHeroSheet(key, img) {
+		if (!img) return;
+		try {
+			const prepped = prepHeroSheet(img);
+			this.imgs[key] = prepped.canvas;
+			if (prepped.frames.length) this.frameBoxes.set(prepped.canvas, prepped.frames);
+		} catch {
+			this.imgs[key] = img;
+		}
+	}
 	async load() {
+		const loadHero = (src) => fetch(src, { cache: "no-store" }).then((r) => {
+			if (!r.ok) throw new Error(String(r.status));
+			return r.blob();
+		}).then((blob) => {
+			const url = URL.createObjectURL(blob);
+			return loadImage(url).finally(() => URL.revokeObjectURL(url));
+		}).catch(() => loadImage(src).catch(() => null));
 		const [grokIdle, grokRun, grokJump, grokAttack, grokHurt, goblinIdle, goblinRun, goblinJump, goblinAttack, goblinHurt, bird, boss, props] = await Promise.all([
-			loadImage("/sprites/characters/grok-idle.png?v=art10"),
-			loadImage("/sprites/characters/grok-run.png?v=art10"),
-			loadImage("/sprites/characters/grok-jump.png?v=art10"),
-			loadImage("/sprites/characters/grok-attack.png?v=art10"),
-			loadImage("/sprites/characters/grok-hurt.png?v=art10"),
-			loadImage("/sprites/characters/goblin-idle.png?v=art10"),
-			loadImage("/sprites/characters/goblin-run.png?v=art10"),
-			loadImage("/sprites/characters/goblin-jump.png?v=art10"),
-			loadImage("/sprites/characters/goblin-attack.png?v=art10"),
-			loadImage("/sprites/characters/goblin-hurt.png?v=art10"),
-			loadImage("/sprites/bird.png?v=art10"),
+			loadHero("/sprites/characters/grok-idle.png?v=hero6"),
+			loadHero("/sprites/characters/grok-run.png?v=hero6"),
+			loadHero("/sprites/characters/grok-jump.png?v=jump3"),
+			loadHero("/sprites/characters/grok-attack.png?v=hero6"),
+			loadHero("/sprites/characters/grok-hurt.png?v=hero6"),
+			loadHero("/sprites/characters/goblin-idle.png?v=hero6"),
+			loadHero("/sprites/characters/goblin-run.png?v=hero6"),
+			loadHero("/sprites/characters/goblin-jump.png?v=hero6"),
+			loadHero("/sprites/characters/goblin-attack.png?v=hero6"),
+			loadHero("/sprites/characters/goblin-hurt.png?v=hero6"),
+			loadHero("/sprites/bird.png?v=bird2"),
 			loadImage("/sprites/don-corvone.png?v=don1"),
 			loadImage("/sprites/props.png")
 		]);
-		this.imgs.grokIdle = grokIdle;
-		this.imgs.grokRun = grokRun;
-		this.imgs.grokJump = grokJump;
-		this.imgs.grokAttack = grokAttack;
-		this.imgs.grokHurt = grokHurt;
-		this.imgs.goblinIdle = goblinIdle;
-		this.imgs.goblinRun = goblinRun;
-		this.imgs.goblinJump = goblinJump;
-		this.imgs.goblinAttack = goblinAttack;
-		this.imgs.goblinHurt = goblinHurt;
-		this.imgs.bird = bird;
+		this.adoptHeroSheet("grokIdle", grokIdle);
+		this.adoptHeroSheet("grokRun", grokRun);
+		this.adoptHeroSheet("grokJump", grokJump);
+		this.adoptHeroSheet("grokAttack", grokAttack);
+		this.adoptHeroSheet("grokHurt", grokHurt);
+		this.adoptHeroSheet("goblinIdle", goblinIdle);
+		this.adoptHeroSheet("goblinRun", goblinRun);
+		this.adoptHeroSheet("goblinJump", goblinJump);
+		this.adoptHeroSheet("goblinAttack", goblinAttack);
+		this.adoptHeroSheet("goblinHurt", goblinHurt);
+		this.adoptHeroSheet("bird", bird);
 		this.imgs.boss = boss;
 		this.imgs.props = props;
 		try {
@@ -4743,6 +5118,7 @@ var GameEngine = class {
 				kind: L.introPower
 			});
 		}
+		this.placeChaosGem();
 		this.homingBurst = 0;
 		this.overloadT = 0;
 		this.rapidT = 0;
@@ -4872,6 +5248,10 @@ var GameEngine = class {
 			operation: op.id,
 			chaosGot: Object.entries(this.save.chaos).filter(([, n]) => n > 0).map(([id]) => id),
 			lastChaos: this.lastChaos,
+			flags: this.platforms.filter((p) => p.kind === "checkpoint").sort((a, b) => a.x - b.x).map((p) => !!p.active),
+			chaosHere: this.level.chaosId ?? seedForLevel(this.level.id),
+			chaosHereGot: hasLevelChaos(this.save, this.level.id) || !!this.chaosGem?.collected,
+			chaosSlots: Array.from({ length: 10 }, (_, slot) => hasLevelChaos(this.save, (op.id - 1) * 10 + slot + 1)),
 			activeBuffs: buffs
 		});
 	}
@@ -5039,8 +5419,7 @@ var GameEngine = class {
 		if (this.hurtPoseT > 0) this.frame = Math.min(3, Math.floor((1 - this.hurtPoseT / .38) * 4));
 		else if (this.attackT > 0) this.frame = Math.min(3, Math.floor((1 - this.attackT / .22) * 4));
 		else if (!this.grounded) {
-			if (this.pvy < -120) this.frame = 1;
-			else if (this.pvy < -20) this.frame = 2;
+			if (this.pvy < 0) this.frame = 1;
 			else this.frame = 3;
 		} else if (Math.abs(this.pvx) > 20) this.frame = Math.floor(this.anim * 12) % 4;
 		else this.frame = Math.floor(this.anim * 4) % 4;
@@ -5092,6 +5471,21 @@ var GameEngine = class {
 		const pose = this.safeStandPose(hintX, hintY);
 		this.spawnX = pose.x;
 		this.spawnY = pose.y;
+	}
+	placeChaosGem() {
+		const L = this.level;
+		const id = L.chaosId ?? seedForLevel(L.id);
+		const already = hasLevelChaos(this.save, L.id);
+		const baked = L.chaosGem;
+		this.chaosGem = {
+			x: baked?.x ?? L.width * .6,
+			y: baked?.y ?? L.height * .35,
+			w: baked?.w ?? 36,
+			h: baked?.h ?? 36,
+			collected: already,
+			bob: 0,
+			id
+		};
 	}
 	/**
 	* Find a landable platform near (worldX, hintY) and return player top-left
@@ -5617,10 +6011,9 @@ var GameEngine = class {
 			this.bossGoalOpen = true;
 			for (const pl of this.platforms) if (pl.kind === "goal") pl.active = true;
 			this.fx.bossDeath(this.boss.x + this.boss.w * .5, this.boss.y + this.boss.h * .5);
-			const op = opOfLevel(this.level.id);
-			grantChaos(this.save, op.seed);
-			this.lastChaos = op.seed;
-			this.radio = formatRadio(chaosBeat(op.seed, !!this.level.epic));
+			grantLevelChaos(this.save, this.level.id);
+			this.lastChaos = seedForLevel(this.level.id);
+			this.radio = formatRadio(chaosBeat(this.lastChaos, !!this.level.epic));
 			gameAudio.play("goal", { volume: .8 });
 			gameAudio.playMusic("battle");
 		}
@@ -5824,6 +6217,11 @@ var GameEngine = class {
 				s.x = p.x;
 				s.y = p.y;
 			}
+			if (this.chaosGem && !this.chaosGem.collected) {
+				const p = pull(this.chaosGem.x, this.chaosGem.y);
+				this.chaosGem.x = p.x;
+				this.chaosGem.y = p.y;
+			}
 		}
 		for (const c of this.coins) {
 			if (c.collected) continue;
@@ -5923,6 +6321,31 @@ var GameEngine = class {
 				const op = opOfLevel(this.level.id);
 				unlockPower(this.save, op.id, s.kind);
 				this.radio = formatRadio(collectBeat(s.kind));
+			}
+		}
+		if (this.chaosGem && !this.chaosGem.collected) {
+			this.chaosGem.bob += FIXED_DT;
+			const g = this.chaosGem;
+			if (aabb(box, {
+				x: g.x,
+				y: g.y + Math.sin(g.bob * 5) * 6,
+				w: g.w,
+				h: g.h
+			})) {
+				g.collected = true;
+				grantLevelChaos(this.save, this.level.id);
+				this.lastChaos = g.id;
+				this.score += 250;
+				this.powerPulse = .7;
+				this.chromPulse = .5;
+				this.vignetteBoost = .35;
+				this.chaosEdge = 5;
+				this.radio = formatRadio(chaosBeat(g.id, !!this.level.epic));
+				this.fx.collect(g.x + 18, g.y + 18, CHAOS_META[g.id].color, true);
+				gameAudio.play("goal", {
+					volume: .7,
+					rate: 1.15
+				});
 			}
 		}
 		for (const p of this.platforms) if (p.kind === "checkpoint" && !p.active && aabb(box, p)) {
@@ -6048,6 +6471,7 @@ var GameEngine = class {
 			if (s.collected) continue;
 			this.drawPowerSeed(ctx, s);
 		}
+		if (this.chaosGem && !this.chaosGem.collected) this.drawChaosGem(ctx, this.chaosGem);
 		this.drawNeonChaosEdges(ctx);
 		for (const b of this.birds) {
 			if (b.dead) continue;
@@ -6434,6 +6858,38 @@ var GameEngine = class {
 		ctx.fillText(label, cx, ly);
 		ctx.restore();
 	}
+	drawChaosGem(ctx, g) {
+		const col = CHAOS_META[g.id].color;
+		const by = g.y + Math.sin(g.bob * 5 + this.time * 3) * 7;
+		const cx = g.x + g.w / 2;
+		const cy = by + g.h / 2;
+		const pulse = .7 + Math.sin(this.time * 4) * .3;
+		ctx.save();
+		ctx.shadowColor = col;
+		ctx.shadowBlur = 18 + pulse * 10;
+		ctx.translate(cx, cy);
+		ctx.rotate(Math.sin(this.time * 1.6) * .12);
+		ctx.beginPath();
+		ctx.moveTo(0, -18);
+		ctx.lineTo(14, 0);
+		ctx.lineTo(0, 18);
+		ctx.lineTo(-14, 0);
+		ctx.closePath();
+		ctx.fillStyle = col + "55";
+		ctx.fill();
+		ctx.strokeStyle = col;
+		ctx.lineWidth = 3;
+		ctx.stroke();
+		ctx.beginPath();
+		ctx.moveTo(0, -9);
+		ctx.lineTo(7, 0);
+		ctx.lineTo(0, 9);
+		ctx.lineTo(-7, 0);
+		ctx.closePath();
+		ctx.fillStyle = "#ffffffcc";
+		ctx.fill();
+		ctx.restore();
+	}
 	tickBossSeeds(dt) {
 		if (!this.boss || this.boss.dead || !this.level.boss) return;
 		const op = opOfLevel(this.level.id);
@@ -6470,17 +6926,6 @@ var GameEngine = class {
 		ctx.lineWidth = thick;
 		ctx.shadowBlur = active ? 18 : 8;
 		const segs = 24;
-		for (let i = 0; i < segs; i++) {
-			const x0 = i / segs * L.width;
-			const x1 = (i + 1) / segs * L.width;
-			const col = NEON_CHAOS[Math.floor((this.time * speed + i) % NEON_CHAOS.length)];
-			ctx.strokeStyle = col;
-			ctx.shadowColor = col;
-			ctx.beginPath();
-			ctx.moveTo(x0, 4);
-			ctx.lineTo(x1, 4);
-			ctx.stroke();
-		}
 		for (let i = 0; i < segs; i++) {
 			const x0 = i / segs * L.width;
 			const x1 = (i + 1) / segs * L.width;
@@ -6810,12 +7255,12 @@ var GameEngine = class {
 		}
 		this.drawSkySun(ctx, camX, camY, pal);
 		if (slotPlate) {
-			const farY = h * .22 - 14;
-			this.drawParallaxPlate(ctx, slotPlate, camX * .08, camY * .02, farY, .78, .24);
+			const farY = h * .22 - 16;
+			this.drawParallaxPlate(ctx, slotPlate, camX * .08, camY * .02, farY, .9, .64);
 			this.blendSkyJoin(ctx, farY, pal);
 		} else if (dunes && this.imgs.bgFar) {
-			const farY = h * .28 - 14;
-			this.drawParallaxPlate(ctx, this.imgs.bgFar, camX * .08, camY * .02, farY, .66, .3);
+			const farY = h * .28 - 16;
+			this.drawParallaxPlate(ctx, this.imgs.bgFar, camX * .08, camY * .02, farY, .8, .64);
 			this.blendSkyJoin(ctx, farY, pal);
 		} else {
 			this.drawMesaLayer(ctx, camX * .1, h * .5, pal.far, 1.4, .5, false, pal.neon);
@@ -6897,27 +7342,8 @@ var GameEngine = class {
 		ctx.arc(sunX, sunY, 24, 0, Math.PI * 2);
 		ctx.fill();
 	}
-	/** Night → sunset as one sky: vertical dither/fog across the far-plate top. */
-	blendSkyJoin(ctx, plateTop, pal) {
-		const w = VIEW_W;
-		const band = 58;
-		const y0 = plateTop - 10;
-		const g = ctx.createLinearGradient(0, y0, 0, y0 + band);
-		g.addColorStop(0, hexA(pal.sky[1], .5));
-		g.addColorStop(.4, hexA(pal.sky[2], .22));
-		g.addColorStop(1, "rgba(0,0,0,0)");
-		ctx.fillStyle = g;
-		ctx.fillRect(0, y0, w, band);
-		ctx.save();
-		for (let i = 0; i < 140; i++) {
-			const x = i * 73 % w;
-			const y = y0 + i * 19 % band;
-			ctx.globalAlpha = .09 * (1 - (y - y0) / band);
-			ctx.fillStyle = i % 3 === 0 ? pal.sky[1] : pal.sky[2];
-			ctx.fillRect(x, y, 1.2, 2.4);
-		}
-		ctx.restore();
-	}
+	/** Night → far plate. The plate's own top 14px is already transparent. */
+	blendSkyJoin(_ctx, _plateTop, _pal) {}
 	drawParallaxPlate(ctx, img, scrollX, scrollY, yOffset, alpha, srcTopCrop = .25) {
 		const w = VIEW_W;
 		const h = VIEW_H;
@@ -6927,23 +7353,35 @@ var GameEngine = class {
 		const drawH = h * .58;
 		const drawW = drawH * aspect;
 		const x = -(scrollX % drawW + drawW) % drawW;
-		ctx.save();
-		ctx.globalAlpha = alpha;
-		ctx.imageSmoothingEnabled = true;
-		for (let i = -1; i <= 2; i++) ctx.drawImage(img, 0, srcY, img.width, srcH, x + i * drawW, yOffset - scrollY * .3, drawW, drawH);
-		const pal = this.themePalette();
-		const topFade = ctx.createLinearGradient(0, yOffset - 8, 0, yOffset + 72);
-		topFade.addColorStop(0, hexA(pal.sky[1], .7));
-		topFade.addColorStop(.4, hexA(pal.sky[2], .32));
-		topFade.addColorStop(1, "rgba(0,0,0,0)");
-		ctx.globalAlpha = 1;
-		ctx.fillStyle = topFade;
-		ctx.fillRect(0, yOffset - 10, w, 84);
-		const fade = ctx.createLinearGradient(0, yOffset + drawH * .5, 0, yOffset + drawH);
+		if (!this.plateBuf) this.plateBuf = document.createElement("canvas");
+		const buf = this.plateBuf;
+		if (buf.width !== w || buf.height !== h) {
+			buf.width = w;
+			buf.height = h;
+		}
+		const b = buf.getContext("2d");
+		if (!b) return;
+		b.clearRect(0, 0, w, h);
+		b.imageSmoothingEnabled = true;
+		const drawY = yOffset - scrollY * .3;
+		for (let i = -1; i <= 2; i++) b.drawImage(img, 0, srcY, img.width, srcH, x + i * drawW, drawY, drawW, drawH);
+		b.save();
+		b.globalCompositeOperation = "destination-out";
+		const melt = b.createLinearGradient(0, drawY, 0, drawY + 16);
+		melt.addColorStop(0, "rgba(0,0,0,1)");
+		melt.addColorStop(.55, "rgba(0,0,0,0.45)");
+		melt.addColorStop(1, "rgba(0,0,0,0)");
+		b.fillStyle = melt;
+		b.fillRect(0, drawY, w, 16);
+		b.restore();
+		const fade = b.createLinearGradient(0, drawY + drawH * .5, 0, drawY + drawH);
 		fade.addColorStop(0, "rgba(10,4,18,0)");
 		fade.addColorStop(1, "rgba(10,4,18,0.9)");
-		ctx.fillStyle = fade;
-		ctx.fillRect(0, yOffset + drawH * .5, w, drawH * .55);
+		b.fillStyle = fade;
+		b.fillRect(0, drawY + drawH * .5, w, drawH * .55);
+		ctx.save();
+		ctx.globalAlpha = alpha;
+		ctx.drawImage(buf, 0, 0);
 		ctx.restore();
 	}
 	/** Flat-top mesa silhouettes — reads as desert canyon, not sine waves */
@@ -8222,27 +8660,37 @@ var GameEngine = class {
 		}
 	}
 	drawSpriteSheet(ctx, img, frame, x, y, dw, dh, flip) {
-		if (!img || !img.complete) {
-			ctx.fillStyle = "#00f0ff";
-			ctx.fillRect(x, y, dw, dh);
+		const readyImg = img instanceof HTMLImageElement ? img.complete && img.naturalWidth > 0 : !!img;
+		if (!img || !readyImg) {
+			ctx.save();
+			ctx.strokeStyle = "#00f0ff";
+			ctx.lineWidth = 2;
+			ctx.strokeRect(x + 8, y + 4, dw - 16, dh - 8);
+			ctx.restore();
 			return;
 		}
-		const cols = 2;
-		const rows = 2;
-		const fw = img.width / cols;
-		const fh = img.height / rows;
+		const boxes = this.frameBoxes.get(img);
+		const cols = 2, rows = 2;
+		const iw = img instanceof HTMLImageElement ? img.naturalWidth || img.width : img.width;
+		const ih = img instanceof HTMLImageElement ? img.naturalHeight || img.height : img.height;
+		const fw = iw / cols, fh = ih / rows;
 		const col = frame % cols;
 		const row = Math.floor(frame / cols) % rows;
+		const box = boxes?.[frame % 4];
+		const sx = box ? box.sx : col * fw;
+		const sy = box ? box.sy : row * fh;
+		const sw = box ? box.sw : fw;
+		const sh = box ? box.sh : fh;
+		const scale = Math.min(dw / sw, dh / sh);
+		const outW = sw * scale, outH = sh * scale;
+		const ox = x + (dw - outW) * .5;
+		const oy = y + (dh - outH);
 		ctx.save();
-		if (img.width >= 400) {
-			ctx.imageSmoothingEnabled = true;
-			ctx.imageSmoothingQuality = "high";
-		}
 		if (flip) {
-			ctx.translate(x + dw, y);
+			ctx.translate(ox + outW, oy);
 			ctx.scale(-1, 1);
-			ctx.drawImage(img, col * fw, row * fh, fw, fh, 0, 0, dw, dh);
-		} else ctx.drawImage(img, col * fw, row * fh, fw, fh, x, y, dw, dh);
+			ctx.drawImage(img, sx, sy, sw, sh, 0, 0, outW, outH);
+		} else ctx.drawImage(img, sx, sy, sw, sh, ox, oy, outW, outH);
 		ctx.restore();
 	}
 	exposeControlsTest() {
@@ -8396,6 +8844,21 @@ var emptyHud = {
 	radio: "",
 	operation: 1,
 	chaosGot: [],
+	flags: [],
+	chaosHere: "crimson",
+	chaosHereGot: false,
+	chaosSlots: [
+		false,
+		false,
+		false,
+		false,
+		false,
+		false,
+		false,
+		false,
+		false,
+		false
+	],
 	activeBuffs: []
 };
 function GameApp() {
@@ -8411,6 +8874,7 @@ function GameApp() {
 	const [muted, setMuted] = (0, import_react.useState)(false);
 	const [loading, setLoading] = (0, import_react.useState)(false);
 	const [bootError, setBootError] = (0, import_react.useState)(null);
+	const [showCliff, setShowCliff] = (0, import_react.useState)(false);
 	const [canvasBox, setCanvasBox] = (0, import_react.useState)({
 		w: 960,
 		h: 720,
@@ -8418,6 +8882,10 @@ function GameApp() {
 		lh: 720
 	});
 	const [briefOpen, setBriefOpen] = (0, import_react.useState)(false);
+	const [pauseWeapon, setPauseWeapon] = (0, import_react.useState)(null);
+	(0, import_react.useEffect)(() => {
+		if (screen !== "paused") setPauseWeapon(null);
+	}, [screen]);
 	(0, import_react.useEffect)(() => {
 		input.bind();
 		return () => {
@@ -8472,8 +8940,8 @@ function GameApp() {
 		setBootError(null);
 		try {
 			input.clear();
-			await gameAudio.unlock();
-			await gameAudio.preload();
+			gameAudio.unlock();
+			gameAudio.preload().catch(() => {});
 			gameAudio.setMuted(muted);
 			const eng = await bootEngine();
 			if (!eng) throw new Error("Canvas not ready");
@@ -8490,12 +8958,13 @@ function GameApp() {
 			setLoading(false);
 		}
 	};
-	const onTitlePlay = async () => {
-		await gameAudio.unlock();
-		await gameAudio.preload();
-		gameAudio.play("confirm");
-		gameAudio.playMusic("title");
+	const onTitlePlay = () => {
+		gameAudio.unlock();
 		setScreen("intro");
+		gameAudio.preload().then(() => {
+			gameAudio.play("confirm");
+			gameAudio.playMusic("title");
+		}).catch(() => {});
 	};
 	(0, import_react.useEffect)(() => {
 		if (typeof window === "undefined") return;
@@ -8517,6 +8986,28 @@ function GameApp() {
 			cancelled = true;
 		};
 	}, []);
+	(0, import_react.useEffect)(() => {
+		let stop = false;
+		const go = () => {
+			if (!stop) setShowCliff(true);
+		};
+		const img = new Image();
+		img.onload = go;
+		img.onerror = go;
+		img.src = "/sprites/title-hero-portrait.jpg?v=title3";
+		const cap = window.setTimeout(go, 2200);
+		return () => {
+			stop = true;
+			window.clearTimeout(cap);
+		};
+	}, []);
+	(0, import_react.useEffect)(() => {
+		if (!showCliff) return;
+		const id = requestAnimationFrame(() => {
+			bootEngine();
+		});
+		return () => cancelAnimationFrame(id);
+	}, [showCliff, bootEngine]);
 	const toggleMute = () => {
 		const next = !muted;
 		setMuted(next);
@@ -8542,19 +9033,19 @@ function GameApp() {
 					className: "relative min-h-0 flex-1",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 						className: "absolute inset-0 flex items-center justify-center p-0 sm:p-1",
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "stage-glow relative overflow-hidden rounded-lg border border-accent/40 bg-black shadow-[0_0_40px_#00f0ff33,0_0_70px_#ff2bd622]",
 							style: {
 								width: canvasBox.w,
 								height: canvasBox.h
 							},
-							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("canvas", {
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("canvas", {
 								ref: canvasRef,
 								className: "block h-full w-full touch-none",
 								style: { imageRendering: "pixelated" },
 								width: canvasBox.lw,
 								height: canvasBox.lh
-							})
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RadioPill, { radio: inPlay ? hud.radio : "" })]
 						})
 					})
 				}), showTouch && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -8573,8 +9064,10 @@ function GameApp() {
 				flush: true,
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TitleScreen, {
 					onPlay: onTitlePlay,
+					onSkip: () => setShowCliff(true),
 					loading,
-					error: bootError
+					error: bootError,
+					showCliff
 				})
 			}),
 			screen === "intro" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FullOverlay, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IntroCutscene, {
@@ -8651,7 +9144,16 @@ function GameApp() {
 								gameAudio.playMusic("title");
 							}
 						}
-					]
+					],
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PauseKit, {
+						hud,
+						weapon: pauseWeapon ?? hud.weapon,
+						onWeapon: (id) => {
+							setPauseWeapon(id);
+							input.setTouch({ weaponPick: id });
+							gameAudio.play("select", { volume: .45 });
+						}
+					})
 				})
 			}),
 			screen === "dead" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FullOverlay, {
@@ -8720,10 +9222,11 @@ function FullOverlay({ children, dim, flush }) {
 	});
 }
 function HudBar({ hud, onPause }) {
+	const chaosColor = CHAOS_META[hud.chaosHere]?.color ?? "#ff2b4a";
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "hud-bar z-30 shrink-0 border-b border-border bg-surface/95 px-2 py-1.5 backdrop-blur-md sm:px-3",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "mx-auto flex max-w-[1400px] items-center gap-2",
+			className: "mx-auto flex max-w-[1400px] items-start gap-2",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "min-w-0 flex-1",
 				children: [
@@ -8740,43 +9243,47 @@ function HudBar({ hud, onPause }) {
 									hud.level
 								]
 							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-								className: "text-warn",
-								children: ["★ ", hud.score.toLocaleString()]
+							hud.activeBuffs.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-primary",
+								children: hud.activeBuffs.join(" · ")
 							}),
 							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-								className: "text-accent",
-								children: ["◎ ", hud.coins]
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: ["♥ ", hud.lives] }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-								className: hud.shielding ? "text-accent" : "text-primary",
+								className: `hud-weapon-pill rounded-full border px-2 py-0.5 text-[9px] font-black tracking-wide ${WEAPON_THEME[hud.weapon].border} ${WEAPON_THEME[hud.weapon].bg} ${WEAPON_THEME[hud.weapon].text}`,
 								children: [
 									WEAPON_LABEL[hud.weapon],
 									" ",
 									WEAPON_INDEX[hud.weapon],
 									"/",
-									WEAPON_TOTAL,
-									hud.shielding ? " · SHIELD" : ""
+									WEAPON_TOTAL
 								]
-							}),
-							hud.activeBuffs.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-primary",
-								children: hud.activeBuffs.join(" · ")
 							})
 						]
 					}),
-					hud.radio && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-						className: "mb-1 line-clamp-2 text-[10px] sm:text-[11px]",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "font-bold uppercase tracking-wide text-primary",
-							children: parseRadio(hud.radio).who
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-							className: "text-accent/90",
-							children: [" · ", parseRadio(hud.radio).text]
-						})]
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "hud-track mb-1 flex flex-wrap items-center gap-1.5",
+						children: [
+							hud.flags.map((on, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(HudFlag, { on }, i)),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)(HudDiamond, {
+								color: chaosColor,
+								filled: hud.chaosHereGot
+							}),
+							SLOT_SEEDS.map((id, slot) => {
+								const got = hud.chaosSlots[slot] ?? false;
+								const col = CHAOS_META[id].color;
+								return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									title: `L${slot + 1} ${CHAOS_META[id].name}`,
+									className: "hud-dot inline-block rounded-full",
+									style: {
+										width: 8,
+										height: 8,
+										border: `1.5px solid ${got ? col : col + "99"}`,
+										background: got ? col : "transparent",
+										boxShadow: got ? `0 0 8px ${col}` : "none"
+									}
+								}, `${id}-${slot}`);
+							})
+						]
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PowerRow, { unlocked: hud.unlockedPowers }),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "grid grid-cols-3 gap-1 sm:grid-cols-4 sm:gap-1.5",
 						children: [
@@ -8835,6 +9342,55 @@ function HudBar({ hud, onPause }) {
 					children: "Pause"
 				})
 			})]
+		})
+	});
+}
+function HudFlag({ on }) {
+	const col = on ? "#39ff9a" : "#c77dff";
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("svg", {
+		width: "14",
+		height: "14",
+		viewBox: "0 0 14 14",
+		"aria-hidden": true,
+		className: "hud-flag",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
+				x: "2",
+				y: "1.5",
+				width: "1.6",
+				height: "11",
+				rx: "0.4",
+				fill: "#2a1a30"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("rect", {
+				x: "2.2",
+				y: "1.7",
+				width: "1.1",
+				height: "10.5",
+				fill: col,
+				opacity: "0.7"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
+				d: "M3.8 2.1 L12.2 5.2 L3.8 8.4 Z",
+				fill: col,
+				style: { filter: on ? `drop-shadow(0 0 4px ${col})` : void 0 }
+			})
+		]
+	});
+}
+function HudDiamond({ color, filled }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("svg", {
+		width: "13",
+		height: "13",
+		viewBox: "0 0 13 13",
+		"aria-hidden": true,
+		className: "hud-diamond mx-0.5",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("path", {
+			d: "M6.5 1.2 L11.6 6.5 L6.5 11.8 L1.4 6.5 Z",
+			fill: filled ? color : "none",
+			stroke: color,
+			strokeWidth: "1.6",
+			style: { filter: filled ? `drop-shadow(0 0 6px ${color})` : void 0 }
 		})
 	});
 }
@@ -8932,82 +9488,66 @@ function IntroCutscene({ onSkip, onDone }) {
 			}),
 			isLast && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
 				className: "mt-4 max-w-sm text-xs text-accent",
-				children: ["Mission: 10 Operations. 9 seeds each. One handler. One Chaos Seed. ", "Is Honey Bun helping us… or farming us?"]
+				children: ["Mission: 10 Operations. 9 seeds each. One handler. One Chaos Seed. ", "Is Honey Bun helping us, or farming us?"]
 			})
 		]
 	});
 }
-function TitleScreen({ onPlay, loading, error }) {
+function TitleScreen({ onPlay, onSkip, loading, error, showCliff }) {
+	if (!showCliff) return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+		type: "button",
+		className: "title-sting",
+		onPointerUp: onSkip,
+		"aria-label": "Continue",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+			src: "/sprites/logo-sting.jpg?v=title3",
+			alt: ""
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "sting-load",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "sting-load-label",
+				children: "Loading"
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "sting-load-track",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "sting-load-bar" })
+			})]
+		})]
+	});
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "title-stage",
-		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("picture", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("source", {
-				media: "(max-aspect-ratio: 4/5)",
-				srcSet: "/sprites/title-hero-portrait.jpg?v=title2"
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-				src: "/sprites/title-hero.jpg?v=title2",
-				alt: "",
-				className: "title-hero"
-			})] }),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "title-vignette",
-				"aria-hidden": true
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "title-scan",
-				"aria-hidden": true
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "title-content",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "title-top",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "title-chip stagger-item",
-							children: "Operation 1 · Canyon Drop"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("h1", {
-							className: "title-lockup stagger-item",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Bird Mafia" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "Madness" })]
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "title-tag stagger-item",
-							children: TITLE_TAG
-						})
-					]
-				}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "title-bottom",
-					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "title-q stagger-item",
-							children: CORE_QUESTION
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-							type: "button",
-							onClick: onPlay,
-							disabled: loading,
-							className: "title-cta stagger-item",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Play, {
-								className: "title-cta-icon",
-								"aria-hidden": true
-							}), loading ? "Loading…" : "Drop In"]
-						}),
-						error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "title-error stagger-item",
-							children: error
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "title-hint stagger-item",
-							children: "Tap Drop In to unlock audio"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-							className: "title-keys stagger-item",
-							children: "WASD · Space jump · J fire · Q/E weapons · L shield"
-						})
-					]
-				})]
+		className: "title-stage cliff",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("picture", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("source", {
+			media: "(max-aspect-ratio: 4/5)",
+			srcSet: "/sprites/title-hero-portrait.jpg?v=title3"
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+			src: "/sprites/title-hero.jpg?v=title3",
+			alt: "",
+			className: "title-hero"
+		})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "title-content",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "title-bottom",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						onClick: onPlay,
+						disabled: loading,
+						className: "title-cta stagger-item",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Play, {
+							className: "title-cta-icon",
+							"aria-hidden": true
+						}), loading ? "Loading…" : "Drop In"]
+					}),
+					error && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "title-error stagger-item",
+						children: error
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "title-hint stagger-item",
+						children: "Tap Drop In to unlock audio"
+					})
+				]
 			})
-		]
+		})]
 	});
 }
 function CharacterSelect({ selected, onSelect, onBack, onNext }) {
@@ -9023,15 +9563,17 @@ function CharacterSelect({ selected, onSelect, onBack, onNext }) {
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CharCard, {
 					name: "Grok",
 					tag: "Jetpack Bot",
-					blurb: "Jetpack bot. “He's still on our side. The crumbs prove it.”",
+					blurb: "“Thrusters are rated. The canyon is not.”",
 					selected: selected === "grok",
+					runner: "grok",
 					img: "/sprites/grok.png?v=art10",
 					onClick: () => onSelect("grok")
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CharCard, {
 					name: "Goblin",
 					tag: "Skyhopper",
-					blurb: "Skyhopper. “The crumbs prove something. That's the problem.”",
+					blurb: "“Jumps are free. Gravity is a suggestion.”",
 					selected: selected === "goblin",
+					runner: "goblin",
 					img: "/sprites/goblin.png?v=art10",
 					onClick: () => onSelect("goblin")
 				})]
@@ -9053,15 +9595,22 @@ function CharacterSelect({ selected, onSelect, onBack, onNext }) {
 		]
 	});
 }
-function CharCard({ name, tag, blurb, selected, img, onClick }) {
+function CharCard({ name, tag, blurb, selected, runner, img, onClick }) {
+	const goblin = runner === "goblin";
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 		type: "button",
 		onClick,
-		className: `rounded-2xl border p-3 text-left transition ${selected ? "border-accent bg-accent/15 shadow-[0_0_20px_#00f0ff44]" : "border-border bg-surface"}`,
+		className: `rounded-2xl border p-3 text-left transition ${selected ? goblin ? "border-primary bg-primary/15 shadow-[0_0_20px_#ff2bd644]" : "border-accent bg-accent/15 shadow-[0_0_20px_#00f0ff44]" : "border-border bg-surface"}`,
 		children: [
-			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "char-art mb-2 flex items-end justify-center rounded-xl bg-bg/60 bg-contain bg-center bg-no-repeat",
-				style: { backgroundImage: `url(${img})` }
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "relative mb-2",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "char-art flex items-end justify-center rounded-xl bg-bg/60 bg-contain bg-center bg-no-repeat",
+					style: { backgroundImage: `url(${img})` }
+				}), selected && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: `absolute right-1.5 top-1.5 rounded border px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${goblin ? "border-primary bg-primary/20 text-primary" : "border-accent bg-accent/20 text-accent"}`,
+					children: "READY"
+				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "text-lg font-bold",
@@ -9305,18 +9854,19 @@ function MissionBrief({ level, onGo }) {
 		]
 	});
 }
-function OverlayCard({ title, body, actions }) {
+function OverlayCard({ title, body, actions, children }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "w-full max-w-sm rounded-2xl border border-border bg-surface p-6 text-center shadow-[0_0_40px_#00f0ff33]",
+		className: "w-full max-w-sm rounded-2xl border border-border bg-surface p-5 text-center shadow-[0_0_40px_#00f0ff33]",
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
 				className: "mb-2 text-2xl font-black",
 				children: title
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-				className: "mb-5 text-sm text-muted",
+				className: "mb-3 text-sm text-muted",
 				children: body
 			}),
+			children,
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "flex flex-col gap-2",
 				children: actions.map((a) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
@@ -9325,6 +9875,74 @@ function OverlayCard({ title, body, actions }) {
 					className: `min-h-12 rounded-xl border px-4 py-3 text-sm font-semibold ${a.primary ? "border-accent bg-accent/30 text-fg" : "border-border bg-surface-2 text-muted"}`,
 					children: a.label
 				}, a.label))
+			})
+		]
+	});
+}
+function RadioPill({ radio }) {
+	const [shown, setShown] = (0, import_react.useState)("");
+	(0, import_react.useEffect)(() => {
+		if (!radio) {
+			setShown("");
+			return;
+		}
+		setShown(radio);
+		const t = window.setTimeout(() => setShown(""), 2e3);
+		return () => window.clearTimeout(t);
+	}, [radio]);
+	if (!shown) return null;
+	const line = parseRadio(shown);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "pointer-events-none absolute inset-x-3 top-2 z-10 flex justify-center",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+			className: "hud-radio max-w-[92%] truncate rounded-full border border-white/10 bg-[#0a0614cc] px-3 py-1.5 text-center text-[10px] sm:text-[11px]",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "font-bold uppercase tracking-wide text-primary",
+				children: line.who
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+				className: "text-accent/90",
+				children: [" · ", line.text]
+			})]
+		})
+	});
+}
+function PauseKit({ hud, weapon, onWeapon }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "mb-4 text-left",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+				className: "mb-2 text-center text-sm font-semibold text-warn",
+				children: [
+					"★ ",
+					hud.score.toLocaleString(),
+					" · ",
+					hud.coins,
+					" coins · ",
+					hud.lives,
+					" lives"
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mb-1 text-[10px] font-bold uppercase tracking-wide text-muted",
+				children: "Powers"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PowerRow, { unlocked: hud.unlockedPowers }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mb-1 text-[10px] font-bold uppercase tracking-wide text-muted",
+				children: "Weapons"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "grid grid-cols-4 gap-1",
+				children: WEAPON_RAIL.map((id) => {
+					const on = id === weapon;
+					const th = WEAPON_THEME[id];
+					return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						type: "button",
+						className: `min-h-9 rounded-lg border px-1 py-1 text-[9px] font-black uppercase ${on ? `${th.border} ${th.bg} ${th.text} ${th.glow}` : "border-border bg-surface-2 text-muted"}`,
+						onClick: () => onWeapon(id),
+						children: WEAPON_LABEL[id]
+					}, id);
+				})
 			})
 		]
 	});
@@ -9370,38 +9988,47 @@ function MobileControls({ weapon, character, shield, maxShield, shielding, onWea
 			className: "mx-auto flex max-w-[720px] flex-col gap-1.5",
 			children: [
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "flex items-stretch gap-1",
-					children: WEAPON_RAIL.map((id) => {
-						const on = id === weapon;
-						const th = WEAPON_THEME[id];
-						return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							type: "button",
-							className: `flex min-h-[2.35rem] min-w-0 flex-1 flex-col items-center justify-center rounded-xl border px-0.5 text-[9px] font-black uppercase leading-none ${on ? `${th.border} ${th.bg} ${th.text} ${th.glow}` : "border-border/70 bg-surface-2 text-muted"}`,
-							style: { touchAction: "none" },
-							onPointerDown: (e) => {
-								e.preventDefault();
-								e.stopPropagation();
-								onWeapon(id);
-							},
-							children: WEAPON_LABEL[id]
-						}, id);
-					})
+					className: "weapon-carousel flex items-stretch gap-1",
+					children: (() => {
+						const i = WEAPON_RAIL.indexOf(weapon);
+						const n = WEAPON_RAIL.length;
+						const prev = WEAPON_RAIL[(i - 1 + n) % n];
+						const next = WEAPON_RAIL[(i + 1) % n];
+						const side = (id) => {
+							const th = WEAPON_THEME[id];
+							return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								type: "button",
+								className: `weapon-neighbor flex min-h-[2.45rem] min-w-0 flex-[0.85] items-center justify-center rounded-xl border px-1 text-[10px] font-black uppercase leading-none ${th.border} bg-surface-2 ${th.text}`,
+								style: { touchAction: "none" },
+								onPointerDown: (e) => {
+									e.preventDefault();
+									e.stopPropagation();
+									onWeapon(id);
+								},
+								children: WEAPON_LABEL[id]
+							}, id + "-side");
+						};
+						const th = WEAPON_THEME[weapon];
+						return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+							side(prev),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								type: "button",
+								className: `weapon-selected flex min-h-[2.55rem] min-w-0 flex-[1.5] items-center justify-center rounded-xl border px-2 text-[12px] font-black uppercase tracking-wide ${th.border} ${th.bg} ${th.text} ${th.glow}`,
+								style: { touchAction: "none" },
+								onPointerDown: (e) => {
+									e.preventDefault();
+									e.stopPropagation();
+								},
+								children: WEAPON_LABEL[weapon]
+							}),
+							side(next)
+						] });
+					})()
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 					className: "flex items-stretch justify-between gap-3",
 					children: [
-						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "flex items-stretch gap-3",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pad, {
-								label: "◀",
-								move: true,
-								...axisPress("left")
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Pad, {
-								label: "▶",
-								move: true,
-								...axisPress("right")
-							})]
-						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(MovePlate, {}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 							type: "button",
 							className: "fire-btn flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl border border-accent bg-accent/30 px-2 shadow-[0_0_16px_#00f0ff44] active:scale-[0.98]",
@@ -9453,6 +10080,84 @@ function MobileControls({ weapon, character, shield, maxShield, shielding, onWea
 				})
 			]
 		})
+	});
+}
+function MovePlate() {
+	const plateRef = (0, import_react.useRef)(null);
+	const drag = (0, import_react.useRef)(null);
+	const [knob, setKnob] = (0, import_react.useState)(50);
+	const [home, setHome] = (0, import_react.useState)(true);
+	const ratio = (clientX) => {
+		const el = plateRef.current;
+		if (!el) return .5;
+		const r = el.getBoundingClientRect();
+		return Math.max(0, Math.min(1, (clientX - r.left) / Math.max(1, r.width)));
+	};
+	const applyZone = (pointerId, t) => {
+		input.holdTouch("left", pointerId, t < .45);
+		input.holdTouch("right", pointerId, t > .55);
+	};
+	const end = (pointerId) => {
+		const d = drag.current;
+		if (!d || d.id !== pointerId) return;
+		input.holdTouch("left", pointerId, false);
+		input.holdTouch("right", pointerId, false);
+		drag.current = null;
+		setHome(true);
+		setKnob(50);
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		ref: plateRef,
+		className: "move-plate",
+		style: { touchAction: "none" },
+		onPointerDown: (e) => {
+			if (drag.current) return;
+			e.preventDefault();
+			e.stopPropagation();
+			try {
+				e.currentTarget.setPointerCapture(e.pointerId);
+			} catch {}
+			const t = ratio(e.clientX);
+			drag.current = {
+				id: e.pointerId,
+				x0: e.clientX,
+				slide: false
+			};
+			setHome(false);
+			setKnob(Math.max(18, Math.min(82, t * 100)));
+			applyZone(e.pointerId, t);
+		},
+		onPointerMove: (e) => {
+			const d = drag.current;
+			if (!d || d.id !== e.pointerId) return;
+			if (!d.slide && Math.abs(e.clientX - d.x0) > 12) d.slide = true;
+			if (!d.slide) return;
+			const t = ratio(e.clientX);
+			setKnob(Math.max(18, Math.min(82, t * 100)));
+			applyZone(e.pointerId, t);
+		},
+		onPointerUp: (e) => end(e.pointerId),
+		onPointerCancel: (e) => end(e.pointerId),
+		onLostPointerCapture: (e) => end(e.pointerId),
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "move-lobe move-lobe-l" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "move-lobe move-lobe-r" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "move-rail" }),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: `move-knob${home ? " is-home" : ""}`,
+				style: { left: `${knob}%` }
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "move-chev move-chev-l",
+				"aria-hidden": true,
+				children: "◀"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "move-chev move-chev-r",
+				"aria-hidden": true,
+				children: "▶"
+			})
+		]
 	});
 }
 function WeaponPatternIcon({ weapon }) {
