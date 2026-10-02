@@ -30,9 +30,11 @@ export function parseRadio(s: string): Beat {
 }
 
 /**
- * Stolen after the boss of the previous operation.
- * Found in the Level 6 cage of the next operation.
- * Op 10 takes the keys. The van does not leave.
+ * Stolen after the boss. Found in the next operation's Level 6 cage.
+ * Lock 2026-10-02: catalytic converter replaces the throttle position sensor.
+ * Seagull steals nothing. Op 10 cage has no keys. The Argentavis keys are wrong.
+ * Real keys were in Goblin's pocket. Wheels and lug nuts were already gone.
+ * The van does not leave.
  */
 export const VAN_PARTS = [
   "camshaft position sensor",
@@ -42,18 +44,18 @@ export const VAN_PARTS = [
   "fuel pump relay",
   "oxygen sensor",
   "starter solenoid",
-  "throttle position sensor",
-  "EGR valve",
-  "keys",
+  "catalytic converter",
 ] as const;
 
 export function partStolenAfter(opId: number): string {
-  return VAN_PARTS[Math.max(0, Math.min(VAN_PARTS.length - 1, opId - 1))] ?? "keys";
+  if (opId < 1 || opId > VAN_PARTS.length) return "";
+  return VAN_PARTS[opId - 1];
 }
 
 export function partFoundInCage(opId: number): string | null {
-  if (opId < 2) return null;
-  return partStolenAfter(opId - 1);
+  if (opId < 2 || opId > 9) return null;
+  const part = partStolenAfter(opId - 1);
+  return part || null;
 }
 
 export function cageCheer(): Beat {
@@ -72,15 +74,34 @@ export function cagePartBeat(opId: number): Beat | null {
 export function vanSting(opId: number): Beat[] {
   const next = OP_OPENS[opId + 1];
   if (next) return next;
-  if (opId >= 10) {
-    return [
-      { who: "GROK-9", text: "They took the keys. I was going to lock the van. The van does not leave." },
-      { who: "GOBLIN", text: "Aw man, the birds stole the keys! There is no next canyon that gives them back." },
-      { who: "HONEY BUN", text: "Thank you for coming. The harvest can wait, and so can the van." },
-    ];
-  }
+  if (opId >= 10) return op10WalkBack();
   return [
     { who: "GOBLIN", text: `Aw man! The birds stole the ${partStolenAfter(opId)}! Quick, let's chase after it!` },
+  ];
+}
+
+/** Normal ending. Wrong keys, pocket keys, bare hubs. */
+export function op10WalkBack(): Beat[] {
+  return [
+    { who: "GOBLIN", text: "... These are not the keys." },
+    { who: "GROK-9", text: "Correct. They are not our keys." },
+    { who: "GOBLIN", text: "Then where are our keys?" },
+    { who: "GROK-9", text: "Did you check your pocket." },
+    { who: "GOBLIN", text: "Aw man." },
+    { who: "GROK-9", text: "The hood is closed, but the wheels are gone. So are the lug nuts." },
+    { who: "GOBLIN", text: "We chased a pastry across ten canyons, finally remember to lock the hood, lose the keys, find the keys, and they took the wheels. Now we gotta drive on the rotors." },
+    { who: "GROK-9", text: "Wait, what?!" },
+  ];
+}
+
+/** Achievement ending. Same hubs. Requirement is not written yet. */
+export function op10AchievementSting(): Beat[] {
+  return [
+    { who: "GROK-9", text: "The tires are leaving." },
+    { who: "GOBLIN", text: "Aw man. They still had tread left on them too. How did we lose all 4? Did you forget to tighten the lug nuts?" },
+    { who: "GROK-9", text: "Quick Honest Assessment: The birds took the lug nuts. We have never touched the lug nuts in the van." },
+    { who: "GOBLIN", text: "Well, looks like we never will either. Hop in!" },
+    { who: "GROK-9", text: "Wait, what?" },
   ];
 }
 
