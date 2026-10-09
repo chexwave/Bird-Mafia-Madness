@@ -8,6 +8,7 @@ import {
   hasLevelChaos,
   loadSave,
   markCleared,
+  bossArmed,
   opOfLevel,
   passivesFrom,
   seedForLevel,
@@ -16,7 +17,7 @@ import {
   type PowerKind,
   type SaveData,
 } from "./progression";
-import { chaosBeat, collectBeat, formatRadio } from "./narrative";
+import { cageCheer, cagePartBeat, chaosBeat, collectBeat, formatRadio } from "./narrative";
 import { ParticleSystem } from "./particles";
 import { SEED_SIZE } from "./types";
 import type {
@@ -606,30 +607,40 @@ export class GameEngine {
     this.weaponCharge = 0;
     this.chargeFiring = false;
     this.boss = null;
-    this.bossGoalOpen = !L.boss;
-    if (L.boss) {
-      const op = opOfLevel(L.id);
-      const hp = Math.round((L.epic ? 220 : 80) * (1 + (op.id - 1) * 0.18));
-      this.boss = {
-        x: L.width * 0.5 - 60,
-        y: 100,
-        w: 168,
-        h: 128,
-        hp,
-        maxHp: hp,
-        phase: 1,
-        t: 0,
-        vx: 80,
-        vy: 0,
-        dead: false,
-        flash: 0,
-        attackCd: 1.2,
-      };
-      this.bossGoalOpen = false;
-      this.lastBossPhase = 1;
-      // hide goal until boss dies
+    this.bossGoalOpen = !L.boss && !L.horde;
+    if (L.horde) {
       for (const pl of this.platforms) {
         if (pl.kind === "goal") pl.active = false;
+      }
+    }
+    if (L.boss) {
+      const op = opOfLevel(L.id);
+      if (!bossArmed(this.save, op.id)) {
+        this.boss = null;
+        this.bossGoalOpen = true;
+        this.radio = "GROK-9 · No handler. Level 6 was not finished. The cage at the top of the vertical ascent is still shut.";
+      } else {
+        const hp = Math.round((L.epic ? 220 : 80) * (1 + (op.id - 1) * 0.18));
+        this.boss = {
+          x: L.width * 0.5 - 60,
+          y: 100,
+          w: 168,
+          h: 128,
+          hp,
+          maxHp: hp,
+          phase: 1,
+          t: 0,
+          vx: 80,
+          vy: 0,
+          dead: false,
+          flash: 0,
+          attackCd: 1.2,
+        };
+        this.bossGoalOpen = false;
+        this.lastBossPhase = 1;
+        for (const pl of this.platforms) {
+          if (pl.kind === "goal") pl.active = false;
+        }
       }
     }
     if (full) {
@@ -891,6 +902,7 @@ export class GameEngine {
     this.wasGrounded = this.grounded;
     this.grounded = false;
     this.resolveY();
+    this.updateSetpieces(dt);
 
     // Keep player on-screen / in world (special jumps can't leave map)
     this.clampToWorld();
@@ -1061,6 +1073,7 @@ export class GameEngine {
   private resolveX() {
     const box = this.playerBox();
     for (const p of this.platforms) {
+      if (p.gone) continue;
       if (p.kind === "hazard" || p.kind === "checkpoint" || p.kind === "goal") continue;
       if (p.kind === "oneway" || p.kind === "spring" || p.kind === "conveyor") continue;
       if (p.h >= 180) continue; // sealed floor is a walk plane, not a wall
@@ -1080,6 +1093,7 @@ export class GameEngine {
   private resolveY() {
     const box = this.playerBox();
     for (const p of this.platforms) {
+      if (p.gone) continue;
       if (p.kind === "checkpoint" || p.kind === "goal") continue;
 
       if (p.kind === "hazard") {
@@ -1146,6 +1160,10 @@ export class GameEngine {
           if (p.kind === "conveyor") {
             this.platformRideVx = p.vx ?? 80;
           }
+          if (p.job === "crumble") {
+            p.timer = (p.timer ?? 0) + FIXED_DT;
+            if (p.timer > (p.crumble ?? 0.5)) p.gone = true;
+          }
         } else if (solid && aabb(box, p) && this.pvy < 0 && box.y >= p.y + p.h - 16) {
           this.py = p.y + p.h - HIT_OY;
           this.pvy = 0;
@@ -1161,6 +1179,18 @@ export class GameEngine {
     let bestDx = this.facing * 200;
     let bestDy = -90;
     let best = 1e12;
+    for (const p of this.platforms) {
+      if (p.gone || (p.job !== "bridge" && p.job !== "cheer")) continue;
+      const dx = p.x + p.w * 0.5 - ox;
+      const dy = p.y + p.h * 0.4 - oy;
+      if (dx * this.facing < -24) continue;
+      const d = dx * dx + dy * dy;
+      if (d < 320 * 320 && d < best) {
+        best = d;
+        bestDx = dx;
+        bestDy = dy;
+      }
+    }
     for (const b of this.birds) {
       if (b.dead) continue;
       const dx = b.x + b.w * 0.5 - ox;
@@ -1172,6 +1202,15 @@ export class GameEngine {
         bestDx = dx;
         bestDy = dy;
       }
+    }
+    if (this.level.horde && !this.bossGoalOpen && this.birds.length > 0 && this.birds.every((b) => b.dead)) {
+      this.bossGoalOpen = true;
+      for (const pl of this.platforms) {
+        if (pl.kind === "goal") pl.active = true;
+      }
+      const partBeat = cagePartBeat(this.level.operation ?? 1);
+      this.radio = formatRadio(partBeat ?? cageCheer());
+      gameAudio.play("goal", { volume: 0.8 });
     }
     if (this.boss && !this.boss.dead) {
       const dx = this.boss.x + this.boss.w * 0.5 - ox;
@@ -1497,6 +1536,13 @@ export class GameEngine {
           this.damageBoss(l.dmg);
           if (!l.nova && !l.pierce) l.life = 0;
         }
+        for (const p of this.platforms) {
+          if (p.gone || (p.job !== "bridge" && p.job !== "cheer")) continue;
+          if (!aabb(l, p)) continue;
+          if (!l.nova && !l.pierce) l.life = 0;
+          this.breakProp(p);
+          this.fx.hit(p.x + p.w * 0.5, p.y + 12, l.color);
+        }
       } else if (aabb(l, this.playerBox())) {
         if (this.shielding) {
           l.life = 0;
@@ -1508,6 +1554,30 @@ export class GameEngine {
       }
     }
     this.lasers = this.lasers.filter((l) => l.life > 0);
+  }
+
+  private breakProp(p: Platform) {
+    if (p.job === "cheer") {
+      p.gone = true;
+      this.radio = formatRadio(cageCheer());
+      gameAudio.play("goal", { volume: 0.55, rate: 1.2 });
+      return;
+    }
+    if (p.job === "bridge") {
+      p.job = "bridge-go";
+      p.kind = "conveyor";
+      p.vx = 860;
+      p.timer = 0;
+      gameAudio.play("hit", { volume: 0.6, rate: 0.7 });
+    }
+  }
+
+  private updateSetpieces(dt: number) {
+    for (const p of this.platforms) {
+      if (p.job !== "bridge-go" || p.gone) continue;
+      p.timer = (p.timer ?? 0) + dt;
+      if ((p.timer ?? 0) > 0.85) p.gone = true;
+    }
   }
 
   private damageBoss(dmg: number) {
@@ -1564,7 +1634,7 @@ export class GameEngine {
       b.x = cx - 50 + Math.sin(b.t * 1.4) * 220;
       b.y = baseY + Math.cos(b.t * 2.2) * 50;
       // summon mafia bird occasionally
-      if (Math.random() < 0.008 && this.birds.filter((x) => !x.dead).length < 5) {
+      if (!this.level.horde && Math.random() < 0.008 && this.birds.filter((x) => !x.dead).length < 5) {
         this.birds.push({
           x: b.x,
           y: b.y + 40,
@@ -3433,6 +3503,27 @@ export class GameEngine {
   }
 
   private drawPlatform(ctx: CanvasRenderingContext2D, p: Platform) {
+    if (p.gone) return;
+    if (p.job === "seed") {
+      this.drawSeedBlock(ctx, p);
+      return;
+    }
+    if (p.job === "cheer") {
+      this.drawCheerCage(ctx, p);
+      return;
+    }
+    if (p.job === "shock") {
+      this.drawShock(ctx, p);
+      return;
+    }
+    if (p.job === "crumble") {
+      this.drawCrumble(ctx, p);
+      return;
+    }
+    if (p.job === "bridge" || p.job === "bridge-go") {
+      this.drawShotBridge(ctx, p);
+      return;
+    }
     if (p.kind === "checkpoint") {
       const on = !!p.active;
       const col = on ? "#39ff9a" : "#c77dff";
@@ -3466,6 +3557,10 @@ export class GameEngine {
       return;
     }
     if (p.kind === "goal") {
+      if (p.job === "don" || p.id === "don") {
+        this.drawDonPortal(ctx, p);
+        return;
+      }
       const on = p.active !== false;
       const gPulse = 0.7 + Math.sin(this.time * 4) * 0.3;
       const cx = p.x + p.w / 2;
@@ -3493,6 +3588,7 @@ export class GameEngine {
       ctx.globalAlpha = on ? 0.2 * gPulse : 0.08;
       ctx.fillRect(cx - 2, p.y - 36, 4, 36);
       ctx.restore();
+      if (this.level.horde) this.drawCageBars(ctx, p.x - 16, p.y - 20, p.w + 36, p.h + 28, on);
       return;
     }
     if (p.kind === "spring") {
@@ -3561,6 +3657,156 @@ export class GameEngine {
       return;
     }
     this.drawRockLedge(ctx, p);
+  }
+
+  private drawCageBars(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    open: boolean,
+  ) {
+    ctx.save();
+    ctx.strokeStyle = open ? "#ffcc33" : "#ff2bd6";
+    ctx.lineWidth = 4;
+    ctx.shadowColor = ctx.strokeStyle;
+    ctx.shadowBlur = 10;
+    ctx.strokeRect(x, y, w, h);
+    ctx.lineWidth = 2;
+    for (let i = 1; i < 5; i++) {
+      const bx = x + (w / 5) * i;
+      ctx.beginPath();
+      ctx.moveTo(bx, y);
+      ctx.lineTo(bx, y + h);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  private drawCrumble(ctx: CanvasRenderingContext2D, p: Platform) {
+    const k = Math.min(1, (p.timer ?? 0) / (p.crumble ?? 0.5));
+    ctx.save();
+    ctx.fillStyle = "#6a3a28";
+    ctx.fillRect(p.x, p.y, p.w, p.h);
+    ctx.fillStyle = "#c47a45";
+    ctx.fillRect(p.x, p.y, p.w, 6);
+    ctx.strokeStyle = `rgba(20,8,4,${0.35 + k * 0.6})`;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(p.x + 8, p.y + 4);
+    ctx.lineTo(p.x + p.w * (0.3 + k * 0.4), p.y + p.h);
+    ctx.moveTo(p.x + p.w * 0.6, p.y);
+    ctx.lineTo(p.x + p.w * 0.4, p.y + p.h);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  private drawShotBridge(ctx: CanvasRenderingContext2D, p: Platform) {
+    const go = p.job === "bridge-go";
+    ctx.save();
+    ctx.fillStyle = go ? "#ff4466" : "#1a3a55";
+    ctx.fillRect(p.x, p.y, p.w, 16);
+    ctx.strokeStyle = "#00f0ff";
+    ctx.lineWidth = 2;
+    ctx.shadowColor = "#00f0ff";
+    ctx.shadowBlur = go ? 4 : 12;
+    ctx.strokeRect(p.x, p.y, p.w, 16);
+    const cx = p.x + p.w * 0.5;
+    const cy = p.y + 36;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+    ctx.moveTo(cx - 22, cy);
+    ctx.lineTo(cx + 22, cy);
+    ctx.moveTo(cx, cy - 22);
+    ctx.lineTo(cx, cy + 22);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  private drawCheerCage(ctx: CanvasRenderingContext2D, p: Platform) {
+    this.drawCageBars(ctx, p.x, p.y, p.w, p.h, false);
+    ctx.save();
+    ctx.fillStyle = "#ffcc33";
+    ctx.font = "10px sans-serif";
+    ctx.fillText("SHOOT", p.x + 6, p.y + p.h + 12);
+    ctx.restore();
+  }
+
+  private drawShock(ctx: CanvasRenderingContext2D, p: Platform) {
+    ctx.save();
+    ctx.strokeStyle = "#7ef9ff";
+    ctx.lineWidth = 2;
+    ctx.shadowColor = "#00f0ff";
+    ctx.shadowBlur = 12;
+    const bolts = Math.max(1, Math.floor(p.w / 18));
+    for (let i = 0; i < bolts; i++) {
+      const x = p.x + 8 + i * 18;
+      const jag = Math.sin(this.time * 18 + i) * 4;
+      ctx.beginPath();
+      ctx.moveTo(x, p.y);
+      ctx.lineTo(x + jag, p.y + p.h * 0.45);
+      ctx.lineTo(x - jag, p.y + p.h);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  private drawSeedBlock(ctx: CanvasRenderingContext2D, p: Platform) {
+    ctx.save();
+    const g = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
+    g.addColorStop(0, "#ffe66a");
+    g.addColorStop(1, "#ff2bd6");
+    ctx.fillStyle = g;
+    ctx.shadowColor = "#ff2bd6";
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.roundRect(p.x, p.y, p.w, p.h, 10);
+    ctx.fill();
+    ctx.strokeStyle = "#1a0614";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(p.x + 8, p.y + 8);
+    ctx.lineTo(p.x + p.w - 10, p.y + p.h - 6);
+    ctx.moveTo(p.x + p.w - 12, p.y + 10);
+    ctx.lineTo(p.x + 10, p.y + p.h - 8);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  private drawDonPortal(ctx: CanvasRenderingContext2D, p: Platform) {
+    const cx = p.x + p.w * 0.5;
+    const bob = Math.sin(this.time * 3) * 4;
+    ctx.save();
+    ctx.fillStyle = "#140810";
+    ctx.beginPath();
+    ctx.ellipse(cx, p.y + p.h * 0.55 + bob, 26, 34, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#1a1a1a";
+    ctx.fillRect(cx - 22, p.y + 8 + bob, 44, 8);
+    ctx.fillStyle = "#00f0ff";
+    ctx.fillRect(cx - 10, p.y + 28 + bob, 6, 3);
+    ctx.fillRect(cx + 4, p.y + 28 + bob, 6, 3);
+    ctx.strokeStyle = "#ff2bd6";
+    ctx.lineWidth = 2;
+    ctx.shadowColor = "#ff2bd6";
+    ctx.shadowBlur = 12;
+    ctx.strokeRect(p.x - 6, p.y, p.w + 12, p.h);
+    ctx.restore();
+  }
+
+  private drawHoneyBun(ctx: CanvasRenderingContext2D, x: number, y: number) {
+    ctx.save();
+    ctx.fillStyle = "#e8b15a";
+    ctx.beginPath();
+    ctx.ellipse(x, y, 16, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#111";
+    ctx.fillRect(x - 12, y - 4, 24, 5);
+    ctx.fillStyle = "#00f0ff";
+    ctx.fillRect(x - 8, y - 3, 5, 3);
+    ctx.fillRect(x + 3, y - 3, 5, 3);
+    ctx.restore();
   }
 
   private drawConveyorBelt(ctx: CanvasRenderingContext2D, p: Platform) {
@@ -4187,6 +4433,7 @@ export class GameEngine {
     ctx.font = "bold 11px sans-serif";
     ctx.textAlign = "center";
     ctx.fillText(`DON CORVONE · P${b.phase}`, cx, b.y - 24);
+    if (this.level.operation === 1) this.drawHoneyBun(ctx, b.x + b.w - 6, b.y + 16);
     ctx.restore();
   }
 

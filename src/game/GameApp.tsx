@@ -12,6 +12,7 @@ import {
   POWER_META,
   SLOT_SEEDS,
   loadSave,
+  bossArmed,
   opUnlocked,
   totalChaos,
   type ChaosId,
@@ -1082,7 +1083,7 @@ function LevelSelect({
                 {L.id}. {L.name}
                 {L.boss ? (
                   <span className="ml-2 rounded bg-primary/30 px-1.5 py-0.5 text-[10px] text-primary">
-                    BOSS
+                    {L.operation === 10 || bossArmed(save, L.operation ?? 1) ? "BOSS" : "CAGE FIRST"}
                   </span>
                 ) : L.introPower ? (
                   <span className="ml-2 text-[10px] text-accent">

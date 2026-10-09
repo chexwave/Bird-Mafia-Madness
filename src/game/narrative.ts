@@ -310,8 +310,12 @@ export function radioFor(opId: number, slot: number): string {
 /** Back-compat for older imports. */
 export const OP1_RADIO: string[] = OP_BEATS[0]!.map(formatRadio);
 
+const CAGE_CLEAR =
+  'GROK-9: "Quick Honest Assessment: We need to get the van parts the birds stole. The cage at the top of the vertical ascent is a prime location for the part."';
+
 export function objectiveFor(level: LevelDef): string {
-  if (level.epic) return "Face Neon Chaos Manifest. The extraction will not finish clean, and the van will not leave.";
+  if (level.epic) return "Beat Argentavis magnificens. The keys on the plateau are the wrong keys. The van does not leave.";
+  if (level.horde) return CAGE_CLEAR;
   if (level.boss) {
     return `Defeat ${level.bossName ?? "the handler"}. Take the chaos seed. Do not expect a clean rescue.`;
   }
@@ -369,7 +373,7 @@ export function chaosBeat(id: ChaosId, epic: boolean): Beat {
   if (epic) {
     return {
       who: "HONEY BUN",
-      text: `${CHAOS_META[id].name} chaos seed is locked. Thank you for coming. The farm stays open, and the keys are gone.`,
+      text: `${CHAOS_META[id].name} chaos seed is locked. Thank you for coming. The keys on the plateau are not ours.`,
     };
   }
   return {
@@ -382,8 +386,8 @@ export function winCopy(level: LevelDef, lastChaos?: ChaosId): { title: string; 
   const op = OPERATIONS[(level.operation ?? 1) - 1] ?? OPERATIONS[0]!;
   if (level.epic) {
     return {
-      title: "The Farm Remembers",
-      body: `Neon Chaos recedes. Honey Bun thanks you. The extraction does not finish, and the birds take the keys. ${
+      title: "Wrong Keys",
+      body: `Argentavis goes down screaming. The keys do not fit. Goblin had the real ones. The wheels and lug nuts were already gone. ${
         lastChaos ? CHAOS_META[lastChaos].name + " seed taken. " : ""
       }The van does not leave. The question stays open.`,
     };
@@ -398,6 +402,9 @@ export function winCopy(level: LevelDef, lastChaos?: ChaosId): { title: string; 
       title: `${level.bossName ?? op.boss} Down`,
       body: `${lastChaos ? CHAOS_META[lastChaos].name + " chaos seed locked in. " : ""}${laugh} ${sting}`,
     };
+  }
+  if (level.horde) {
+    return { title: "Cage Clear", body: CAGE_CLEAR };
   }
   const beat = levelBeat(op.id, (level.id - 1) % 10);
   return {

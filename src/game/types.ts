@@ -45,6 +45,12 @@ export type Platform = Rect & {
   phase?: number;
   active?: boolean;
   id?: string;
+  /** Seconds of standing before this floor drops. */
+  crumble?: number;
+  /** Shot bridge, shot cheer cage, crumbling dune, seed block, shock line, Don portal. */
+  job?: "crumble" | "bridge" | "bridge-go" | "cheer" | "seed" | "shock" | "don";
+  timer?: number;
+  gone?: boolean;
 };
 
 export type Coin = Rect & { collected: boolean; bob: number };
@@ -128,6 +134,10 @@ export type LevelDef = {
   seeds?: Omit<PowerSeed, "collected" | "bob">[];
   disasterInterval: number;
   boss?: boolean;
+  /** Level 6 cage. Door stays shut until the flock is dead. */
+  horde?: boolean;
+  /** Van part recovered when the horde door opens. Null on Operation 1 and 10. */
+  cagePart?: string | null;
   theme?: "dunes" | "bridges" | "spikes" | "storm" | "vertical" | "hq" | "boss";
   radio?: string;
   operation?: number;

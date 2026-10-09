@@ -285,6 +285,8 @@ export type SaveData = {
   chaos: Record<ChaosId, number>;
   /** Level ids whose chaos seed has been collected. */
   chaosLevels: number[];
+  /** Level ids actually finished. Level 6 of an operation arms that boss. */
+  clearedLevels: number[];
 };
 
 const SAVE_KEY = "bmm-progress-v2";
@@ -311,6 +313,7 @@ export function loadSave(): SaveData {
     inventory: {},
     chaos: emptyChaos(),
     chaosLevels: [],
+    clearedLevels: [],
   };
   if (typeof localStorage === "undefined") return blank;
   try {
@@ -330,6 +333,9 @@ export function loadSave(): SaveData {
       inventory: parsed.inventory ?? {},
       chaos,
       chaosLevels,
+      clearedLevels: Array.isArray(parsed.clearedLevels)
+        ? parsed.clearedLevels.slice()
+        : Array.from({ length: parsed.highestCleared ?? 0 }, (_, i) => i + 1),
     };
   } catch {
     return blank;
@@ -402,8 +408,24 @@ export function hasLevelChaos(save: SaveData, levelId: number) {
 
 export function markCleared(save: SaveData, levelId: number): SaveData {
   save.highestCleared = Math.max(save.highestCleared, levelId);
+  if (!save.clearedLevels) save.clearedLevels = [];
+  if (!save.clearedLevels.includes(levelId)) save.clearedLevels.push(levelId);
   writeSave(save);
   return save;
+}
+
+export function cageLevelId(opId: number): number {
+  return (opId - 1) * 10 + 6;
+}
+
+export function cageCleared(save: SaveData, opId: number): boolean {
+  return (save.clearedLevels ?? []).includes(cageLevelId(opId));
+}
+
+/** Ops 1-9 spawn a boss only after Level 6. Operation 10 has no part and no gate. */
+export function bossArmed(save: SaveData, opId: number): boolean {
+  if (opId >= 10) return true;
+  return cageCleared(save, opId);
 }
 
 export function opUnlocked(save: SaveData, opId: number) {

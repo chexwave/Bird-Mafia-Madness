@@ -2,7 +2,7 @@
  * Chunk-based level generator — unique deterministic stages, not template clones.
  * Each level is assembled from authored chunks (start → beats → setpiece → finish).
  */
-import { radioFor } from "./narrative";
+import { partFoundInCage, radioFor } from "./narrative";
 import {
   OPERATIONS,
   powerForSlot,
@@ -182,6 +182,46 @@ function checkpoint(x: number, y: number, id: string): Platform {
 }
 function goal(x: number, y: number): Platform {
   return { x: x * TILE, y: y * TILE - 80, w: 40, h: 90, kind: "goal", id: "goal" };
+}
+function crumblePlat(x: number, y: number, wTiles: number, seconds = 0.5): Platform {
+  return {
+    x: x * TILE,
+    y: y * TILE,
+    w: wTiles * TILE,
+    h: 28,
+    kind: "oneway",
+    form: "mesa",
+    job: "crumble",
+    crumble: seconds,
+  };
+}
+function bridgePlat(x: number, y: number, wTiles: number): Platform {
+  return {
+    x: x * TILE,
+    y: y * TILE,
+    w: wTiles * TILE,
+    h: 72,
+    kind: "oneway",
+    form: "deck",
+    job: "bridge",
+  };
+}
+function cheerCage(x: number, y: number): Platform {
+  return { x: x * TILE, y: y * TILE, w: 56, h: 72, kind: "oneway", job: "cheer", id: "cheer" };
+}
+function shockLine(x: number, y: number, wTiles: number): Platform {
+  return { x: x * TILE, y: y * TILE + 8, w: wTiles * TILE, h: 36, kind: "hazard", job: "shock" };
+}
+function seedBlock(x: number, y: number, wTiles = 2): Platform {
+  return {
+    x: x * TILE,
+    y: y * TILE,
+    w: wTiles * TILE,
+    h: 40,
+    kind: "solid",
+    form: "mushroom",
+    job: "seed",
+  };
 }
 function coin(x: number, y: number) {
   return { x: x * TILE, y: y * TILE, w: 22, h: 22 };
@@ -1905,6 +1945,10 @@ function pickChaosSpot(
 }
 
 function withChaosGem(L: LevelDef): LevelDef {
+  if (L.chaosGem) {
+    L.chaosId = L.chaosGem.id;
+    return L;
+  }
   const id = seedForLevel(L.id);
   const avoid = L.seeds?.[0];
   const spot = pickChaosSpot(L.platforms, L.width, avoid);
@@ -1913,7 +1957,338 @@ function withChaosGem(L: LevelDef): LevelDef {
   return L;
 }
 
+
+function buildHorde(opIdx: number, slot: number): LevelDef {
+  const op = OPERATIONS[opIdx]!;
+  const levelId = opIdx * 10 + slot + 1;
+  const [name, subtitle] = op.levelNames[slot]!;
+  const power = powerForSlot(op.id, slot);
+  const radio = radioFor(op.id, slot);
+  const part = partFoundInCage(op.id);
+  const empty = op.id === 10;
+  const T = TILE;
+  const birds = empty
+    ? []
+    : [8, 10, 12, 14, 16].flatMap((x, i) => [
+        bird(x, 6, i % 2 ? 40 : -40, 2),
+        bird(x + 1, 5, i % 2 ? -30 : 30, 3),
+      ]).slice(0, 8);
+  return {
+    id: levelId,
+    name,
+    subtitle,
+    width: 22 * T,
+    height: 42 * T,
+    spawn: { x: 3 * T, y: 38 * T - PLAYER_H },
+    platforms: [
+      mesa(0, 39, 22),
+      plat(2, 36, 4, "oneway"),
+      plat(8, 33, 4, "oneway"),
+      plat(3, 30, 5, "oneway"),
+      plat(10, 27, 4, "oneway"),
+      plat(4, 24, 5, "oneway"),
+      plat(11, 21, 4, "oneway"),
+      plat(5, 18, 5, "oneway"),
+      plat(12, 15, 4, "oneway"),
+      pillar(6, 8, 1, 6),
+      pillar(16, 8, 1, 6),
+      plat(7, 8, 9),
+      mesa(0, 11, 6),
+      goal(18, 10),
+    ],
+    coins: part ? [coin(11, 6)] : [],
+    birds,
+    ammo: [ammo(4, 37, 16)],
+    seeds: [],
+    disasterInterval: 40,
+    boss: false,
+    horde: !empty,
+    cagePart: part,
+    theme: "vertical",
+    radio,
+    operation: op.id,
+    introPower: power,
+    epic: false,
+  };
+}
+
+function buildOp1(slot: number): LevelDef {
+  const op = OPERATIONS[0]!;
+  const levelId = slot + 1;
+  const [name, subtitle] = op.levelNames[slot]!;
+  const radio = radioFor(1, slot);
+  const power = powerForSlot(1, slot);
+  const T = TILE;
+  const seed = (x: number, y: number): Omit<PowerSeed, "collected" | "bob"> => ({
+    x: x * T,
+    y: y * T,
+    w: SEED_SIZE,
+    h: SEED_SIZE,
+    kind: power,
+  });
+  const head = {
+    id: levelId,
+    name,
+    subtitle,
+    radio,
+    operation: 1 as const,
+    boss: false,
+    epic: false,
+    introPower: power,
+    disasterInterval: 36,
+    ammo: [ammo(3, 14, 16)],
+    birds: [] as LevelDef["birds"],
+    coins: [] as LevelDef["coins"],
+    seeds: [] as LevelDef["seeds"],
+  };
+
+  if (slot === 0) {
+    return {
+      ...head,
+      width: 48 * T,
+      height: 24 * T,
+      theme: "dunes",
+      spawn: { x: 2 * T, y: 16 * T - PLAYER_H },
+      platforms: [
+        mesa(0, 16, 16),
+        checkpoint(12, 16, "cp1"),
+        crumblePlat(17, 16, 3, 0.42),
+        crumblePlat(21, 16, 3, 0.42),
+        crumblePlat(25, 16, 3, 0.42),
+        spikes(16, 19, 14),
+        sealedFloor(48, 21, "mesa"),
+        spring(20, 20.3),
+        mesa(32, 16, 14),
+        goal(42, 16),
+      ],
+      coins: [3, 5, 7, 9, 11, 13, 34, 38].map((x) => coin(x, 15)),
+      birds: [bird(36, 12, 40, 2)],
+      ammo: [ammo(4, 15, 14), ammo(34, 15, 12)],
+      seeds: [seed(8, 13)],
+    };
+  }
+
+  if (slot === 1) {
+    return {
+      ...head,
+      width: 36 * T,
+      height: 26 * T,
+      theme: "dunes",
+      spawn: { x: 2 * T, y: 12 * T - PLAYER_H },
+      platforms: [
+        mesa(0, 12, 6),
+        pillar(0, 12, 1.2, 10),
+        sealedFloor(36, 22, "bowl"),
+        { x: 2 * T, y: 8 * T, w: 12 * T, h: 36, kind: "solid", form: "arch" },
+        pillar(32, 8, 1.4, 14),
+        spring(16, 21.2),
+        deck(26, 11, 6),
+        goal(30, 11),
+      ],
+      coins: [coin(4, 11), coin(17, 20), coin(28, 10)],
+      birds: [bird(28, 8, -40, 2)],
+      ammo: [ammo(3, 11, 12)],
+      seeds: [seed(27, 8)],
+    };
+  }
+
+  if (slot === 2) {
+    return {
+      ...head,
+      width: 40 * T,
+      height: 24 * T,
+      theme: "bridges",
+      spawn: { x: 2 * T, y: 10 * T - PLAYER_H },
+      platforms: [
+        mesa(0, 10, 4),
+        bridgePlat(3, 10, 8),
+        spikes(4, 18, 14),
+        mesa(20, 14, 14),
+        goal(28, 14),
+        checkpoint(22, 14, "cp1"),
+      ],
+      coins: [coin(3, 9), coin(22, 13)],
+      birds: [],
+      ammo: [ammo(2, 9, 20)],
+      seeds: [seed(22, 11)],
+    };
+  }
+
+  if (slot === 3) {
+    return {
+      ...head,
+      width: 44 * T,
+      height: 26 * T,
+      theme: "spikes",
+      spawn: { x: 2 * T, y: 6 * T - PLAYER_H },
+      platforms: [
+        crumblePlat(0, 6, 5, 0.35),
+        spikes(0, 18, 12),
+        sealedFloor(44, 21, "tooth"),
+        conveyor(14, 17, 6, 1, 100),
+        conveyor(22, 14, 6, 1, 110),
+        conveyor(30, 11, 6, 1, 120),
+        mesa(38, 8, 6),
+        goal(41, 8),
+      ],
+      coins: [coin(16, 16), coin(24, 13), coin(32, 10)],
+      birds: [bird(40, 5, -50, 2)],
+      ammo: [ammo(15, 16, 14)],
+      seeds: [seed(39, 6)],
+    };
+  }
+
+  if (slot === 4) {
+    return {
+      ...head,
+      width: 34 * T,
+      height: 36 * T,
+      theme: "storm",
+      spawn: { x: 2 * T, y: 28 * T - PLAYER_H },
+      platforms: [
+        conveyor(0, 28, 8, 1, 120),
+        conveyor(8, 28, 8, 1, 150),
+        conveyor(16, 28, 5, 1, 170),
+        seedBlock(21, 27, 3),
+        seedBlock(21, 26, 3),
+        seedBlock(21, 25, 3),
+        seedBlock(21, 24, 3),
+        plat(25, 26, 4, "oneway"),
+        plat(24, 22, 4, "oneway"),
+        plat(26, 18, 4, "oneway"),
+        plat(24, 14, 4, "oneway"),
+        plat(26, 10, 4, "oneway"),
+        mesa(24, 6, 8),
+        goal(28, 6),
+        checkpoint(25, 18, "cp1"),
+      ],
+      coins: [coin(4, 27), coin(12, 27), coin(26, 17), coin(26, 9)],
+      birds: [bird(27, 4, -40, 2), bird(10, 24, 50, 2)],
+      ammo: [ammo(2, 27, 16)],
+      seeds: [seed(26, 4)],
+    };
+  }
+
+  if (slot === 5) {
+    return {
+      ...head,
+      width: 22 * T,
+      height: 46 * T,
+      theme: "vertical",
+      horde: true,
+      cagePart: null,
+      spawn: { x: 3 * T, y: 40 * T - PLAYER_H },
+      platforms: [
+        mesa(0, 41, 22),
+        plat(2, 37, 5, "oneway"),
+        plat(10, 33, 5, "oneway"),
+        plat(3, 29, 5, "oneway"),
+        plat(11, 25, 5, "oneway"),
+        plat(4, 21, 5, "oneway"),
+        plat(12, 17, 5, "oneway"),
+        pillar(5, 8, 1.2, 8),
+        pillar(16, 8, 1.2, 8),
+        plat(6, 8, 10),
+        goal(12, 8),
+        checkpoint(4, 29, "cp1"),
+      ],
+      coins: [coin(12, 32), coin(5, 20), coin(13, 16)],
+      birds: [8, 10, 12, 14].flatMap((x, i) => [
+        bird(x, 6, i % 2 ? 36 : -36, 2),
+        bird(x, 5, i % 2 ? -28 : 28, 3),
+      ]),
+      ammo: [ammo(3, 40, 18)],
+      seeds: [seed(8, 6)],
+    };
+  }
+
+  if (slot === 6) {
+    return {
+      ...head,
+      width: 26 * T,
+      height: 40 * T,
+      theme: "vertical",
+      spawn: { x: 4 * T, y: 4 * T - PLAYER_H },
+      platforms: [
+        mesa(2, 4, 8),
+        deck(8, 8, 4),
+        deck(3, 12, 4),
+        deck(10, 16, 4),
+        deck(4, 20, 4),
+        cheerCage(16, 9),
+        cheerCage(1, 17),
+        deck(3, 28, 3),
+        deck(9, 28, 3),
+        deck(15, 28, 3),
+        deck(21, 28, 4),
+        shockLine(6, 30, 3),
+        shockLine(12, 30, 3),
+        shockLine(18, 30, 3),
+        sealedFloor(26, 34, "panel"),
+        spring(8, 33.2),
+        goal(22, 28),
+        checkpoint(4, 20, "cp1"),
+      ],
+      coins: [coin(5, 3), coin(11, 15), coin(16, 27)],
+      birds: [bird(20, 24, -40, 2)],
+      ammo: [ammo(3, 3, 16)],
+      seeds: [seed(22, 26)],
+    };
+  }
+
+  if (slot === 7) {
+    return {
+      ...head,
+      width: 42 * T,
+      height: 22 * T,
+      theme: "storm",
+      spawn: { x: 1.2 * T, y: 14 * T - PLAYER_H },
+      platforms: [
+        spring(1, 14),
+        spring(8, 14),
+        spring(15, 14),
+        spring(22, 14),
+        spring(29, 14),
+        shockLine(4, 16, 3),
+        shockLine(11, 16, 3),
+        shockLine(18, 16, 3),
+        shockLine(25, 16, 3),
+        shockLine(32, 16, 3),
+        sealedFloor(42, 19, "slab"),
+        mesa(35, 14, 6),
+        goal(38, 14),
+      ],
+      coins: [coin(8, 12), coin(22, 12), coin(36, 13)],
+      birds: [bird(36, 10, -45, 2)],
+      ammo: [ammo(2, 12, 12)],
+      seeds: [seed(36, 11)],
+    };
+  }
+
+  const chaosId = seedForLevel(levelId);
+  return {
+    ...head,
+    width: 72 * T,
+    height: 20 * T,
+    theme: "hq",
+    spawn: { x: 2 * T, y: 16 * T - PLAYER_H },
+    platforms: [
+      mesa(0, 16, 70),
+      checkpoint(24, 16, "cp1"),
+      checkpoint(48, 16, "cp2"),
+      { ...goal(64, 16), id: "don", job: "don" },
+    ],
+    coins: [coin(10, 15), coin(30, 15), coin(50, 15)],
+    birds: [bird(36, 12, 50, 3), bird(56, 12, -55, 3)],
+    ammo: [ammo(8, 15, 16), ammo(40, 15, 14)],
+    seeds: [seed(18, 13)],
+    chaosId,
+    chaosGem: { x: 6 * T, y: 16 * T - 70, w: 36, h: 36, id: chaosId },
+  };
+}
+
 function buildLevel(opIdx: number, slot: number): LevelDef {
+  if (opIdx === 0 && slot !== 9) return buildOp1(slot);
   const op = OPERATIONS[opIdx]!;
   const levelId = opIdx * 10 + slot + 1;
   const [name, subtitle] = op.levelNames[slot]!;
@@ -1925,6 +2300,8 @@ function buildLevel(opIdx: number, slot: number): LevelDef {
 
   const power = powerForSlot(op.id, slot);
   const radio = radioFor(op.id, slot);
+
+  if (slot === 5) return buildHorde(opIdx, slot);
 
   if (slot === 9) {
     const rand = rng(levelId * 99991);
