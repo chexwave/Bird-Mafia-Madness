@@ -1,0 +1,4738 @@
+{
+  "tile": 40,
+  "runPxPerSec": 280,
+  "coords": "tile units. mesa(x, y, w) style. multiply by 40 for pixels.",
+  "checkpointsPerLevel": 3,
+  "applyTo": "src/game/levelGen.ts buildSignatureOp1 slots 0-8, and Operation 1 slot 9 boss arena",
+  "doNotTouch": [
+    "Operations 2-10 layouts",
+    "dialogue",
+    "van cutscenes",
+    "seed story",
+    "boss speeches"
+  ],
+  "rules": {
+    "checkpointsPerLevel": 3,
+    "l1Finish": "floor drop into the next level",
+    "l2Open": "spawn in the sealed cave the L1 shaft dropped into",
+    "l3": "sky run first, shot bridge over the gorge is the middle, not the start",
+    "l3Tell": "neon SHOOT plate on the lip plus a hinge target on the drawbridge",
+    "l4": "rim run first, needle drop is the middle, belts carry you up",
+    "l5": "storm run first, eight belts 110 to 180 by tens, seed wall, tube up",
+    "l6": "narrow tube, 60-tile required climb, cage at top, door after flock, no van part",
+    "l7": "22-tile dump, 32-tile wall, 28-tile shock descent, two optional SHOOT cages",
+    "l8": "approach first, eight springs over eight shocks, wall at the end",
+    "l9": "extra long plateau, seed early, Don arrives at the far end and does not fight",
+    "l10": "Don Corvone boss arena, three phases, extract, Honey Bun is in another canyon"
+  },
+  "levels": [
+    {
+      "level": 1,
+      "slot": 0,
+      "name": "Desert Briefing",
+      "blurb": "Honey Bun is already gone, and the crumbs spell a path across the dunes until the ground gives way.",
+      "w": 268,
+      "h": 24,
+      "theme": "dunes",
+      "spawn": [
+        2,
+        16
+      ],
+      "power": "health",
+      "chaosId": "crimson",
+      "chaosColor": "#ff2b4a",
+      "vertical": false,
+      "boss": false,
+      "note": "Finish is the drop, not a door after the gag. Three checkpoints. Side spikes punish a miss. The shaft is the clear.",
+      "acts": [
+        {
+          "id": "approach",
+          "label": "Approach",
+          "x0": 0,
+          "x1": 105,
+          "note": "Crumb dunes. First gaps are hops. Checkpoint 1."
+        },
+        {
+          "id": "flock",
+          "label": "Flock",
+          "x0": 105,
+          "x1": 201,
+          "note": "The canyon. Fall-through deck, four birds, checkpoint 2."
+        },
+        {
+          "id": "drop",
+          "label": "Drop",
+          "x0": 201,
+          "x1": 268,
+          "note": "Checkpoint 3 on the lip. The floor gives way. The fall is Level 2."
+        }
+      ],
+      "event": {
+        "x0": 220,
+        "x1": 236,
+        "label": "floor drops"
+      },
+      "markers": [],
+      "plats": [
+        {
+          "x": -2.0,
+          "y": 21.0,
+          "w": 248.0,
+          "h": 6.5,
+          "kind": "solid",
+          "form": "mesa",
+          "job": "floor"
+        },
+        {
+          "x": 0.0,
+          "y": 16.0,
+          "w": 10.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 11.0,
+          "y": 13.0,
+          "w": 3.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 15.0,
+          "y": 15.0,
+          "w": 6.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 23.0,
+          "y": 14.0,
+          "w": 6.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 30.0,
+          "y": 12.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 36.0,
+          "y": 15.0,
+          "w": 6.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 44.0,
+          "y": 16.0,
+          "w": 7.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 48.0,
+          "y": 15.3,
+          "w": 1.4,
+          "h": 0.7,
+          "kind": "spring"
+        },
+        {
+          "x": 53.0,
+          "y": 15.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 58.0,
+          "y": 13.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp1"
+        },
+        {
+          "x": 63.0,
+          "y": 16.0,
+          "w": 6.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 71.0,
+          "y": 13.0,
+          "w": 6.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 79.0,
+          "y": 16.0,
+          "w": 7.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 88.0,
+          "y": 14.0,
+          "w": 7.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 97.0,
+          "y": 16.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 107.0,
+          "y": 15.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 117.0,
+          "y": 13.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 123.0,
+          "y": 16.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 133.0,
+          "y": 14.0,
+          "w": 7.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 142.0,
+          "y": 16.0,
+          "w": 6.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 146.0,
+          "y": 14.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp2"
+        },
+        {
+          "x": 156.0,
+          "y": 13.0,
+          "w": 6.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 164.0,
+          "y": 16.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 168.0,
+          "y": 15.3,
+          "w": 1.4,
+          "h": 0.7,
+          "kind": "spring"
+        },
+        {
+          "x": 174.0,
+          "y": 14.0,
+          "w": 7.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 183.0,
+          "y": 16.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 193.0,
+          "y": 15.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 203.0,
+          "y": 16.0,
+          "w": 14.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 210.0,
+          "y": 14.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp3"
+        },
+        {
+          "x": 220.0,
+          "y": 16.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "mesa",
+          "job": "crumble"
+        },
+        {
+          "x": 225.0,
+          "y": 16.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "mesa",
+          "job": "crumble"
+        },
+        {
+          "x": 230.0,
+          "y": 16.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "mesa",
+          "job": "crumble"
+        },
+        {
+          "x": 219.0,
+          "y": 19.45,
+          "w": 4.0,
+          "h": 0.55,
+          "kind": "hazard",
+          "job": "spike"
+        },
+        {
+          "x": 236.0,
+          "y": 19.45,
+          "w": 4.0,
+          "h": 0.55,
+          "kind": "hazard",
+          "job": "spike"
+        },
+        {
+          "x": 224.0,
+          "y": 20.0,
+          "w": 10.0,
+          "h": 1.6,
+          "kind": "goal",
+          "job": "drop",
+          "id": "drop"
+        }
+      ],
+      "coins": [
+        {
+          "x": 4.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 6.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 12.0,
+          "y": 12.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 17.0,
+          "y": 14.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 25.0,
+          "y": 13.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 31.0,
+          "y": 11.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 38.0,
+          "y": 14.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 46.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 55.0,
+          "y": 14.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 65.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 73.0,
+          "y": 12.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 81.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 90.0,
+          "y": 13.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 100.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 110.0,
+          "y": 14.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 125.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 135.0,
+          "y": 13.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 158.0,
+          "y": 12.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 176.0,
+          "y": 13.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 186.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 206.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 214.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        }
+      ],
+      "birds": [
+        {
+          "x": 74.0,
+          "y": 9.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 48,
+          "hp": 2
+        },
+        {
+          "x": 120.0,
+          "y": 10.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": -46,
+          "hp": 2
+        },
+        {
+          "x": 130.0,
+          "y": 9.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 52,
+          "hp": 3
+        },
+        {
+          "x": 166.0,
+          "y": 11.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": -40,
+          "hp": 2
+        },
+        {
+          "x": 188.0,
+          "y": 10.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 44,
+          "hp": 3
+        }
+      ],
+      "ammo": [
+        {
+          "x": 3.0,
+          "y": 15.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 16
+        },
+        {
+          "x": 148.0,
+          "y": 15.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 14
+        }
+      ],
+      "seeds": [
+        {
+          "x": 31.0,
+          "y": 10.0,
+          "w": 1.4,
+          "h": 1.4,
+          "kind": "health"
+        }
+      ],
+      "chaos": {
+        "x": 24.0,
+        "y": 12.7,
+        "w": 0.9,
+        "h": 0.9,
+        "id": "crimson",
+        "placed": "authored"
+      }
+    },
+    {
+      "level": 2,
+      "slot": 1,
+      "name": "Neon Caves",
+      "blurb": "The fall ends in a sealed cave, and the jump pad at the end is the only way back to the sky.",
+      "w": 156,
+      "h": 40,
+      "theme": "dunes",
+      "spawn": [
+        4,
+        28
+      ],
+      "power": "stamina",
+      "chaosId": "cyan",
+      "chaosColor": "#00f0ff",
+      "vertical": false,
+      "boss": false,
+      "note": "Opens in the cave Level 1 dropped you into. Spring reach is about 13 tiles, so the sky lip sits 11 above the pad. Three checkpoints.",
+      "acts": [
+        {
+          "id": "landing",
+          "label": "Landing",
+          "x0": 0,
+          "x1": 16,
+          "note": "You fell in. The shaft is capped. Checkpoint 1."
+        },
+        {
+          "id": "descent",
+          "label": "Descent",
+          "x0": 16,
+          "x1": 114,
+          "note": "The sealed cave. You go down. Checkpoint 2."
+        },
+        {
+          "id": "spring",
+          "label": "Spring",
+          "x0": 114,
+          "x1": 156,
+          "note": "Checkpoint 3 on the pad lip. The spring is the only way to the sky."
+        }
+      ],
+      "event": {
+        "x0": 124,
+        "x1": 132,
+        "label": "spring out"
+      },
+      "markers": [],
+      "plats": [
+        {
+          "x": -2.0,
+          "y": 38.0,
+          "w": 160.0,
+          "h": 6.5,
+          "kind": "solid",
+          "form": "bowl",
+          "job": "floor"
+        },
+        {
+          "x": 0.0,
+          "y": 14.0,
+          "w": 1.3,
+          "h": 16.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 12.0,
+          "y": 14.0,
+          "w": 1.3,
+          "h": 12.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 1.0,
+          "y": 14.0,
+          "w": 12.0,
+          "h": 2.2,
+          "kind": "solid",
+          "form": "arch"
+        },
+        {
+          "x": 2.0,
+          "y": 28.0,
+          "w": 10.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 8.0,
+          "y": 26.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp1"
+        },
+        {
+          "x": 16.0,
+          "y": 30.0,
+          "w": 8.0,
+          "h": 2.0,
+          "kind": "solid",
+          "form": "bowl"
+        },
+        {
+          "x": 26.0,
+          "y": 26.0,
+          "w": 7.0,
+          "h": 2.2,
+          "kind": "solid",
+          "form": "arch"
+        },
+        {
+          "x": 35.0,
+          "y": 32.0,
+          "w": 7.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 44.0,
+          "y": 33.0,
+          "w": 8.0,
+          "h": 2.0,
+          "kind": "solid",
+          "form": "bowl"
+        },
+        {
+          "x": 54.0,
+          "y": 32.0,
+          "w": 6.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 62.0,
+          "y": 30.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 68.0,
+          "y": 28.0,
+          "w": 7.0,
+          "h": 2.2,
+          "kind": "solid",
+          "form": "arch"
+        },
+        {
+          "x": 77.0,
+          "y": 34.0,
+          "w": 8.0,
+          "h": 2.0,
+          "kind": "solid",
+          "form": "bowl"
+        },
+        {
+          "x": 82.0,
+          "y": 32.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp2"
+        },
+        {
+          "x": 88.0,
+          "y": 33.0,
+          "w": 7.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 97.0,
+          "y": 34.0,
+          "w": 8.0,
+          "h": 2.0,
+          "kind": "solid",
+          "form": "bowl"
+        },
+        {
+          "x": 107.0,
+          "y": 33.0,
+          "w": 6.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 116.0,
+          "y": 34.0,
+          "w": 14.0,
+          "h": 2.0,
+          "kind": "solid",
+          "form": "bowl"
+        },
+        {
+          "x": 120.0,
+          "y": 32.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp3"
+        },
+        {
+          "x": 126.0,
+          "y": 33.3,
+          "w": 1.4,
+          "h": 0.7,
+          "kind": "spring"
+        },
+        {
+          "x": 134.0,
+          "y": 16.0,
+          "w": 1.3,
+          "h": 20.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 146.0,
+          "y": 16.0,
+          "w": 1.3,
+          "h": 20.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 136.0,
+          "y": 23.0,
+          "w": 8.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 140.0,
+          "y": 21.0,
+          "w": 1.0,
+          "h": 2.25,
+          "kind": "goal",
+          "id": "goal"
+        }
+      ],
+      "coins": [
+        {
+          "x": 4.0,
+          "y": 27.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 6.0,
+          "y": 27.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 18.0,
+          "y": 29.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 28.0,
+          "y": 25.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 37.0,
+          "y": 31.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 46.0,
+          "y": 32.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 56.0,
+          "y": 31.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 63.0,
+          "y": 29.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 70.0,
+          "y": 27.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 79.0,
+          "y": 33.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 90.0,
+          "y": 32.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 99.0,
+          "y": 33.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 109.0,
+          "y": 32.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 118.0,
+          "y": 33.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 138.0,
+          "y": 22.0,
+          "w": 0.55,
+          "h": 0.55
+        }
+      ],
+      "birds": [
+        {
+          "x": 40.0,
+          "y": 28.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": -42,
+          "hp": 2
+        },
+        {
+          "x": 72.0,
+          "y": 26.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 50,
+          "hp": 3
+        },
+        {
+          "x": 104.0,
+          "y": 29.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": -46,
+          "hp": 2
+        }
+      ],
+      "ammo": [
+        {
+          "x": 4.0,
+          "y": 27.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 14
+        },
+        {
+          "x": 122.0,
+          "y": 33.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 12
+        }
+      ],
+      "seeds": [
+        {
+          "x": 63.0,
+          "y": 28.0,
+          "w": 1.4,
+          "h": 1.4,
+          "kind": "stamina"
+        }
+      ],
+      "chaos": {
+        "x": 46.0,
+        "y": 31.7,
+        "w": 0.9,
+        "h": 0.9,
+        "id": "cyan",
+        "placed": "authored"
+      }
+    },
+    {
+      "level": 3,
+      "slot": 2,
+      "name": "Sky Bridges",
+      "blurb": "The rails look like a clean signal, but the bridge you shoot will break and slide you into the spikes.",
+      "w": 260,
+      "h": 26,
+      "theme": "bridges",
+      "spawn": [
+        2,
+        12
+      ],
+      "power": "ammo",
+      "chaosId": "azure",
+      "chaosColor": "#4cc9ff",
+      "vertical": false,
+      "boss": false,
+      "note": "Longer sky run. The tell is a neon SHOOT plate on the lip and a hinge target on the near end of the drawbridge. Shoot the hinge. Three checkpoints.",
+      "acts": [
+        {
+          "id": "sky",
+          "label": "Sky run",
+          "x0": 0,
+          "x1": 128,
+          "note": "Longer pylon run. Checkpoint 1, then the warning lip."
+        },
+        {
+          "id": "break",
+          "label": "Break",
+          "x0": 128,
+          "x1": 170,
+          "note": "SHOOT plate on the lip. Hinge on the drawbridge. It slides into the spikes."
+        },
+        {
+          "id": "exit",
+          "label": "Exit",
+          "x0": 170,
+          "x1": 260,
+          "note": "Checkpoint 3, flock, goal on its own mesa."
+        }
+      ],
+      "event": {
+        "x0": 132,
+        "x1": 146,
+        "label": "break bridge"
+      },
+      "markers": [
+        {
+          "x": 124,
+          "y": 10,
+          "kind": "plate",
+          "text": "SHOOT"
+        },
+        {
+          "x": 133,
+          "y": 11,
+          "kind": "hinge",
+          "text": "hinge"
+        }
+      ],
+      "plats": [
+        {
+          "x": -2.0,
+          "y": 22.0,
+          "w": 264.0,
+          "h": 6.5,
+          "kind": "solid",
+          "form": "deck",
+          "job": "floor"
+        },
+        {
+          "x": 0.0,
+          "y": 12.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 2.0,
+          "y": 12.0,
+          "w": 1.2,
+          "h": 6.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 10.0,
+          "y": 11.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 16.0,
+          "y": 10.0,
+          "w": 1.1,
+          "h": 8.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 18.0,
+          "y": 10.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 25.0,
+          "y": 12.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 30.0,
+          "y": 11.0,
+          "w": 1.1,
+          "h": 7.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 32.0,
+          "y": 11.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 36.0,
+          "y": 9.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp1"
+        },
+        {
+          "x": 40.0,
+          "y": 10.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 46.0,
+          "y": 9.0,
+          "w": 1.1,
+          "h": 9.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 48.0,
+          "y": 9.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 55.0,
+          "y": 11.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 60.0,
+          "y": 10.0,
+          "w": 1.1,
+          "h": 8.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 62.0,
+          "y": 10.0,
+          "w": 6.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 70.0,
+          "y": 12.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 76.0,
+          "y": 11.0,
+          "w": 1.2,
+          "h": 7.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 78.0,
+          "y": 12.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 88.0,
+          "y": 11.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 94.0,
+          "y": 10.0,
+          "w": 1.1,
+          "h": 8.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 96.0,
+          "y": 10.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 103.0,
+          "y": 12.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 108.0,
+          "y": 11.0,
+          "w": 1.1,
+          "h": 7.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 110.0,
+          "y": 11.0,
+          "w": 6.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 118.0,
+          "y": 12.0,
+          "w": 10.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 122.0,
+          "y": 10.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp2"
+        },
+        {
+          "x": 124.0,
+          "y": 10.0,
+          "w": 1.6,
+          "h": 0.9,
+          "kind": "solid",
+          "form": "panel",
+          "job": "shoot"
+        },
+        {
+          "x": 132.0,
+          "y": 12.0,
+          "w": 14.0,
+          "h": 1.8,
+          "kind": "oneway",
+          "form": "deck",
+          "job": "bridge"
+        },
+        {
+          "x": 132.0,
+          "y": 20.45,
+          "w": 18.0,
+          "h": 0.55,
+          "kind": "hazard",
+          "job": "spike"
+        },
+        {
+          "x": 152.0,
+          "y": 19.3,
+          "w": 1.4,
+          "h": 0.7,
+          "kind": "spring"
+        },
+        {
+          "x": 160.0,
+          "y": 14.0,
+          "w": 10.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 166.0,
+          "y": 12.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp3"
+        },
+        {
+          "x": 172.0,
+          "y": 12.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 178.0,
+          "y": 11.0,
+          "w": 1.1,
+          "h": 7.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 180.0,
+          "y": 11.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 187.0,
+          "y": 13.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 192.0,
+          "y": 12.0,
+          "w": 1.1,
+          "h": 6.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 194.0,
+          "y": 12.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 201.0,
+          "y": 13.0,
+          "w": 7.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 210.0,
+          "y": 11.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 216.0,
+          "y": 10.0,
+          "w": 1.1,
+          "h": 8.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 218.0,
+          "y": 10.0,
+          "w": 6.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 226.0,
+          "y": 12.0,
+          "w": 16.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 236.0,
+          "y": 10.0,
+          "w": 1.0,
+          "h": 2.25,
+          "kind": "goal",
+          "id": "goal"
+        }
+      ],
+      "coins": [
+        {
+          "x": 3.0,
+          "y": 11.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 12.0,
+          "y": 10.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 20.0,
+          "y": 9.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 27.0,
+          "y": 11.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 34.0,
+          "y": 10.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 42.0,
+          "y": 9.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 50.0,
+          "y": 8.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 57.0,
+          "y": 10.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 64.0,
+          "y": 9.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 72.0,
+          "y": 11.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 80.0,
+          "y": 11.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 90.0,
+          "y": 10.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 98.0,
+          "y": 9.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 105.0,
+          "y": 11.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 112.0,
+          "y": 10.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 120.0,
+          "y": 11.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 162.0,
+          "y": 13.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 174.0,
+          "y": 11.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 182.0,
+          "y": 10.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 196.0,
+          "y": 11.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 212.0,
+          "y": 10.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 220.0,
+          "y": 9.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 230.0,
+          "y": 11.0,
+          "w": 0.55,
+          "h": 0.55
+        }
+      ],
+      "birds": [
+        {
+          "x": 28.0,
+          "y": 7.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 46,
+          "hp": 2
+        },
+        {
+          "x": 66.0,
+          "y": 6.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": -50,
+          "hp": 3
+        },
+        {
+          "x": 100.0,
+          "y": 7.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 44,
+          "hp": 2
+        },
+        {
+          "x": 176.0,
+          "y": 8.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 48,
+          "hp": 2
+        },
+        {
+          "x": 190.0,
+          "y": 8.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": -52,
+          "hp": 3
+        },
+        {
+          "x": 214.0,
+          "y": 7.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 44,
+          "hp": 2
+        }
+      ],
+      "ammo": [
+        {
+          "x": 4.0,
+          "y": 11.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 18
+        },
+        {
+          "x": 162.0,
+          "y": 13.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 14
+        }
+      ],
+      "seeds": [
+        {
+          "x": 42.0,
+          "y": 8.0,
+          "w": 1.4,
+          "h": 1.4,
+          "kind": "ammo"
+        }
+      ],
+      "chaos": {
+        "x": 20.0,
+        "y": 8.7,
+        "w": 0.9,
+        "h": 0.9,
+        "id": "azure",
+        "placed": "authored"
+      }
+    },
+    {
+      "level": 4,
+      "slot": 3,
+      "name": "Spike Gorge",
+      "blurb": "The broken bridge drops you onto the needles, and a conveyor belt is already waiting to carry you up.",
+      "w": 248,
+      "h": 28,
+      "theme": "spikes",
+      "spawn": [
+        2,
+        10
+      ],
+      "power": "shield",
+      "chaosId": "magenta",
+      "chaosColor": "#ff2bd6",
+      "vertical": false,
+      "boss": false,
+      "note": "Opens on the rim after the sky run. The drop is the middle. Four belts carry you up. Three checkpoints.",
+      "acts": [
+        {
+          "id": "rim",
+          "label": "Rim",
+          "x0": 0,
+          "x1": 110,
+          "note": "A run along the gorge. Checkpoints 1 and 2. The floor has not given way."
+        },
+        {
+          "id": "drop",
+          "label": "Drop",
+          "x0": 110,
+          "x1": 160,
+          "note": "Crumble onto the needles. The belts are already waiting."
+        },
+        {
+          "id": "climb",
+          "label": "Climb",
+          "x0": 160,
+          "x1": 248,
+          "note": "Checkpoint 3 at the top of the belts. Exit ridge, then the door."
+        }
+      ],
+      "event": {
+        "x0": 112,
+        "x1": 124,
+        "label": "needle drop"
+      },
+      "markers": [],
+      "plats": [
+        {
+          "x": -2.0,
+          "y": 24.0,
+          "w": 252.0,
+          "h": 6.5,
+          "kind": "solid",
+          "form": "tooth",
+          "job": "floor"
+        },
+        {
+          "x": 0.0,
+          "y": 10.0,
+          "w": 10.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 12.0,
+          "y": 9.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 18.0,
+          "y": 10.0,
+          "w": 7.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 27.0,
+          "y": 8.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 33.0,
+          "y": 10.0,
+          "w": 7.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 38.0,
+          "y": 8.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp1"
+        },
+        {
+          "x": 44.0,
+          "y": 11.0,
+          "w": 6.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 52.0,
+          "y": 9.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 58.0,
+          "y": 10.0,
+          "w": 7.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 67.0,
+          "y": 8.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 73.0,
+          "y": 10.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 83.0,
+          "y": 11.0,
+          "w": 7.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 92.0,
+          "y": 9.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 98.0,
+          "y": 10.0,
+          "w": 10.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 104.0,
+          "y": 8.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp2"
+        },
+        {
+          "x": 112.0,
+          "y": 10.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "mesa",
+          "job": "crumble"
+        },
+        {
+          "x": 117.0,
+          "y": 10.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "mesa",
+          "job": "crumble"
+        },
+        {
+          "x": 112.0,
+          "y": 22.45,
+          "w": 14.0,
+          "h": 0.55,
+          "kind": "hazard",
+          "job": "spike"
+        },
+        {
+          "x": 128.0,
+          "y": 21.0,
+          "w": 6.0,
+          "h": 0.85,
+          "kind": "conveyor",
+          "form": "belt",
+          "vx": 100
+        },
+        {
+          "x": 136.0,
+          "y": 18.0,
+          "w": 6.0,
+          "h": 0.85,
+          "kind": "conveyor",
+          "form": "belt",
+          "vx": 110
+        },
+        {
+          "x": 144.0,
+          "y": 15.0,
+          "w": 6.0,
+          "h": 0.85,
+          "kind": "conveyor",
+          "form": "belt",
+          "vx": 120
+        },
+        {
+          "x": 152.0,
+          "y": 12.0,
+          "w": 6.0,
+          "h": 0.85,
+          "kind": "conveyor",
+          "form": "belt",
+          "vx": 110
+        },
+        {
+          "x": 160.0,
+          "y": 10.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 164.0,
+          "y": 8.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp3"
+        },
+        {
+          "x": 170.0,
+          "y": 9.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 176.0,
+          "y": 10.0,
+          "w": 7.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 185.0,
+          "y": 8.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 191.0,
+          "y": 10.0,
+          "w": 7.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 200.0,
+          "y": 9.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 206.0,
+          "y": 10.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 216.0,
+          "y": 10.0,
+          "w": 16.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 226.0,
+          "y": 8.0,
+          "w": 1.0,
+          "h": 2.25,
+          "kind": "goal",
+          "id": "goal"
+        }
+      ],
+      "coins": [
+        {
+          "x": 4.0,
+          "y": 9.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 8.0,
+          "y": 9.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 14.0,
+          "y": 8.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 20.0,
+          "y": 9.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 29.0,
+          "y": 7.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 35.0,
+          "y": 9.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 46.0,
+          "y": 10.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 54.0,
+          "y": 8.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 60.0,
+          "y": 9.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 69.0,
+          "y": 7.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 75.0,
+          "y": 9.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 85.0,
+          "y": 10.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 94.0,
+          "y": 8.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 100.0,
+          "y": 9.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 130.0,
+          "y": 20.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 138.0,
+          "y": 17.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 146.0,
+          "y": 14.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 154.0,
+          "y": 11.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 172.0,
+          "y": 8.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 178.0,
+          "y": 9.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 187.0,
+          "y": 7.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 193.0,
+          "y": 9.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 210.0,
+          "y": 9.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 220.0,
+          "y": 9.0,
+          "w": 0.55,
+          "h": 0.55
+        }
+      ],
+      "birds": [
+        {
+          "x": 24.0,
+          "y": 6.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 46,
+          "hp": 2
+        },
+        {
+          "x": 64.0,
+          "y": 6.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": -50,
+          "hp": 3
+        },
+        {
+          "x": 180.0,
+          "y": 6.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 48,
+          "hp": 2
+        },
+        {
+          "x": 198.0,
+          "y": 6.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": -44,
+          "hp": 2
+        }
+      ],
+      "ammo": [
+        {
+          "x": 3.0,
+          "y": 9.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 16
+        },
+        {
+          "x": 162.0,
+          "y": 9.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 14
+        }
+      ],
+      "seeds": [
+        {
+          "x": 29.0,
+          "y": 6.0,
+          "w": 1.4,
+          "h": 1.4,
+          "kind": "shield"
+        }
+      ],
+      "chaos": {
+        "x": 20.0,
+        "y": 8.7,
+        "w": 0.9,
+        "h": 0.9,
+        "id": "magenta",
+        "placed": "authored"
+      }
+    },
+    {
+      "level": 5,
+      "slot": 4,
+      "name": "Belt Run",
+      "blurb": "The belts shove you forward through the storm, and the exit is a wall of giant broken seeds.",
+      "w": 302,
+      "h": 36,
+      "theme": "storm",
+      "spawn": [
+        2,
+        18
+      ],
+      "power": "homing",
+      "chaosId": "lime",
+      "chaosColor": "#b8ff3a",
+      "vertical": false,
+      "boss": false,
+      "note": "Storm run first. Shove is eight belts, 110 to 180 by tens, into the giant broken seeds. The tube is still the way up. Three checkpoints.",
+      "acts": [
+        {
+          "id": "storm",
+          "label": "Storm",
+          "x0": 0,
+          "x1": 94,
+          "note": "A run before the belts own you. Checkpoints 1 and 2."
+        },
+        {
+          "id": "shove",
+          "label": "Shove",
+          "x0": 94,
+          "x1": 196,
+          "note": "Eight belts. 110 to 180 by tens. Then the seed wall."
+        },
+        {
+          "id": "tube",
+          "label": "Tube",
+          "x0": 196,
+          "x1": 302,
+          "note": "The ladder up. Checkpoint 3. Goal on the far ridge."
+        }
+      ],
+      "event": {
+        "x0": 192,
+        "x1": 196,
+        "label": "seed wall"
+      },
+      "markers": [],
+      "plats": [
+        {
+          "x": -2.0,
+          "y": 32.0,
+          "w": 240.0,
+          "h": 6.5,
+          "kind": "solid",
+          "form": "wreck",
+          "job": "floor"
+        },
+        {
+          "x": 0.0,
+          "y": 18.0,
+          "w": 10.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 12.0,
+          "y": 16.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 18.0,
+          "y": 18.0,
+          "w": 7.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 27.0,
+          "y": 16.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 33.0,
+          "y": 18.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 38.0,
+          "y": 16.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp1"
+        },
+        {
+          "x": 44.0,
+          "y": 17.0,
+          "w": 7.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 53.0,
+          "y": 15.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 59.0,
+          "y": 17.0,
+          "w": 7.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 68.0,
+          "y": 18.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 78.0,
+          "y": 16.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 84.0,
+          "y": 18.0,
+          "w": 10.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 90.0,
+          "y": 16.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp2"
+        },
+        {
+          "x": 198.0,
+          "y": 16.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 204.0,
+          "y": 13.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 198.0,
+          "y": 10.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 200.0,
+          "y": 8.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp3"
+        },
+        {
+          "x": 206.0,
+          "y": 7.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 200.0,
+          "y": 4.0,
+          "w": 12.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 214.0,
+          "y": 5.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 220.0,
+          "y": 6.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 230.0,
+          "y": 5.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 236.0,
+          "y": 6.0,
+          "w": 10.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 248.0,
+          "y": 6.0,
+          "w": 16.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 258.0,
+          "y": 4.0,
+          "w": 1.0,
+          "h": 2.25,
+          "kind": "goal",
+          "id": "goal"
+        },
+        {
+          "x": 96.0,
+          "y": 18.0,
+          "w": 12.0,
+          "h": 0.85,
+          "kind": "conveyor",
+          "form": "belt",
+          "vx": 110
+        },
+        {
+          "x": 108.0,
+          "y": 18.0,
+          "w": 12.0,
+          "h": 0.85,
+          "kind": "conveyor",
+          "form": "belt",
+          "vx": 120
+        },
+        {
+          "x": 120.0,
+          "y": 18.0,
+          "w": 12.0,
+          "h": 0.85,
+          "kind": "conveyor",
+          "form": "belt",
+          "vx": 130
+        },
+        {
+          "x": 132.0,
+          "y": 18.0,
+          "w": 12.0,
+          "h": 0.85,
+          "kind": "conveyor",
+          "form": "belt",
+          "vx": 140
+        },
+        {
+          "x": 144.0,
+          "y": 18.0,
+          "w": 12.0,
+          "h": 0.85,
+          "kind": "conveyor",
+          "form": "belt",
+          "vx": 150
+        },
+        {
+          "x": 156.0,
+          "y": 18.0,
+          "w": 12.0,
+          "h": 0.85,
+          "kind": "conveyor",
+          "form": "belt",
+          "vx": 160
+        },
+        {
+          "x": 168.0,
+          "y": 18.0,
+          "w": 12.0,
+          "h": 0.85,
+          "kind": "conveyor",
+          "form": "belt",
+          "vx": 170
+        },
+        {
+          "x": 180.0,
+          "y": 18.0,
+          "w": 12.0,
+          "h": 0.85,
+          "kind": "conveyor",
+          "form": "belt",
+          "vx": 180
+        },
+        {
+          "x": 192.0,
+          "y": 18.0,
+          "w": 3.0,
+          "h": 1.0,
+          "kind": "solid",
+          "form": "mushroom",
+          "job": "seed"
+        },
+        {
+          "x": 192.0,
+          "y": 17.0,
+          "w": 3.0,
+          "h": 1.0,
+          "kind": "solid",
+          "form": "mushroom",
+          "job": "seed"
+        },
+        {
+          "x": 192.0,
+          "y": 16.0,
+          "w": 3.0,
+          "h": 1.0,
+          "kind": "solid",
+          "form": "mushroom",
+          "job": "seed"
+        },
+        {
+          "x": 192.0,
+          "y": 15.0,
+          "w": 3.0,
+          "h": 1.0,
+          "kind": "solid",
+          "form": "mushroom",
+          "job": "seed"
+        }
+      ],
+      "coins": [
+        {
+          "x": 4.0,
+          "y": 17.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 8.0,
+          "y": 17.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 14.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 20.0,
+          "y": 17.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 29.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 35.0,
+          "y": 17.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 46.0,
+          "y": 16.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 55.0,
+          "y": 14.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 61.0,
+          "y": 16.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 70.0,
+          "y": 17.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 80.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 86.0,
+          "y": 17.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 200.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 206.0,
+          "y": 12.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 208.0,
+          "y": 9.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 216.0,
+          "y": 4.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 222.0,
+          "y": 5.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 232.0,
+          "y": 4.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 242.0,
+          "y": 5.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 100.0,
+          "y": 17.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 112.0,
+          "y": 17.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 124.0,
+          "y": 17.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 136.0,
+          "y": 17.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 148.0,
+          "y": 17.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 160.0,
+          "y": 17.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 172.0,
+          "y": 17.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 184.0,
+          "y": 17.0,
+          "w": 0.55,
+          "h": 0.55
+        }
+      ],
+      "birds": [
+        {
+          "x": 22.0,
+          "y": 14.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 48,
+          "hp": 2
+        },
+        {
+          "x": 62.0,
+          "y": 13.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": -50,
+          "hp": 3
+        },
+        {
+          "x": 224.0,
+          "y": 2.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 44,
+          "hp": 2
+        },
+        {
+          "x": 240.0,
+          "y": 2.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": -46,
+          "hp": 2
+        }
+      ],
+      "ammo": [
+        {
+          "x": 3.0,
+          "y": 17.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 16
+        },
+        {
+          "x": 202.0,
+          "y": 15.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 14
+        }
+      ],
+      "seeds": [
+        {
+          "x": 55.0,
+          "y": 13.0,
+          "w": 1.4,
+          "h": 1.4,
+          "kind": "homing"
+        }
+      ],
+      "chaos": {
+        "x": 20.0,
+        "y": 16.7,
+        "w": 0.9,
+        "h": 0.9,
+        "id": "lime",
+        "placed": "authored"
+      }
+    },
+    {
+      "level": 6,
+      "slot": 5,
+      "name": "Vertical Ascent",
+      "blurb": "The tube climbs to a giant bird cage, and the door opens only after the flock is gone.",
+      "w": 26,
+      "h": 72,
+      "theme": "vertical",
+      "spawn": [
+        4,
+        66
+      ],
+      "power": "overload",
+      "chaosId": "violet",
+      "chaosColor": "#a78bfa",
+      "vertical": true,
+      "boss": false,
+      "note": "Narrow tube, 60 tiles of required climb. Decks every 4 tiles, more than a jump. Cage is visible at the top. Door after the flock. Operation 1 has no van part. Three checkpoints.",
+      "acts": [
+        {
+          "id": "lower",
+          "label": "Lower tube",
+          "x0": 0,
+          "x1": 26,
+          "y0": 42,
+          "y1": 72,
+          "note": "Spawn on the floor. Four-tile rises. Checkpoint 1."
+        },
+        {
+          "id": "mid",
+          "label": "Mid tube",
+          "x0": 0,
+          "x1": 26,
+          "y0": 18,
+          "y1": 42,
+          "note": "The climb continues. Checkpoint 2. No spring, no skip."
+        },
+        {
+          "id": "cage",
+          "label": "Cage",
+          "x0": 0,
+          "x1": 26,
+          "y0": 0,
+          "y1": 18,
+          "note": "Checkpoint 3 under the cage. Eight birds. Door opens after the flock. No van part."
+        }
+      ],
+      "event": {
+        "x0": 4,
+        "x1": 22,
+        "label": "cage door"
+      },
+      "markers": [],
+      "plats": [
+        {
+          "x": 0.0,
+          "y": 66.0,
+          "w": 26.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 0.0,
+          "y": 6.0,
+          "w": 1.2,
+          "h": 60.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 23.0,
+          "y": 6.0,
+          "w": 1.2,
+          "h": 60.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 2.0,
+          "y": 62.0,
+          "w": 7.0,
+          "h": 1.1,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 16.0,
+          "y": 58.0,
+          "w": 7.0,
+          "h": 1.1,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 2.0,
+          "y": 54.0,
+          "w": 7.0,
+          "h": 1.1,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 16.0,
+          "y": 50.0,
+          "w": 7.0,
+          "h": 1.1,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 2.0,
+          "y": 46.0,
+          "w": 7.0,
+          "h": 1.1,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 16.0,
+          "y": 42.0,
+          "w": 7.0,
+          "h": 1.1,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 2.0,
+          "y": 38.0,
+          "w": 7.0,
+          "h": 1.1,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 16.0,
+          "y": 34.0,
+          "w": 7.0,
+          "h": 1.1,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 2.0,
+          "y": 30.0,
+          "w": 7.0,
+          "h": 1.1,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 16.0,
+          "y": 26.0,
+          "w": 7.0,
+          "h": 1.1,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 2.0,
+          "y": 22.0,
+          "w": 7.0,
+          "h": 1.1,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 16.0,
+          "y": 18.0,
+          "w": 7.0,
+          "h": 1.1,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 2.0,
+          "y": 14.0,
+          "w": 7.0,
+          "h": 1.1,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 16.0,
+          "y": 10.0,
+          "w": 7.0,
+          "h": 1.1,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 4.0,
+          "y": 48.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp1"
+        },
+        {
+          "x": 18.0,
+          "y": 28.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp2"
+        },
+        {
+          "x": 4.0,
+          "y": 12.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp3"
+        },
+        {
+          "x": 2.0,
+          "y": 6.0,
+          "w": 22.0,
+          "h": 1.1,
+          "kind": "solid",
+          "form": "slab"
+        },
+        {
+          "x": 4.0,
+          "y": 2.0,
+          "w": 1.1,
+          "h": 6.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 20.0,
+          "y": 2.0,
+          "w": 1.1,
+          "h": 6.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 12.0,
+          "y": 2.0,
+          "w": 1.0,
+          "h": 2.25,
+          "kind": "goal",
+          "id": "goal"
+        }
+      ],
+      "coins": [
+        {
+          "x": 4.0,
+          "y": 61.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 18.0,
+          "y": 53.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 4.0,
+          "y": 45.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 18.0,
+          "y": 37.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 4.0,
+          "y": 29.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 18.0,
+          "y": 21.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 4.0,
+          "y": 13.0,
+          "w": 0.55,
+          "h": 0.55
+        }
+      ],
+      "birds": [
+        {
+          "x": 6.0,
+          "y": 2.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 28,
+          "hp": 2
+        },
+        {
+          "x": 8.0,
+          "y": 2.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": -28,
+          "hp": 3
+        },
+        {
+          "x": 10.0,
+          "y": 2.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 28,
+          "hp": 2
+        },
+        {
+          "x": 12.0,
+          "y": 2.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": -28,
+          "hp": 3
+        },
+        {
+          "x": 14.0,
+          "y": 2.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 28,
+          "hp": 2
+        },
+        {
+          "x": 16.0,
+          "y": 2.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": -28,
+          "hp": 3
+        },
+        {
+          "x": 18.0,
+          "y": 2.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 28,
+          "hp": 2
+        },
+        {
+          "x": 20.0,
+          "y": 2.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": -28,
+          "hp": 3
+        }
+      ],
+      "ammo": [
+        {
+          "x": 4.0,
+          "y": 65.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 18
+        }
+      ],
+      "seeds": [
+        {
+          "x": 18.0,
+          "y": 28.6,
+          "w": 1.4,
+          "h": 1.4,
+          "kind": "overload"
+        }
+      ],
+      "chaos": {
+        "x": 4.0,
+        "y": 48.7,
+        "w": 0.9,
+        "h": 0.9,
+        "id": "violet",
+        "placed": "authored"
+      }
+    },
+    {
+      "level": 7,
+      "slot": 6,
+      "name": "Vertical Descent",
+      "blurb": "The cage door dumps you onto a long wall, and two optional cages are worth shooting on the way to the lines.",
+      "w": 32,
+      "h": 96,
+      "theme": "vertical",
+      "spawn": [
+        4,
+        6
+      ],
+      "power": "rapid",
+      "chaosId": "amber",
+      "chaosColor": "#ff9f43",
+      "vertical": true,
+      "boss": false,
+      "note": "Dump is 22 tiles. Wall is 32. Lines are a 28-tile descent through four shock rows. Three checkpoints.",
+      "acts": [
+        {
+          "id": "dump",
+          "label": "Dump",
+          "x0": 0,
+          "x1": 32,
+          "y0": 0,
+          "y1": 30,
+          "note": "Cage door. 22-tile fall onto the wall. Checkpoint 1."
+        },
+        {
+          "id": "wall",
+          "label": "Wall",
+          "x0": 0,
+          "x1": 32,
+          "y0": 30,
+          "y1": 62,
+          "note": "Long descent. Two optional cages, both marked SHOOT."
+        },
+        {
+          "id": "lines",
+          "label": "Lines",
+          "x0": 0,
+          "x1": 32,
+          "y0": 62,
+          "y1": 96,
+          "note": "Four rows of shock lines. Spring is the bail at the bottom."
+        }
+      ],
+      "event": {
+        "x0": 4,
+        "x1": 28,
+        "label": "shock lines"
+      },
+      "markers": [
+        {
+          "x": 25,
+          "y": 31,
+          "kind": "plate",
+          "text": "SHOOT"
+        },
+        {
+          "x": 2,
+          "y": 45,
+          "kind": "plate",
+          "text": "SHOOT"
+        }
+      ],
+      "plats": [
+        {
+          "x": -2.0,
+          "y": 92.0,
+          "w": 36.0,
+          "h": 6.5,
+          "kind": "solid",
+          "form": "panel",
+          "job": "floor"
+        },
+        {
+          "x": 2.0,
+          "y": 6.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 0.0,
+          "y": 6.0,
+          "w": 1.1,
+          "h": 18.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 8.0,
+          "y": 28.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 18.0,
+          "y": 32.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 6.0,
+          "y": 36.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 18.0,
+          "y": 40.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 6.0,
+          "y": 44.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 18.0,
+          "y": 48.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 6.0,
+          "y": 52.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 18.0,
+          "y": 56.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 10.0,
+          "y": 26.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp1"
+        },
+        {
+          "x": 8.0,
+          "y": 42.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp2"
+        },
+        {
+          "x": 8.0,
+          "y": 54.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp3"
+        },
+        {
+          "x": 24.0,
+          "y": 32.0,
+          "w": 1.4,
+          "h": 1.8,
+          "kind": "oneway",
+          "form": "deck",
+          "job": "cheer",
+          "id": "cheer"
+        },
+        {
+          "x": 1.0,
+          "y": 46.0,
+          "w": 1.4,
+          "h": 1.8,
+          "kind": "oneway",
+          "form": "deck",
+          "job": "cheer",
+          "id": "cheer"
+        },
+        {
+          "x": 6.0,
+          "y": 64.0,
+          "w": 4.0,
+          "h": 0.9,
+          "kind": "hazard",
+          "job": "shock"
+        },
+        {
+          "x": 16.0,
+          "y": 64.0,
+          "w": 4.0,
+          "h": 0.9,
+          "kind": "hazard",
+          "job": "shock"
+        },
+        {
+          "x": 24.0,
+          "y": 64.0,
+          "w": 4.0,
+          "h": 0.9,
+          "kind": "hazard",
+          "job": "shock"
+        },
+        {
+          "x": 4.0,
+          "y": 68.0,
+          "w": 4.0,
+          "h": 0.9,
+          "kind": "hazard",
+          "job": "shock"
+        },
+        {
+          "x": 14.0,
+          "y": 68.0,
+          "w": 4.0,
+          "h": 0.9,
+          "kind": "hazard",
+          "job": "shock"
+        },
+        {
+          "x": 22.0,
+          "y": 68.0,
+          "w": 4.0,
+          "h": 0.9,
+          "kind": "hazard",
+          "job": "shock"
+        },
+        {
+          "x": 8.0,
+          "y": 72.0,
+          "w": 4.0,
+          "h": 0.9,
+          "kind": "hazard",
+          "job": "shock"
+        },
+        {
+          "x": 18.0,
+          "y": 72.0,
+          "w": 4.0,
+          "h": 0.9,
+          "kind": "hazard",
+          "job": "shock"
+        },
+        {
+          "x": 6.0,
+          "y": 76.0,
+          "w": 4.0,
+          "h": 0.9,
+          "kind": "hazard",
+          "job": "shock"
+        },
+        {
+          "x": 16.0,
+          "y": 76.0,
+          "w": 4.0,
+          "h": 0.9,
+          "kind": "hazard",
+          "job": "shock"
+        },
+        {
+          "x": 24.0,
+          "y": 76.0,
+          "w": 4.0,
+          "h": 0.9,
+          "kind": "hazard",
+          "job": "shock"
+        },
+        {
+          "x": 10.0,
+          "y": 80.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 12.0,
+          "y": 86.3,
+          "w": 1.4,
+          "h": 0.7,
+          "kind": "spring"
+        },
+        {
+          "x": 20.0,
+          "y": 84.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 24.0,
+          "y": 82.0,
+          "w": 1.0,
+          "h": 2.25,
+          "kind": "goal",
+          "id": "goal"
+        }
+      ],
+      "coins": [
+        {
+          "x": 4.0,
+          "y": 5.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 10.0,
+          "y": 27.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 20.0,
+          "y": 31.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 8.0,
+          "y": 35.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 20.0,
+          "y": 39.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 8.0,
+          "y": 43.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 20.0,
+          "y": 47.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 8.0,
+          "y": 51.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 20.0,
+          "y": 55.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 12.0,
+          "y": 79.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 22.0,
+          "y": 83.0,
+          "w": 0.55,
+          "h": 0.55
+        }
+      ],
+      "birds": [
+        {
+          "x": 12.0,
+          "y": 20.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 40,
+          "hp": 2
+        },
+        {
+          "x": 22.0,
+          "y": 42.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": -44,
+          "hp": 2
+        }
+      ],
+      "ammo": [
+        {
+          "x": 4.0,
+          "y": 5.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 16
+        },
+        {
+          "x": 22.0,
+          "y": 83.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 12
+        }
+      ],
+      "seeds": [
+        {
+          "x": 20.0,
+          "y": 30.6,
+          "w": 1.4,
+          "h": 1.4,
+          "kind": "rapid"
+        }
+      ],
+      "chaos": {
+        "x": 8.0,
+        "y": 34.7,
+        "w": 0.9,
+        "h": 0.9,
+        "id": "amber",
+        "placed": "authored"
+      }
+    },
+    {
+      "level": 8,
+      "slot": 7,
+      "name": "Hardpan",
+      "blurb": "The power lines bounce under your feet, and a missed jump will shock you before the wall at the end.",
+      "w": 248,
+      "h": 24,
+      "theme": "storm",
+      "spawn": [
+        2,
+        14
+      ],
+      "power": "zapper",
+      "chaosId": "chartreuse",
+      "chaosColor": "#c6ff3a",
+      "vertical": false,
+      "boss": false,
+      "note": "Approach first. Bounce field is eight springs over eight shocks. The wall is the end, not the start. Three checkpoints.",
+      "acts": [
+        {
+          "id": "approach",
+          "label": "Approach",
+          "x0": 0,
+          "x1": 80,
+          "note": "A run before the lines. Checkpoints 1 and 2."
+        },
+        {
+          "id": "bounce",
+          "label": "Bounce",
+          "x0": 80,
+          "x1": 186,
+          "note": "Eight springs. A shock under each. Miss and you eat the line."
+        },
+        {
+          "id": "wall",
+          "label": "Wall",
+          "x0": 186,
+          "x1": 248,
+          "note": "Checkpoint 3, then the wall, then the door."
+        }
+      ],
+      "event": {
+        "x0": 80,
+        "x1": 176,
+        "label": "shock bounce"
+      },
+      "markers": [],
+      "plats": [
+        {
+          "x": -2.0,
+          "y": 20.0,
+          "w": 252.0,
+          "h": 6.5,
+          "kind": "solid",
+          "form": "slab",
+          "job": "floor"
+        },
+        {
+          "x": 0.0,
+          "y": 14.0,
+          "w": 10.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 12.0,
+          "y": 12.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 18.0,
+          "y": 14.0,
+          "w": 7.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 27.0,
+          "y": 12.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 33.0,
+          "y": 14.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 38.0,
+          "y": 12.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp1"
+        },
+        {
+          "x": 44.0,
+          "y": 13.0,
+          "w": 7.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 53.0,
+          "y": 11.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 59.0,
+          "y": 13.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 69.0,
+          "y": 14.0,
+          "w": 10.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 74.0,
+          "y": 12.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp2"
+        },
+        {
+          "x": 82.0,
+          "y": 13.3,
+          "w": 1.4,
+          "h": 0.7,
+          "kind": "spring"
+        },
+        {
+          "x": 81.0,
+          "y": 16.0,
+          "w": 4.0,
+          "h": 0.9,
+          "kind": "hazard",
+          "job": "shock"
+        },
+        {
+          "x": 94.0,
+          "y": 13.3,
+          "w": 1.4,
+          "h": 0.7,
+          "kind": "spring"
+        },
+        {
+          "x": 93.0,
+          "y": 16.0,
+          "w": 4.0,
+          "h": 0.9,
+          "kind": "hazard",
+          "job": "shock"
+        },
+        {
+          "x": 106.0,
+          "y": 13.3,
+          "w": 1.4,
+          "h": 0.7,
+          "kind": "spring"
+        },
+        {
+          "x": 105.0,
+          "y": 16.0,
+          "w": 4.0,
+          "h": 0.9,
+          "kind": "hazard",
+          "job": "shock"
+        },
+        {
+          "x": 118.0,
+          "y": 13.3,
+          "w": 1.4,
+          "h": 0.7,
+          "kind": "spring"
+        },
+        {
+          "x": 117.0,
+          "y": 16.0,
+          "w": 4.0,
+          "h": 0.9,
+          "kind": "hazard",
+          "job": "shock"
+        },
+        {
+          "x": 130.0,
+          "y": 13.3,
+          "w": 1.4,
+          "h": 0.7,
+          "kind": "spring"
+        },
+        {
+          "x": 129.0,
+          "y": 16.0,
+          "w": 4.0,
+          "h": 0.9,
+          "kind": "hazard",
+          "job": "shock"
+        },
+        {
+          "x": 142.0,
+          "y": 13.3,
+          "w": 1.4,
+          "h": 0.7,
+          "kind": "spring"
+        },
+        {
+          "x": 141.0,
+          "y": 16.0,
+          "w": 4.0,
+          "h": 0.9,
+          "kind": "hazard",
+          "job": "shock"
+        },
+        {
+          "x": 154.0,
+          "y": 13.3,
+          "w": 1.4,
+          "h": 0.7,
+          "kind": "spring"
+        },
+        {
+          "x": 153.0,
+          "y": 16.0,
+          "w": 4.0,
+          "h": 0.9,
+          "kind": "hazard",
+          "job": "shock"
+        },
+        {
+          "x": 166.0,
+          "y": 13.3,
+          "w": 1.4,
+          "h": 0.7,
+          "kind": "spring"
+        },
+        {
+          "x": 165.0,
+          "y": 16.0,
+          "w": 4.0,
+          "h": 0.9,
+          "kind": "hazard",
+          "job": "shock"
+        },
+        {
+          "x": 178.0,
+          "y": 14.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 182.0,
+          "y": 12.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp3"
+        },
+        {
+          "x": 192.0,
+          "y": 10.0,
+          "w": 3.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 192.0,
+          "y": 14.0,
+          "w": 3.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 198.0,
+          "y": 12.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 204.0,
+          "y": 14.0,
+          "w": 8.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 214.0,
+          "y": 14.0,
+          "w": 16.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 224.0,
+          "y": 12.0,
+          "w": 1.0,
+          "h": 2.25,
+          "kind": "goal",
+          "id": "goal"
+        }
+      ],
+      "coins": [
+        {
+          "x": 4.0,
+          "y": 13.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 8.0,
+          "y": 13.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 14.0,
+          "y": 11.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 20.0,
+          "y": 13.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 29.0,
+          "y": 11.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 35.0,
+          "y": 13.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 46.0,
+          "y": 12.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 55.0,
+          "y": 10.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 61.0,
+          "y": 12.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 71.0,
+          "y": 13.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 84.0,
+          "y": 12.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 96.0,
+          "y": 12.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 108.0,
+          "y": 12.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 120.0,
+          "y": 12.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 132.0,
+          "y": 12.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 144.0,
+          "y": 12.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 156.0,
+          "y": 12.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 168.0,
+          "y": 12.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 180.0,
+          "y": 13.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 200.0,
+          "y": 11.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 208.0,
+          "y": 13.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 218.0,
+          "y": 13.0,
+          "w": 0.55,
+          "h": 0.55
+        }
+      ],
+      "birds": [
+        {
+          "x": 22.0,
+          "y": 10.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 46,
+          "hp": 2
+        },
+        {
+          "x": 62.0,
+          "y": 9.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": -50,
+          "hp": 2
+        },
+        {
+          "x": 206.0,
+          "y": 10.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 44,
+          "hp": 2
+        }
+      ],
+      "ammo": [
+        {
+          "x": 3.0,
+          "y": 13.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 16
+        },
+        {
+          "x": 180.0,
+          "y": 13.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 14
+        }
+      ],
+      "seeds": [
+        {
+          "x": 29.0,
+          "y": 10.0,
+          "w": 1.4,
+          "h": 1.4,
+          "kind": "zapper"
+        }
+      ],
+      "chaos": {
+        "x": 20.0,
+        "y": 12.7,
+        "w": 0.9,
+        "h": 0.9,
+        "id": "chartreuse",
+        "placed": "authored"
+      }
+    },
+    {
+      "level": 9,
+      "slot": 8,
+      "name": "Mafia Approach",
+      "blurb": "The plateau does not show an end, the seed is early, and the portal is Don Corvone arriving.",
+      "w": 520,
+      "h": 22,
+      "theme": "hq",
+      "spawn": [
+        2,
+        16
+      ],
+      "power": "slowmo",
+      "chaosId": "fuchsia",
+      "chaosColor": "#ff4fd8",
+      "vertical": false,
+      "boss": false,
+      "note": "Extra long plateau. 520 tiles, past the minute. Seed is early. Don arrives at the far end and does not fight here. Three checkpoints.",
+      "acts": [
+        {
+          "id": "early",
+          "label": "Early",
+          "x0": 0,
+          "x1": 80,
+          "note": "Seed and chaos are here. Checkpoint 1. The end is not in frame."
+        },
+        {
+          "id": "plateau",
+          "label": "Plateau",
+          "x0": 80,
+          "x1": 420,
+          "note": "One long mesa. Birds. Checkpoint 2. Still no end."
+        },
+        {
+          "id": "don",
+          "label": "Don",
+          "x0": 420,
+          "x1": 520,
+          "note": "Checkpoint 3, then Don Corvone arrives. He does not fight. He opens Level 10."
+        }
+      ],
+      "event": {
+        "x0": 496,
+        "x1": 508,
+        "label": "Don arrives"
+      },
+      "markers": [],
+      "plats": [
+        {
+          "x": 0.0,
+          "y": 16.0,
+          "w": 520.0,
+          "h": 2.3,
+          "kind": "solid",
+          "form": "mesa"
+        },
+        {
+          "x": 40.0,
+          "y": 14.0,
+          "w": 6.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 120.0,
+          "y": 14.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 210.0,
+          "y": 13.0,
+          "w": 6.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 300.0,
+          "y": 14.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 390.0,
+          "y": 14.0,
+          "w": 6.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 460.0,
+          "y": 13.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 36.0,
+          "y": 14.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp1"
+        },
+        {
+          "x": 200.0,
+          "y": 14.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp2"
+        },
+        {
+          "x": 430.0,
+          "y": 14.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp3"
+        },
+        {
+          "x": 500.0,
+          "y": 14.0,
+          "w": 1.0,
+          "h": 2.25,
+          "kind": "goal",
+          "job": "don",
+          "id": "don"
+        }
+      ],
+      "coins": [
+        {
+          "x": 8.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 24.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 60.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 100.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 150.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 190.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 240.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 280.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 330.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 370.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 410.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 450.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 490.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        }
+      ],
+      "birds": [
+        {
+          "x": 80.0,
+          "y": 12.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 50,
+          "hp": 3
+        },
+        {
+          "x": 180.0,
+          "y": 12.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": -55,
+          "hp": 3
+        },
+        {
+          "x": 270.0,
+          "y": 12.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 48,
+          "hp": 2
+        },
+        {
+          "x": 360.0,
+          "y": 12.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": -50,
+          "hp": 3
+        },
+        {
+          "x": 450.0,
+          "y": 12.0,
+          "w": 1.2,
+          "h": 0.9,
+          "vx": 46,
+          "hp": 2
+        }
+      ],
+      "ammo": [
+        {
+          "x": 6.0,
+          "y": 15.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 16
+        },
+        {
+          "x": 220.0,
+          "y": 15.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 14
+        },
+        {
+          "x": 440.0,
+          "y": 15.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 14
+        }
+      ],
+      "seeds": [
+        {
+          "x": 18.0,
+          "y": 14.0,
+          "w": 1.4,
+          "h": 1.4,
+          "kind": "slowmo"
+        }
+      ],
+      "chaos": {
+        "x": 10.0,
+        "y": 14.7,
+        "w": 0.9,
+        "h": 0.9,
+        "id": "fuchsia",
+        "placed": "authored"
+      }
+    },
+    {
+      "level": 10,
+      "slot": 9,
+      "name": "Don Corvone",
+      "blurb": "Kingpin has Honey Bun AI \u2014 three phases. Extract him.",
+      "w": 108,
+      "h": 26,
+      "theme": "boss",
+      "spawn": [
+        3,
+        20
+      ],
+      "power": "neon",
+      "chaosId": "fuchsia",
+      "chaosColor": "#ff4fd8",
+      "vertical": false,
+      "boss": true,
+      "note": "Boss arena, not a runway. Three phases, three checkpoints. After the extract: Sorry, your Honey Bun is in another canyon. The 10th Neon Chaos Seed can spawn here if all 9 were taken.",
+      "acts": [
+        {
+          "id": "floor",
+          "label": "Phase 1",
+          "x0": 0,
+          "x1": 36,
+          "note": "The floor. Springs on the sides. Don is on the perch. Checkpoint 1."
+        },
+        {
+          "id": "tiers",
+          "label": "Phase 2",
+          "x0": 36,
+          "x1": 72,
+          "note": "He goes up. Tiers and moving decks. Checkpoint 2."
+        },
+        {
+          "id": "extract",
+          "label": "Phase 3",
+          "x0": 72,
+          "x1": 108,
+          "note": "Pillars close. Checkpoint 3. Extract him. He does not fight on the plateau."
+        }
+      ],
+      "event": {
+        "x0": 86,
+        "x1": 96,
+        "label": "extract"
+      },
+      "markers": [
+        {
+          "x": 30,
+          "y": 14,
+          "kind": "boss",
+          "text": "DON"
+        },
+        {
+          "x": 58,
+          "y": 9,
+          "kind": "boss",
+          "text": "DON"
+        },
+        {
+          "x": 88,
+          "y": 10,
+          "kind": "boss",
+          "text": "EXTRACT"
+        }
+      ],
+      "plats": [
+        {
+          "x": 0.0,
+          "y": 20.0,
+          "w": 108.0,
+          "h": 3.0,
+          "kind": "solid",
+          "form": "hex",
+          "job": "floor"
+        },
+        {
+          "x": 6.0,
+          "y": 16.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 16.0,
+          "y": 14.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 4.0,
+          "y": 19.3,
+          "w": 1.4,
+          "h": 0.7,
+          "kind": "spring"
+        },
+        {
+          "x": 28.0,
+          "y": 19.3,
+          "w": 1.4,
+          "h": 0.7,
+          "kind": "spring"
+        },
+        {
+          "x": 24.0,
+          "y": 15.0,
+          "w": 6.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 4.0,
+          "y": 18.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp1"
+        },
+        {
+          "x": 40.0,
+          "y": 16.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 48.0,
+          "y": 13.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 56.0,
+          "y": 10.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 44.0,
+          "y": 12.0,
+          "w": 3.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck",
+          "job": "moving"
+        },
+        {
+          "x": 52.0,
+          "y": 9.0,
+          "w": 3.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck",
+          "job": "moving"
+        },
+        {
+          "x": 38.0,
+          "y": 19.3,
+          "w": 1.4,
+          "h": 0.7,
+          "kind": "spring"
+        },
+        {
+          "x": 42.0,
+          "y": 14.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp2"
+        },
+        {
+          "x": 74.0,
+          "y": 8.0,
+          "w": 1.2,
+          "h": 12.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 96.0,
+          "y": 8.0,
+          "w": 1.2,
+          "h": 12.0,
+          "kind": "solid",
+          "form": "pillar"
+        },
+        {
+          "x": 78.0,
+          "y": 14.0,
+          "w": 4.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 86.0,
+          "y": 11.0,
+          "w": 5.0,
+          "h": 0.7,
+          "kind": "oneway",
+          "form": "deck"
+        },
+        {
+          "x": 80.0,
+          "y": 19.3,
+          "w": 1.4,
+          "h": 0.7,
+          "kind": "spring"
+        },
+        {
+          "x": 76.0,
+          "y": 12.5,
+          "w": 0.7,
+          "h": 1.75,
+          "kind": "checkpoint",
+          "id": "cp3"
+        },
+        {
+          "x": 90.0,
+          "y": 9.0,
+          "w": 1.0,
+          "h": 2.25,
+          "kind": "goal",
+          "job": "extract",
+          "id": "extract"
+        }
+      ],
+      "coins": [
+        {
+          "x": 8.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 18.0,
+          "y": 13.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 26.0,
+          "y": 14.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 42.0,
+          "y": 15.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 50.0,
+          "y": 12.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 58.0,
+          "y": 9.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 80.0,
+          "y": 13.0,
+          "w": 0.55,
+          "h": 0.55
+        },
+        {
+          "x": 88.0,
+          "y": 10.0,
+          "w": 0.55,
+          "h": 0.55
+        }
+      ],
+      "birds": [],
+      "ammo": [
+        {
+          "x": 6.0,
+          "y": 19.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 20
+        },
+        {
+          "x": 40.0,
+          "y": 19.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 18
+        },
+        {
+          "x": 82.0,
+          "y": 19.0,
+          "w": 0.7,
+          "h": 0.7,
+          "amount": 20
+        }
+      ],
+      "seeds": [
+        {
+          "x": 56.0,
+          "y": 8.0,
+          "w": 1.4,
+          "h": 1.4,
+          "kind": "neon"
+        }
+      ],
+      "chaos": {
+        "x": 26.0,
+        "y": 13.7,
+        "w": 0.9,
+        "h": 0.9,
+        "id": "fuchsia",
+        "placed": "authored"
+      }
+    }
+  ]
+}

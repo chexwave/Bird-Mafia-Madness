@@ -48,7 +48,7 @@ export type Platform = Rect & {
   /** Seconds of standing before this floor drops. */
   crumble?: number;
   /** Shot bridge, shot cheer cage, crumbling dune, seed block, shock line, Don portal. */
-  job?: "crumble" | "bridge" | "bridge-go" | "cheer" | "seed" | "shock" | "don";
+  job?: "crumble" | "bridge" | "bridge-go" | "cheer" | "seed" | "shock" | "don" | "drop" | "shoot" | "extract" | "moving";
   timer?: number;
   gone?: boolean;
 };

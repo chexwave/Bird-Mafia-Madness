@@ -13,7 +13,9 @@ import {
   SLOT_SEEDS,
   loadSave,
   bossArmed,
+  hasLevelChaos,
   opUnlocked,
+  seedForLevel,
   totalChaos,
   type ChaosId,
   type PowerKind,
@@ -663,9 +665,17 @@ function HudFlag({ on }: { on: boolean }) {
   );
 }
 
-function HudDiamond({ color, filled }: { color: string; filled: boolean }) {
+function HudDiamond({
+  color,
+  filled,
+  size = 13,
+}: {
+  color: string;
+  filled: boolean;
+  size?: number;
+}) {
   return (
-    <svg width="13" height="13" viewBox="0 0 13 13" aria-hidden className="hud-diamond mx-0.5">
+    <svg width={size} height={size} viewBox="0 0 13 13" aria-hidden className="hud-diamond mx-0.5">
       <path
         d="M6.5 1.2 L11.6 6.5 L6.5 11.8 L1.4 6.5 Z"
         fill={filled ? color : "none"}
@@ -1068,6 +1078,9 @@ function LevelSelect({
       <div className="mb-4 flex max-h-[38vh] w-full flex-col gap-1.5 overflow-y-auto pr-1">
         {levels.map((L, i) => {
           const idx = start + i;
+          const seedId = seedForLevel(L.id);
+          const seedGot = hasLevelChaos(save, L.id);
+          const seedCol = CHAOS_META[seedId].color;
           return (
             <button
               key={L.id}
@@ -1079,19 +1092,29 @@ function LevelSelect({
                   : "border-border bg-surface"
               }`}
             >
-              <div className="font-bold">
-                {L.id}. {L.name}
-                {L.boss ? (
-                  <span className="ml-2 rounded bg-primary/30 px-1.5 py-0.5 text-[10px] text-primary">
-                    {L.operation === 10 || bossArmed(save, L.operation ?? 1) ? "BOSS" : "CAGE FIRST"}
-                  </span>
-                ) : L.introPower ? (
-                  <span className="ml-2 text-[10px] text-accent">
-                    {POWER_META[L.introPower].short}
-                  </span>
-                ) : null}
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="font-bold">
+                    {L.id}. {L.name}
+                    {L.boss ? (
+                      <span className="ml-2 rounded bg-primary/30 px-1.5 py-0.5 text-[10px] text-primary">
+                        {L.operation === 10 || bossArmed(save, L.operation ?? 1) ? "BOSS" : "CAGE FIRST"}
+                      </span>
+                    ) : L.introPower ? (
+                      <span className="ml-2 text-[10px] text-accent">
+                        {POWER_META[L.introPower].short}
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="text-xs text-muted">{L.subtitle}</p>
+                </div>
+                <span
+                  title={`${CHAOS_META[seedId].name} seed ${seedGot ? "taken" : "still out"}`}
+                  className="mt-0.5 shrink-0"
+                >
+                  <HudDiamond color={seedCol} filled={seedGot} size={16} />
+                </span>
               </div>
-              <p className="text-xs text-muted">{L.subtitle}</p>
             </button>
           );
         })}

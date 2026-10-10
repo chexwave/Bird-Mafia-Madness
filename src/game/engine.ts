@@ -1009,6 +1009,13 @@ export class GameEngine {
 
   private placeChaosGem() {
     const L = this.level;
+    if (L.id === 10) {
+      const ready = [1, 2, 3, 4, 5, 6, 7, 8, 9].every((id) => hasLevelChaos(this.save, id));
+      if (!ready) {
+        this.chaosGem = null;
+        return;
+      }
+    }
     const id = L.chaosId ?? seedForLevel(L.id);
     const already = hasLevelChaos(this.save, L.id);
     const baked = L.chaosGem;
@@ -1074,6 +1081,7 @@ export class GameEngine {
     const box = this.playerBox();
     for (const p of this.platforms) {
       if (p.gone) continue;
+      if (p.job === "shoot") continue;
       if (p.kind === "hazard" || p.kind === "checkpoint" || p.kind === "goal") continue;
       if (p.kind === "oneway" || p.kind === "spring" || p.kind === "conveyor") continue;
       if (p.h >= 180) continue; // sealed floor is a walk plane, not a wall
@@ -1094,6 +1102,7 @@ export class GameEngine {
     const box = this.playerBox();
     for (const p of this.platforms) {
       if (p.gone) continue;
+      if (p.job === "shoot") continue;
       if (p.kind === "checkpoint" || p.kind === "goal") continue;
 
       if (p.kind === "hazard") {
@@ -1566,7 +1575,7 @@ export class GameEngine {
     if (p.job === "bridge") {
       p.job = "bridge-go";
       p.kind = "conveyor";
-      p.vx = 860;
+      p.vx = 980;
       p.timer = 0;
       gameAudio.play("hit", { volume: 0.6, rate: 0.7 });
     }
@@ -1576,7 +1585,7 @@ export class GameEngine {
     for (const p of this.platforms) {
       if (p.job !== "bridge-go" || p.gone) continue;
       p.timer = (p.timer ?? 0) + dt;
-      if ((p.timer ?? 0) > 0.85) p.gone = true;
+      if ((p.timer ?? 0) > 1.05) p.gone = true;
     }
   }
 
@@ -3524,6 +3533,10 @@ export class GameEngine {
       this.drawShotBridge(ctx, p);
       return;
     }
+    if (p.job === "shoot") {
+      this.drawShootPlate(ctx, p);
+      return;
+    }
     if (p.kind === "checkpoint") {
       const on = !!p.active;
       const col = on ? "#39ff9a" : "#c77dff";
@@ -3561,6 +3574,10 @@ export class GameEngine {
         this.drawDonPortal(ctx, p);
         return;
       }
+      if (p.job === "drop") {
+        this.drawDropShaft(ctx, p);
+        return;
+      }
       const on = p.active !== false;
       const gPulse = 0.7 + Math.sin(this.time * 4) * 0.3;
       const cx = p.x + p.w / 2;
@@ -3588,6 +3605,14 @@ export class GameEngine {
       ctx.globalAlpha = on ? 0.2 * gPulse : 0.08;
       ctx.fillRect(cx - 2, p.y - 36, 4, 36);
       ctx.restore();
+      if (p.job === "extract") {
+        ctx.save();
+        ctx.fillStyle = on ? "#ffcc33" : "#7a4aa0";
+        ctx.font = "bold 11px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("EXTRACT", cx, p.y - 8);
+        ctx.restore();
+      }
       if (this.level.horde) this.drawCageBars(ctx, p.x - 16, p.y - 20, p.w + 36, p.h + 28, on);
       return;
     }
@@ -3657,6 +3682,37 @@ export class GameEngine {
       return;
     }
     this.drawRockLedge(ctx, p);
+  }
+
+  private drawShootPlate(ctx: CanvasRenderingContext2D, p: Platform) {
+    ctx.save();
+    ctx.fillStyle = "#071820";
+    ctx.strokeStyle = "#00f0ff";
+    ctx.lineWidth = 2;
+    ctx.shadowColor = "#00f0ff";
+    ctx.shadowBlur = 12;
+    ctx.fillRect(p.x, p.y, p.w, p.h);
+    ctx.strokeRect(p.x, p.y, p.w, p.h);
+    ctx.fillStyle = "#00f0ff";
+    ctx.font = "bold 12px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("SHOOT", p.x + p.w * 0.5, p.y + p.h * 0.7);
+    ctx.restore();
+  }
+
+  private drawDropShaft(ctx: CanvasRenderingContext2D, p: Platform) {
+    ctx.save();
+    const g = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h + 40);
+    g.addColorStop(0, "rgba(0,0,0,0.15)");
+    g.addColorStop(1, "rgba(0,240,255,0.35)");
+    ctx.fillStyle = g;
+    ctx.fillRect(p.x, p.y, p.w, p.h);
+    ctx.strokeStyle = "#ff2bd6";
+    ctx.lineWidth = 2;
+    ctx.shadowColor = "#ff2bd6";
+    ctx.shadowBlur = 10;
+    ctx.strokeRect(p.x, p.y, p.w, p.h);
+    ctx.restore();
   }
 
   private drawCageBars(
