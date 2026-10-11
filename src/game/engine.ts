@@ -418,9 +418,9 @@ export class GameEngine {
     } catch {
       /* keep procedural-only */
     }
-    for (let i = 1; i <= 9; i++) {
+    for (let i = 1; i <= 10; i++) {
       try {
-        this.imgs[`bgL${i}`] = await loadImage(`/sprites/bg/l${i}-far.jpg?v=sky1`);
+        this.imgs[`bgL${i}`] = await loadImage(`/sprites/bg/l${i}-far.jpg?v=theme1`);
       } catch {
         /* plate optional */
       }
@@ -2910,7 +2910,10 @@ export class GameEngine {
     const pal = this.themePalette();
     const t = this.time;
     const slot = Math.max(0, ((this.level?.id ?? 1) - 1) % 10);
-    const slotPlate = slot >= 0 && slot < 9 ? this.imgs[`bgL${slot + 1}`] : undefined;
+    const op = this.level?.operation ?? 1;
+    const op1Boss = op === 1 && (slot === 9 || this.level?.theme === "boss");
+    const slotPlate = slot < 9 ? this.imgs[`bgL${slot + 1}`] : op1Boss ? this.imgs.bgL10 : undefined;
+    const sealedCave = this.level?.id === 2;
     const dunes = (this.level?.theme ?? "dunes") === "dunes";
 
     // Layer 0 — sky gradient
@@ -2924,7 +2927,7 @@ export class GameEngine {
     ctx.fillRect(0, 0, w, h);
 
     // Layer 1 — stars
-    if (pal.stars) {
+    if (pal.stars && !slotPlate) {
       ctx.fillStyle = "#ffffff";
       for (let i = 0; i < 90; i++) {
         const sx = ((i * 97 - camX * 0.04 + t * 2) % (w + 40) + w + 40) % (w + 40) - 20;
@@ -2936,7 +2939,7 @@ export class GameEngine {
     }
 
     // Layer 2 — clouds
-    if (pal.clouds) {
+    if (pal.clouds && !slotPlate) {
       for (let i = 0; i < 7; i++) {
         const cx = ((i * 210 - camX * 0.07 + t * 10) % (w + 220) + w + 220) % (w + 220) - 110;
         const cy = 50 + (i % 3) * 36 + Math.sin(t * 0.35 + i) * 7 - camY * 0.03;
@@ -2950,14 +2953,24 @@ export class GameEngine {
       }
     }
 
-    // Layer 3 — one sun + soft corona, in the sky gradient only
-    this.drawSkySun(ctx, camX, camY, pal);
+    // Theme plates already carry their sky. A second sun reads as a zipper.
+    if (!slotPlate) this.drawSkySun(ctx, camX, camY, pal);
 
-    // Layer 4 — far plate. Crop past the painted sun. Overlap the sky and melt 14px.
+    // Layer 4 — far plate. New theme plates have no baked sun, so keep the room.
     if (slotPlate) {
-      const farY = h * 0.22 - 16;
-      this.drawParallaxPlate(ctx, slotPlate, camX * 0.08, camY * 0.02, farY, 0.9, 0.64);
-      this.blendSkyJoin(ctx, farY, pal);
+      const farY = sealedCave ? 0 : h * 0.12;
+      this.drawParallaxPlate(
+        ctx,
+        slotPlate,
+        camX * 0.08,
+        camY * 0.02,
+        farY,
+        0.92,
+        sealedCave ? 0 : 0.04,
+        sealedCave ? 0.96 : 0.8,
+        sealedCave ? 0 : 16,
+      );
+      if (!sealedCave) this.blendSkyJoin(ctx, farY, pal);
     } else if (dunes && this.imgs.bgFar) {
       const farY = h * 0.28 - 16;
       this.drawParallaxPlate(ctx, this.imgs.bgFar, camX * 0.08, camY * 0.02, farY, 0.8, 0.64);
@@ -2976,8 +2989,8 @@ export class GameEngine {
     ctx.fillRect(0, h * 0.36, w, h * 0.4);
 
     // Layer 5 — mid art plate / mesas
-    // Mid plate only on L1 so later stages don't reuse the same desert photo
-    if (slot === 0 && this.imgs.bgMid) {
+    // Mid plate only when a level has no theme plate, so the new rooms stay visible
+    if (slot === 0 && this.imgs.bgMid && !slotPlate) {
       this.drawParallaxPlate(ctx, this.imgs.bgMid, camX * 0.22, camY * 0.04, h * 0.34, 0.75, 0.22);
     } else {
       this.drawMesaLayer(ctx, camX * 0.26, h * 0.56, pal.mid, 1.05, 0.72, true, pal.neon);
@@ -3088,13 +3101,16 @@ export class GameEngine {
     alpha: number,
     /** Crop top fraction of source image (sky) so procedural sky/sun stay clean */
     srcTopCrop = 0.25,
+    /** How much of the view the plate fills */
+    drawFrac = 0.58,
+    meltPx = 16,
   ) {
     const w = VIEW_W;
     const h = VIEW_H;
     const srcY = img.height * srcTopCrop;
     const srcH = img.height * (1 - srcTopCrop);
     const aspect = img.width / Math.max(1, srcH);
-    const drawH = h * 0.58;
+    const drawH = h * drawFrac;
     const drawW = drawH * aspect;
     const x = -((scrollX % drawW) + drawW) % drawW;
     if (!this.plateBuf) this.plateBuf = document.createElement("canvas");
@@ -3114,12 +3130,14 @@ export class GameEngine {
     // Fade only the plate, so the sky gradient shows through. No stroke, no color band.
     b.save();
     b.globalCompositeOperation = "destination-out";
-    const melt = b.createLinearGradient(0, drawY, 0, drawY + 16);
-    melt.addColorStop(0, "rgba(0,0,0,1)");
-    melt.addColorStop(0.55, "rgba(0,0,0,0.45)");
-    melt.addColorStop(1, "rgba(0,0,0,0)");
-    b.fillStyle = melt;
-    b.fillRect(0, drawY, w, 16);
+    if (meltPx > 0) {
+      const melt = b.createLinearGradient(0, drawY, 0, drawY + meltPx);
+      melt.addColorStop(0, "rgba(0,0,0,1)");
+      melt.addColorStop(0.55, "rgba(0,0,0,0.45)");
+      melt.addColorStop(1, "rgba(0,0,0,0)");
+      b.fillStyle = melt;
+      b.fillRect(0, drawY, w, meltPx);
+    }
     b.restore();
     const fade = b.createLinearGradient(0, drawY + drawH * 0.5, 0, drawY + drawH);
     fade.addColorStop(0, "rgba(10,4,18,0)");

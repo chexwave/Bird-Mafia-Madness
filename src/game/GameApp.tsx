@@ -1157,8 +1157,45 @@ function MissionBrief({
   onGo: () => void;
 }) {
   const m = missionFor(level);
+  const plate =
+    level.operation === 1 && level.id >= 1 && level.id <= 10
+      ? `/sprites/enter/enter-l${level.id}.jpg?v=enter1`
+      : null;
+  const [ready, setReady] = useState(!plate);
+  useEffect(() => {
+    if (!plate) {
+      setReady(true);
+      return;
+    }
+    setReady(false);
+    const t = window.setTimeout(() => setReady(true), 1500);
+    return () => window.clearTimeout(t);
+  }, [plate]);
+  if (plate && !ready) {
+    return (
+      <button
+        type="button"
+        className="enter-sting"
+        onClick={() => setReady(true)}
+        aria-label="Continue"
+      >
+        <img src={plate} alt="" />
+        <div className="sting-load">
+          <p className="sting-load-label">Loading</p>
+          <div className="sting-load-track">
+            <div className="enter-load-bar" key={plate} />
+          </div>
+        </div>
+      </button>
+    );
+  }
   return (
     <div className="w-full max-w-md rounded-2xl border border-accent/40 bg-surface p-5 text-left shadow-[0_0_40px_#00f0ff33]">
+      {plate && (
+        <div className="enter-plate mb-3">
+          <img src={plate} alt="" />
+        </div>
+      )}
       <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
         {m.epic ? "Epic Boss" : m.boss ? "Handler Fight" : "Canyon Drop"} · Op {level.operation ?? 1}
       </p>
