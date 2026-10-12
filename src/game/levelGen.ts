@@ -1906,11 +1906,17 @@ function pickChaosSpot(
 }
 
 function withChaosGem(L: LevelDef): LevelDef {
-  if (L.chaosGem) {
-    L.chaosId = L.chaosGem.id;
+  const slot = (L.id - 1) % 10;
+  if (slot >= 9 || L.boss) {
+    L.chaosId = undefined;
     return L;
   }
   const id = seedForLevel(L.id);
+  if (L.chaosGem) {
+    L.chaosGem.id = id;
+    L.chaosId = id;
+    return L;
+  }
   const avoid = L.seeds?.[0];
   const spot = pickChaosSpot(L.platforms, L.width, avoid);
   L.chaosId = id;

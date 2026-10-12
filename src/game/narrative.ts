@@ -4,6 +4,7 @@
  * Op 1 path lock 2026-10-01: chase exits, full sentences, van-part cycle.
  */
 import { CHAOS_META, OPERATIONS, POWER_META, type ChaosId, type PowerKind } from "./progression";
+import { hexNick } from "./deployCards";
 import type { LevelDef } from "./types";
 
 export type Voice =
@@ -317,7 +318,7 @@ export function objectiveFor(level: LevelDef): string {
   if (level.epic) return "Beat Argentavis magnificens. The keys on the plateau are the wrong keys. The van does not leave.";
   if (level.horde) return CAGE_CLEAR;
   if (level.boss) {
-    return `Defeat ${level.bossName ?? "the handler"}. Take the chaos seed. Do not expect a clean rescue.`;
+    return `Defeat ${level.bossName ?? "the handler"}. The Neon Chaos Seed appears only if this operation's nine Hex Seeds are already taken.`;
   }
   const hunt = level.introPower ? POWER_META[level.introPower].name : "the power gift";
   return `Collect the ${hunt}. Reach the exit this room throws you through. Survive the flock he pointed you at.`;
@@ -373,12 +374,25 @@ export function chaosBeat(id: ChaosId, epic: boolean): Beat {
   if (epic) {
     return {
       who: "HONEY BUN",
-      text: `${CHAOS_META[id].name} chaos seed is locked. Thank you for coming. The keys on the plateau are not ours.`,
+      text: `${CHAOS_META[id].name}, ${hexNick(id)}, is locked. Thank you for coming. The keys on the plateau are not ours.`,
     };
   }
   return {
     who: "HONEY BUN",
-    text: `${CHAOS_META[id].name} chaos seed is locked. The next signal is ready, and so is the next missing part.`,
+    text: `${CHAOS_META[id].name}, ${hexNick(id)}, is locked. The next signal is ready, and so is the next missing part.`,
+  };
+}
+
+export function neonBeat(on: boolean): Beat {
+  if (on) {
+    return {
+      who: "HONEY BUN",
+      text: "Neon Chaos Seed is live. Every Hex buff scales with this operation, and it fades when the fight ends.",
+    };
+  }
+  return {
+    who: "GROK-9",
+    text: "Neon Chaos Seed burned out. The Hex stacks stay. The van does not.",
   };
 }
 
@@ -388,7 +402,7 @@ export function winCopy(level: LevelDef, lastChaos?: ChaosId): { title: string; 
     return {
       title: "Wrong Keys",
       body: `Argentavis goes down screaming. The keys do not fit. Goblin had the real ones. The wheels and lug nuts were already gone. ${
-        lastChaos ? CHAOS_META[lastChaos].name + " seed taken. " : ""
+        lastChaos ? CHAOS_META[lastChaos].name + " taken. " : ""
       }The van does not leave. The question stays open.`,
     };
   }
@@ -400,7 +414,7 @@ export function winCopy(level: LevelDef, lastChaos?: ChaosId): { title: string; 
     const sting = vanSting(op.id).map((b) => `${b.who}: “${b.text}”`).join(" ");
     return {
       title: `${level.bossName ?? op.boss} Down`,
-      body: `${lastChaos ? CHAOS_META[lastChaos].name + " chaos seed locked in. " : ""}${laugh} ${sting}`,
+      body: `${lastChaos ? CHAOS_META[lastChaos].name + " locked in. " : ""}${laugh} ${sting}`,
     };
   }
   if (level.horde) {

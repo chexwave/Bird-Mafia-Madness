@@ -2,6 +2,13 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { Play } from "lucide-react";
 import { gameAudio } from "./audio";
 import { CAMPAIGN } from "./campaign";
+import {
+  HEX_CARD,
+  NEON_CARD,
+  OP1_ROOM,
+  hexObjective,
+  type SeedMark,
+} from "./deployCards";
 import { GameEngine } from "./engine";
 import { input } from "./input";
 import {
@@ -14,6 +21,7 @@ import {
   loadSave,
   bossArmed,
   hasLevelChaos,
+  hexesReady,
   opUnlocked,
   seedForLevel,
   totalChaos,
@@ -588,7 +596,12 @@ function HudBar({
             {hud.flags.map((on, i) => (
               <HudFlag key={i} on={on} />
             ))}
-            <HudDiamond color={chaosColor} filled={hud.chaosHereGot} />
+            <HudDiamond
+              color={chaosColor}
+              filled={hud.chaosHereGot}
+              neon={hud.chaosNeon}
+              gid="hud-neon"
+            />
             {SLOT_SEEDS.map((id, slot) => {
               const got = hud.chaosSlots[slot] ?? false;
               const col = CHAOS_META[id].color;
@@ -668,20 +681,36 @@ function HudFlag({ on }: { on: boolean }) {
 function HudDiamond({
   color,
   filled,
+  neon = false,
   size = 13,
+  gid = "hud-neon",
 }: {
   color: string;
   filled: boolean;
+  neon?: boolean;
   size?: number;
+  gid?: string;
 }) {
+  const stroke = neon ? `url(#${gid})` : color;
+  const fill = filled ? stroke : "none";
   return (
     <svg width={size} height={size} viewBox="0 0 13 13" aria-hidden className="hud-diamond mx-0.5">
+      {neon && (
+        <defs>
+          <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#00f0ff" />
+            <stop offset="0.34" stopColor="#ffe14a" />
+            <stop offset="0.67" stopColor="#ff2bd6" />
+            <stop offset="1" stopColor="#7a5cff" />
+          </linearGradient>
+        </defs>
+      )}
       <path
-        d="M6.5 1.2 L11.6 6.5 L6.5 11.8 L1.4 6.5 Z"
-        fill={filled ? color : "none"}
-        stroke={color}
-        strokeWidth="1.6"
-        style={{ filter: filled ? `drop-shadow(0 0 6px ${color})` : undefined }}
+        d="M6.5 1.2 L11.2 3.6 L11.2 9.4 L6.5 11.8 L1.8 9.4 L1.8 3.6 Z"
+        fill={fill}
+        stroke={stroke}
+        strokeWidth="1.4"
+        style={{ filter: filled ? `drop-shadow(0 0 6px ${neon ? "#ff2bd6" : color})` : undefined }}
       />
     </svg>
   );
@@ -796,7 +825,7 @@ function IntroCutscene({
       </div>
       {isLast && (
         <p className="mt-4 max-w-sm text-xs text-accent">
-          Mission: 10 Operations. 9 seeds each. One handler. One Chaos Seed. {CORE_QUESTION}
+          Mission: 10 Operations. Nine Hex Seeds each. Neon Chaos Seed on the handler if all nine are taken. {CORE_QUESTION}
         </p>
       )}
     </div>
@@ -1028,7 +1057,7 @@ function LevelSelect({
       <p className="mb-3 text-center text-sm text-muted">
         Running as <span className="text-accent">{character === "grok" ? "Grok" : "Goblin"}</span>
         {" · "}
-        {totalChaos(save)} Chaos Seeds
+        {totalChaos(save)} Hex Seeds
       </p>
       <div className="mb-3 flex w-full flex-wrap justify-center gap-1">
         {OPERATIONS.map((o) => {
@@ -1058,7 +1087,7 @@ function LevelSelect({
       <div className="mb-3 w-full rounded-xl border border-border bg-surface p-3 text-left">
         <div className="text-sm font-bold text-accent">{op.name}</div>
         <div className="text-[11px] text-muted">
-          Boss {op.boss} · {CHAOS_META[op.seed].name} Seed · {op.theme}
+          Boss {op.boss} · {hexesReady(save, op.id) ? "Neon Chaos Seed armed" : "Hex Seeds"} · {op.theme}
         </div>
         <p className="mt-1 text-[11px] italic text-accent/80">{op.signal}</p>
       </div>
@@ -1078,9 +1107,11 @@ function LevelSelect({
       <div className="mb-4 flex max-h-[38vh] w-full flex-col gap-1.5 overflow-y-auto pr-1">
         {levels.map((L, i) => {
           const idx = start + i;
-          const seedId = seedForLevel(L.id);
-          const seedGot = hasLevelChaos(save, L.id);
-          const seedCol = CHAOS_META[seedId].color;
+          const bossSlot = (L.id - 1) % 10 === 9;
+          const seedId = bossSlot ? null : seedForLevel(L.id);
+          const seedGot = bossSlot ? hexesReady(save, L.operation ?? 1) : hasLevelChaos(save, L.id);
+          const seedCol = seedId ? CHAOS_META[seedId].color : "#ff2bd6";
+          const seedName = bossSlot ? "Neon Chaos Seed" : CHAOS_META[seedId!].name;
           return (
             <button
               key={L.id}
@@ -1109,10 +1140,16 @@ function LevelSelect({
                   <p className="text-xs text-muted">{L.subtitle}</p>
                 </div>
                 <span
-                  title={`${CHAOS_META[seedId].name} seed ${seedGot ? "taken" : "still out"}`}
+                  title={`${seedName} ${seedGot ? (bossSlot ? "armed" : "taken") : bossSlot ? "needs the nine" : "still out"}`}
                   className="mt-0.5 shrink-0"
                 >
-                  <HudDiamond color={seedCol} filled={seedGot} size={16} />
+                  <HudDiamond
+                    color={seedCol}
+                    filled={seedGot}
+                    neon={bossSlot}
+                    size={16}
+                    gid={`hex-${L.id}`}
+                  />
                 </span>
               </div>
             </button>
@@ -1149,6 +1186,83 @@ function LevelSelect({
   );
 }
 
+function SeedMarkIcon({ mark, color }: { mark: SeedMark; color: string }) {
+  return (
+    <svg viewBox="0 0 40 40" className="h-full w-full" aria-hidden>
+      <polygon points="20,3 35,11 35,29 20,37 5,29 5,11" fill="none" stroke={color} strokeWidth="1.8" />
+      {mark === "heart" && (
+        <path d="M20 28 C12 22 10 16 13 13 C16 10 18 13 20 16 C22 13 24 10 27 13 C30 16 28 22 20 28Z" fill={color} />
+      )}
+      {mark === "blast" && (
+        <path d="M20 8 L23 17 L32 18 L25 24 L28 33 L20 27 L12 33 L15 24 L8 18 L17 17 Z" fill={color} />
+      )}
+      {mark === "ammo" && (
+        <g fill={color}>
+          <rect x="11" y="12" width="4" height="16" rx="2" />
+          <rect x="18" y="9" width="4" height="19" rx="2" />
+          <rect x="25" y="14" width="4" height="14" rx="2" />
+        </g>
+      )}
+      {mark === "magnet" && (
+        <path d="M12 10 V22 A8 8 0 0 0 28 22 V10" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" />
+      )}
+      {mark === "armor" && (
+        <path d="M20 9 L30 13 V21 C30 27 25 31 20 33 C15 31 10 27 10 21 V13 Z" fill={color} />
+      )}
+      {mark === "fuel" && (
+        <path d="M20 8 C20 8 28 18 28 23 A8 8 0 0 1 12 23 C12 18 20 8 20 8Z" fill={color} />
+      )}
+      {mark === "stamina" && (
+        <path d="M22 8 L12 22 H19 L17 32 L28 17 H21 Z" fill={color} />
+      )}
+      {mark === "bullet" && (
+        <g fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round">
+          <path d="M10 14 H24" />
+          <path d="M14 20 H28" />
+          <path d="M10 26 H24" />
+        </g>
+      )}
+      {mark === "shield" && (
+        <g fill="none" stroke={color} strokeWidth="2">
+          <circle cx="20" cy="20" r="8" />
+          <circle cx="20" cy="20" r="3" fill={color} stroke="none" />
+        </g>
+      )}
+      {mark === "neon" && (
+        <g>
+          <polygon points="20,12 26,16 26,24 20,28 14,24 14,16" fill="#00f0ff" opacity="0.7" />
+          <polygon points="20,14 28,20 20,26 12,20" fill="#ff2bd6" opacity="0.75" />
+          <polygon points="20,17 23,20 20,23 17,20" fill="#ffe14a" />
+        </g>
+      )}
+    </svg>
+  );
+}
+
+function SeedDiamond({ color, neon = false }: { color: string; neon?: boolean }) {
+  return (
+    <svg viewBox="0 0 40 40" className="h-full w-full" aria-hidden>
+      <circle cx="20" cy="20" r="15.5" fill="none" stroke={neon ? "#00f0ff" : color} strokeWidth="2.2" />
+      <path d="M20 11 L26 20 L20 29 L14 20 Z" fill={neon ? "#ff2bd6" : color} opacity="0.55" stroke={neon ? "#ffe14a" : color} strokeWidth="1.4" />
+      <path d="M20 15 L23 20 L20 25 L17 20 Z" fill={neon ? "#00f0ff" : "#ffffff"} opacity="0.9" />
+    </svg>
+  );
+}
+
+function DeployWaves() {
+  return (
+    <svg viewBox="0 0 28 28" width="34" height="34" aria-hidden>
+      <circle cx="14" cy="14" r="3.2" fill="#00f0ff" />
+      <path d="M8 16.5 A6 6 0 0 1 8 11.5" stroke="#00f0ff" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+      <path d="M5 18.5 A9 9 0 0 1 5 9.5" stroke="#00f0ff" strokeWidth="1.8" strokeLinecap="round" fill="none" opacity="0.75" />
+      <path d="M2 20.5 A12 12 0 0 1 2 7.5" stroke="#00f0ff" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.5" />
+      <path d="M20 16.5 A6 6 0 0 0 20 11.5" stroke="#00f0ff" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+      <path d="M23 18.5 A9 9 0 0 0 23 9.5" stroke="#00f0ff" strokeWidth="1.8" strokeLinecap="round" fill="none" opacity="0.75" />
+      <path d="M26 20.5 A12 12 0 0 0 26 7.5" stroke="#00f0ff" strokeWidth="1.4" strokeLinecap="round" fill="none" opacity="0.5" />
+    </svg>
+  );
+}
+
 function MissionBrief({
   level,
   onGo,
@@ -1156,7 +1270,6 @@ function MissionBrief({
   level: (typeof CAMPAIGN)[number];
   onGo: () => void;
 }) {
-  const m = missionFor(level);
   const plate =
     level.operation === 1 && level.id >= 1 && level.id <= 10
       ? `/sprites/enter/enter-l${level.id}.jpg?v=enter1`
@@ -1189,42 +1302,72 @@ function MissionBrief({
       </button>
     );
   }
+
+  const slot = (level.id - 1) % 10;
+  const op1 = level.operation === 1;
+  const room = op1 ? OP1_ROOM[slot] : null;
+  const boss = slot === 9 || !!level.boss;
+  const hexId = boss ? null : seedForLevel(level.id);
+  const hex = hexId ? HEX_CARD[hexId] : null;
+  const color = hexId ? CHAOS_META[hexId].color : NEON_CARD.color;
+  const radio = room?.radio ?? missionFor(level).beat.text;
+  const who = room ? "HONEY·BUN" : missionFor(level).beat.who;
+  const flavor = room?.flavor ?? level.subtitle;
+  const objective = boss
+    ? `Grab the Neon Chaos Seed if the nine Hex are collected. ${room?.path ?? "Survive the phases and take the extract."}`
+    : hexId
+      ? hexObjective(hexId, room?.path ?? "Reach the exit this room throws you through.")
+      : missionFor(level).objective;
+  const seedName = boss ? NEON_CARD.name : CHAOS_META[hexId!].name;
+  const seedNick = boss ? NEON_CARD.nick : hex!.nick;
+  const seedEffect = boss ? NEON_CARD.effect : hex!.effect;
+  const mark: SeedMark = boss ? "neon" : hex!.mark;
+
   return (
-    <div className="w-full max-w-md rounded-2xl border border-accent/40 bg-surface p-5 text-left shadow-[0_0_40px_#00f0ff33]">
-      {plate && (
-        <div className="enter-plate mb-3">
-          <img src={plate} alt="" />
+    <div className="deploy-card">
+      <div className="deploy-radio">
+        <div className="deploy-radio-top">
+          <span className="deploy-radio-mark" aria-hidden>
+            <DeployWaves />
+          </span>
+          <span className="deploy-radio-who">{who}</span>
         </div>
-      )}
-      <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-        {m.epic ? "Epic Boss" : m.boss ? "Handler Fight" : "Canyon Drop"} · Op {level.operation ?? 1}
-      </p>
-      <h3 className="mb-0.5 text-xl font-black text-accent">{m.opName}</h3>
-      <p className="mb-3 text-xs text-muted">{m.opTheme} · {m.signal}</p>
-      <div className="mb-3 rounded-xl border border-border bg-bg/50 px-3 py-2">
-        <div className="text-sm font-bold">
-          {level.id}. {m.name}
-        </div>
-        <p className="text-xs text-muted">{m.subtitle}</p>
+        <p className="deploy-radio-text">
+          <span className="deploy-play" aria-hidden>▶</span>
+          {radio}
+        </p>
       </div>
-      <p className="mb-2 text-sm text-fg">
-        <span className="font-bold text-primary">OBJECTIVE · </span>
-        {m.objective}
-      </p>
-      {m.hunt && (
-        <p className="mb-2 text-xs text-accent">Hunt this canyon: {m.hunt}</p>
-      )}
-      <p className="mb-4 text-sm italic">
-        <span className="font-bold not-italic text-primary">{m.beat.who}</span>
-        {" · "}
-        {m.beat.text}
-      </p>
-      <button
-        type="button"
-        onClick={onGo}
-        className="min-h-12 w-full rounded-xl border border-primary bg-primary/30 px-4 py-3 text-sm font-bold"
-      >
-        Deploy
+      <div className="deploy-level" style={{ ["--seed" as string]: color }}>
+        <div className="deploy-level-row">
+          <div className="deploy-num">{slot + 1}</div>
+          <div className="min-w-0 flex-1">
+            <div className="deploy-name">{level.name}</div>
+            <p className="deploy-flavor">{flavor}</p>
+            <p className="deploy-obj-label">Objective</p>
+            <p className="deploy-obj">{objective}</p>
+          </div>
+        </div>
+        <div className="deploy-stack" style={{ borderColor: color }}>
+          <span className="deploy-hex">
+            <SeedMarkIcon mark={mark} color={color} />
+          </span>
+          <div className="deploy-stack-copy">
+            <div className="deploy-seed-name" style={{ color }}>{seedName}</div>
+            <div className="deploy-seed-nick">{seedNick}</div>
+            <div className="deploy-seed-effect">{seedEffect}</div>
+          </div>
+          <span className="deploy-hex">
+            <SeedDiamond color={color} neon={boss} />
+          </span>
+        </div>
+      </div>
+      <button type="button" onClick={onGo} className="deploy-go">
+        <DeployWaves />
+        <span>DEPLOY</span>
+        <svg viewBox="0 0 28 20" width="34" height="24" aria-hidden>
+          <path d="M6 4 L14 10 L6 16" stroke="#00f0ff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <path d="M14 4 L22 10 L14 16" stroke="#00f0ff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+        </svg>
       </button>
     </div>
   );

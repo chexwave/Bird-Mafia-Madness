@@ -29,33 +29,31 @@ export const POWER_META: Record<
 
 export const CHAOS_IDS = [
   "crimson",
-  "cyan",
-  "chartreuse",
-  "magenta",
   "amber",
-  "violet",
-  "azure",
+  "chartreuse",
   "lime",
-  "fuchsia",
+  "viridian",
+  "cyan",
+  "azure",
   "indigo",
+  "fuchsia",
 ] as const;
 
 export type ChaosId = (typeof CHAOS_IDS)[number];
 
 export const CHAOS_META: Record<
   ChaosId,
-  { name: string; color: string; passive: string }
+  { name: string; color: string; glow: string; passive: string }
 > = {
-  crimson: { name: "Crimson", color: "#ff2b4a", passive: "+ max Health" },
-  cyan: { name: "Cyan", color: "#00f0ff", passive: "+ max Stamina" },
-  chartreuse: { name: "Chartreuse", color: "#c6ff3a", passive: "+ max Ammo" },
-  magenta: { name: "Magenta", color: "#ff2bd6", passive: "+ max Shield" },
-  amber: { name: "Amber", color: "#ff9f43", passive: "damage boost" },
-  violet: { name: "Violet", color: "#a78bfa", passive: "faster fire" },
-  azure: { name: "Azure", color: "#4cc9ff", passive: "jump / air control" },
-  lime: { name: "Lime", color: "#b8ff3a", passive: "pickup magnet" },
-  fuchsia: { name: "Fuchsia", color: "#ff4fd8", passive: "less incoming damage" },
-  indigo: { name: "Electric Indigo", color: "#6c5ce7", passive: "pierce / chain chance" },
+  crimson: { name: "Crimson Hex Seed", color: "#ff2b4a", glow: "#ff6b81", passive: "+5 max Health" },
+  amber: { name: "Amber Hex Seed", color: "#ff9f43", glow: "#ffd29a", passive: "damage boost" },
+  chartreuse: { name: "Chartreuse Hex Seed", color: "#d6ff3a", glow: "#f4ff9a", passive: "+ max Ammo" },
+  lime: { name: "Lime Hex Seed", color: "#39ff2f", glow: "#c6ff9a", passive: "pickup magnet" },
+  viridian: { name: "Viridian Hex Seed", color: "#0f7a45", glow: "#5dff9a", passive: "damage reduction" },
+  cyan: { name: "Cyan Hex Seed", color: "#00f0ff", glow: "#b8ffff", passive: "stamina lean" },
+  azure: { name: "Azure Hex Seed", color: "#2f6bff", glow: "#9ec0ff", passive: "+ max Stamina" },
+  indigo: { name: "Indigo Hex Seed", color: "#4b1fff", glow: "#b9a6ff", passive: "faster bullets" },
+  fuchsia: { name: "Fuchsia Hex Seed", color: "#ff2bd6", glow: "#ffb3ef", passive: "max shield time" },
 };
 
 export type OperationDef = {
@@ -133,7 +131,7 @@ export const OPERATIONS: OperationDef[] = [
     id: 4,
     name: "Nest Infiltration",
     boss: "Capo Raven",
-    seed: "magenta",
+    seed: "fuchsia",
     theme: "Deeper hierarchy",
     signal: "Conflicting coordinates. Both are real. Both hurt.",
     levelNames: [
@@ -173,7 +171,7 @@ export const OPERATIONS: OperationDef[] = [
     id: 6,
     name: "Timeline Echoes",
     boss: "Owl Corina",
-    seed: "violet",
+    seed: "indigo",
     theme: "OPCC residual echoes",
     signal: "Past Groks talking over Honey Bun.",
     levelNames: [
@@ -294,15 +292,14 @@ const SAVE_KEY = "bmm-progress-v2";
 function emptyChaos(): Record<ChaosId, number> {
   return {
     crimson: 0,
-    cyan: 0,
-    chartreuse: 0,
-    magenta: 0,
     amber: 0,
-    violet: 0,
-    azure: 0,
+    chartreuse: 0,
     lime: 0,
-    fuchsia: 0,
+    viridian: 0,
+    cyan: 0,
+    azure: 0,
     indigo: 0,
+    fuchsia: 0,
   };
 }
 
@@ -320,7 +317,11 @@ export function loadSave(): SaveData {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return blank;
     const parsed = JSON.parse(raw) as SaveData;
-    const chaos = { ...emptyChaos(), ...parsed.chaos };
+    const rawChaos = (parsed.chaos ?? {}) as Record<string, number>;
+    const chaos = emptyChaos();
+    for (const id of CHAOS_IDS) chaos[id] = rawChaos[id] ?? 0;
+    // Old violet was faster fire. That job now lives on Indigo.
+    if (rawChaos.violet) chaos.indigo += rawChaos.violet;
     let chaosLevels = Array.isArray(parsed.chaosLevels) ? parsed.chaosLevels.slice() : [];
     if (chaosLevels.length === 0) {
       for (const [i, id] of SLOT_SEEDS.entries()) {
@@ -355,22 +356,30 @@ export function slotOfLevel(levelId: number) {
   return (levelId - 1) % 10;
 }
 
-/** One chaos color per slot in an operation. L1 red, L3 light-blue, etc. */
+/** Nine Hex Seeds, one per L1–L9. L10 is the Neon Chaos Seed, not a tenth color. */
 export const SLOT_SEEDS: ChaosId[] = [
   "crimson",
-  "cyan",
-  "azure",
-  "magenta",
-  "lime",
-  "violet",
   "amber",
   "chartreuse",
-  "fuchsia",
+  "lime",
+  "viridian",
+  "cyan",
+  "azure",
   "indigo",
+  "fuchsia",
 ];
 
 export function seedForLevel(levelId: number): ChaosId {
-  return SLOT_SEEDS[slotOfLevel(levelId)] ?? "crimson";
+  const slot = slotOfLevel(levelId);
+  return SLOT_SEEDS[slot] ?? "crimson";
+}
+
+/** True when this operation's nine Hex Seeds are already collected. */
+export function hexesReady(save: SaveData, opId: number) {
+  for (let slot = 0; slot < SLOT_SEEDS.length; slot++) {
+    if (!hasLevelChaos(save, levelIdOf(opId, slot))) return false;
+  }
+  return true;
 }
 
 export function levelIdOf(opId: number, slot: number) {
@@ -441,20 +450,22 @@ export function totalChaos(save: SaveData) {
   return CHAOS_IDS.reduce((n, id) => n + (save.chaos[id] ?? 0), 0);
 }
 
-export function passivesFrom(save: SaveData, epic: boolean) {
-  const amp = epic ? 2 : 1;
+export function passivesFrom(save: SaveData, epic: boolean, neonAmp = 1) {
+  const amp = (epic ? 2 : 1) * Math.max(1, neonAmp);
   const c = (id: ChaosId) => (save.chaos[id] ?? 0) * amp;
   return {
-    maxHealth: 100 + 14 * c("crimson"),
-    maxStamina: 100 + 14 * c("cyan"),
+    maxHealth: 100 + 5 * c("crimson"),
+    maxStamina: 100 + 14 * c("azure"),
     maxAmmo: 40 + 8 * c("chartreuse"),
-    maxShield: 5 + 0.7 * c("magenta"),
+    maxShield: 5 + c("fuchsia"),
     dmgMul: 1 + 0.09 * c("amber"),
-    fireMul: Math.max(0.55, 1 - 0.07 * c("violet")),
-    jumpMul: 1 + 0.06 * c("azure"),
-    airMul: 1 + 0.1 * c("azure"),
+    fireMul: 1,
+    jumpMul: 1,
+    airMul: 1,
     magnet: 48 * c("lime"),
-    dmgTaken: Math.max(0.55, 1 - 0.07 * c("fuchsia")),
-    pierce: Math.min(0.55, 0.1 * c("indigo")),
+    dmgTaken: Math.max(0.5, 1 - 0.08 * c("viridian")),
+    pierce: 0,
+    stamLean: Math.max(0.5, 1 - 0.1 * c("cyan")),
+    bulletMul: 1 + 0.15 * c("indigo"),
   };
 }

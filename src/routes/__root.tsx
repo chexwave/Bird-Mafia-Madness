@@ -24,7 +24,7 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "Neon canyon platformer. Grok & Goblin extract Honey Bun AI from the Bird Mafia. 100 levels, 9 Power-Ups, 10 Chaos Seeds.",
+          "Neon canyon platformer. Grok & Goblin extract Honey Bun AI from the Bird Mafia. 100 levels, 9 Hex Seeds an operation, Neon Chaos Seed on the handler.",
       },
     ],
     links: [

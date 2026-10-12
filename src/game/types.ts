@@ -177,11 +177,13 @@ export type HudState = {
   lastChaos?: ChaosId;
   /** Checkpoint flags in world-x order — true once that flag is tagged. */
   flags: boolean[];
-  /** This level's chaos seed color. */
+  /** This level's Hex color. Boss rooms leave this unused and set chaosNeon. */
   chaosHere: ChaosId;
-  /** True once THIS level's chaos seed has been collected. */
+  /** True once this room's Hex is taken, or the Neon Chaos Seed is held. */
   chaosHereGot: boolean;
-  /** Current operation's 10 level-seed dots, slot 0–9. */
+  /** Boss room. The diamond is the Neon Chaos Seed, not a tenth Hex. */
+  chaosNeon?: boolean;
+  /** Current operation's nine Hex dots, L1–L9. */
   chaosSlots: boolean[];
   activeBuffs: string[];
 };

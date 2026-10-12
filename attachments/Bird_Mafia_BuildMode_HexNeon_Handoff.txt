@@ -1,0 +1,63 @@
+# Bird Mafia Madness — Hex Seeds + Neon Chaos Seed Handoff
+# Drop this into the existing Grok Build Mode chat.
+# Live game is assembled by Build Mode. This is the delta.
+
+## Seed logic lock (2026-10-11)
+
+Per operation:
+- 9 Hex Seeds (permanent small buffs, one per L1–L9).
+- L10 Neon Chaos Seed only appears if that operation’s 9 Hex Seeds are already collected.
+- Neon Chaos Seed is temporary: major scaled increase of all Hex buffs for the boss fight only.
+- Scale = operation number (Op 1 = 1×, Op 4 = 4×, Op 10 = 10×).
+- Following operations have independent Hex sets for the Neon check.
+- Permanent Hex stacks stay global.
+
+## Hex Seed names + roles (locked)
+
+| Slot | Name                  | Color intent     | Passive (keep existing jobs) |
+|------|-----------------------|------------------|------------------------------|
+| 1    | Crimson Hex Seed      | hot red          | + max Health                 |
+| 2    | Amber Hex Seed        | orange           | damage boost                 |
+| 3    | Chartreuse Hex Seed   | yellow-green     | + max Ammo                   |
+| 4    | Lime Hex Seed         | bright pure green| pickup magnet                |
+| 5    | Viridian Hex Seed     | deep dark green  | damage reduction / stamina lean |
+| 6    | Cyan Hex Seed         | bright cyan      | + max Stamina                |
+| 7    | Azure Hex Seed        | medium blue      | jump / air control           |
+| 8    | Indigo Hex Seed       | deep purple      | faster fire / pierce         |
+| 9    | Fuchsia Hex Seed      | hot pink         | less incoming damage         |
+
+Viridian glow is brighter than the first draft. Lime is greener than the old yellow-green version.
+
+## Neon Chaos Seed visual
+
+Holographic crystal design. Prismatic multi-facet crystal with rainbow refraction, intense multi-color neon glow (cyan / magenta / yellow / violet), crystalline internal structure. Distinctly larger and more complex than the single-color Hex Seeds. Use the clean multi-facet version or the canyon-grounded floating version as the pickup sprite.
+
+## Code changes needed (Build Mode)
+
+1. In progression.ts:
+   - Rename CHAOS_META entries to the nine Hex names above.
+   - Drop the permanent 10th color (old indigo as a regular seed).
+   - SLOT_SEEDS becomes the nine Hex colors only.
+   - Add a temporary neonAmp flag or similar that multiplies Hex passives by opId while active.
+
+2. In engine.ts placeChaosGem:
+   - Change the ready check from absolute L.id === 10 + levels 1–9
+     to the current operation’s L1–L9.
+   - Neon gem only spawns on the operation’s L10 when the nine Hex for that op are collected.
+   - Collecting Neon does not permanently grant a 10th chaos color.
+   - While Neon is held in the boss fight, apply the temporary multiplier (op number × base Hex values).
+   - Clear the multiplier when the fight ends.
+
+3. Radio / HUD labels:
+   - Update chaosBeat and any seed text to say “Hex Seed” for the nine and “Neon Chaos Seed” for the conditional one.
+   - HUD dots stay nine per operation.
+
+4. Visual:
+   - Hex Seeds keep single-color neon hex style (with Viridian brighter, Lime greener).
+   - Neon Chaos Seed uses the holographic crystal design.
+
+## Do not reopen
+- Van-part chain, boss gate, Op 1 structures, entrance stills, narrative recompile.
+- This is seed logic + labeling only.
+
+Paste the above into the existing Build Mode chat and ask it to apply the delta.

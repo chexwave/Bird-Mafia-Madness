@@ -4,20 +4,23 @@ import { input } from "./input";
 import {
   CHAOS_META,
   POWER_META,
+  SLOT_SEEDS,
   grantLevelChaos,
   hasLevelChaos,
+  hexesReady,
   loadSave,
   markCleared,
   bossArmed,
   opOfLevel,
   passivesFrom,
   seedForLevel,
+  slotOfLevel,
   unlockPower,
   type ChaosId,
   type PowerKind,
   type SaveData,
 } from "./progression";
-import { cageCheer, cagePartBeat, chaosBeat, collectBeat, formatRadio } from "./narrative";
+import { cageCheer, cagePartBeat, chaosBeat, collectBeat, formatRadio, neonBeat } from "./narrative";
 import { ParticleSystem } from "./particles";
 import { SEED_SIZE } from "./types";
 import type {
@@ -267,7 +270,9 @@ export class GameEngine {
     collected: boolean;
     bob: number;
     id: ChaosId;
+    neon?: boolean;
   } | null = null;
+  private neonAmp = 0;
   private plateBuf: HTMLCanvasElement | null = null;
   private save: SaveData = loadSave();
   private passives = passivesFrom(loadSave(), false);
@@ -437,6 +442,7 @@ export class GameEngine {
     this.level = LEVELS[this.levelIdx]!;
     this.keepProgress = keepProgress;
     this.save = loadSave();
+    this.neonAmp = 0;
     this.applyPassives();
     this.resetLevel(!keepProgress);
     this.paused = false;
@@ -458,7 +464,7 @@ export class GameEngine {
 
   private applyPassives() {
     this.save = loadSave();
-    this.passives = passivesFrom(this.save, !!this.level?.epic);
+    this.passives = passivesFrom(this.save, !!this.level?.epic, this.neonAmp);
     this.maxHealth = this.passives.maxHealth;
     this.maxStamina = this.passives.maxStamina;
     this.maxAmmo = this.passives.maxAmmo;
@@ -667,7 +673,7 @@ export class GameEngine {
     if (this.homingBurst > 0) buffs.push("HOM");
     if (this.overloadT > 0) buffs.push("OVR");
     if (this.rapidT > 0) buffs.push("RPD");
-    if (this.zapperT > 0) buffs.push("ZAP");
+    if (this.neonAmp > 0) buffs.push(`NEON ×${this.neonAmp}`);
     this.cbs.onHud({
       score: this.score,
       coins: this.coinCount,
@@ -700,9 +706,12 @@ export class GameEngine {
         .filter((p) => p.kind === "checkpoint")
         .sort((a, b) => a.x - b.x)
         .map((p) => !!p.active),
-      chaosHere: this.level.chaosId ?? seedForLevel(this.level.id),
-      chaosHereGot: hasLevelChaos(this.save, this.level.id) || !!this.chaosGem?.collected,
-      chaosSlots: Array.from({ length: 10 }, (_, slot) =>
+      chaosHere: this.level.boss ? "fuchsia" : (this.level.chaosId ?? seedForLevel(this.level.id)),
+      chaosHereGot: this.level.boss
+        ? !!this.chaosGem?.collected
+        : hasLevelChaos(this.save, this.level.id) || !!this.chaosGem?.collected,
+      chaosNeon: !!this.level.boss,
+      chaosSlots: SLOT_SEEDS.map((_, slot) =>
         hasLevelChaos(this.save, (op.id - 1) * 10 + slot + 1),
       ),
       activeBuffs: buffs,
@@ -742,7 +751,7 @@ export class GameEngine {
     if (inp.weaponNext) this.cycleWeapon(1);
     if (inp.weaponPrev) this.cycleWeapon(-1);
 
-    // Shield: hold to block attacks. Max 5s use. Regen 20% (1s) every 2s when not held.
+    // Shield: hold to block. The pool is seconds. Fuchsia Hex adds a second per stack.
     this.updateShield(dt, inp.shield);
 
     this.stamina = Math.min(this.maxStamina, this.stamina + 18 * dt);
@@ -1009,14 +1018,27 @@ export class GameEngine {
 
   private placeChaosGem() {
     const L = this.level;
-    if (L.id === 10) {
-      const ready = [1, 2, 3, 4, 5, 6, 7, 8, 9].every((id) => hasLevelChaos(this.save, id));
-      if (!ready) {
+    const op = opOfLevel(L.id);
+    const bossRoom = slotOfLevel(L.id) === 9 || !!L.boss;
+    if (bossRoom) {
+      if (!hexesReady(this.save, op.id)) {
         this.chaosGem = null;
         return;
       }
+      const baked = L.chaosGem;
+      this.chaosGem = {
+        x: baked?.x ?? L.width * 0.55,
+        y: baked?.y ?? L.height * 0.38,
+        w: 52,
+        h: 52,
+        collected: false,
+        bob: 0,
+        id: "fuchsia",
+        neon: true,
+      };
+      return;
     }
-    const id = L.chaosId ?? seedForLevel(L.id);
+    const id = seedForLevel(L.id);
     const already = hasLevelChaos(this.save, L.id);
     const baked = L.chaosGem;
     this.chaosGem = {
@@ -1305,12 +1327,16 @@ export class GameEngine {
     if (this.weapon === "charge" && !fromCharge) return;
     const chargeMul = this.weapon === "charge" ? 0.5 + this.weaponCharge * 1.2 : 1;
     const cost = w.cost;
-    if (this.ammo < cost || this.stamina < w.stamina * (this.weapon === "charge" ? 0.6 + this.weaponCharge * 0.6 : 1)) {
+    const stamCost =
+      w.stamina *
+      (this.weapon === "charge" ? 0.6 + this.weaponCharge * 0.6 : 1) *
+      this.passives.stamLean;
+    if (this.ammo < cost || this.stamina < stamCost) {
       gameAudio.play("hurt", { volume: 0.25, rate: 0.7 });
       return;
     }
     this.ammo -= cost;
-    this.stamina -= w.stamina * (this.weapon === "charge" ? 0.6 + this.weaponCharge * 0.6 : 1);
+    this.stamina -= stamCost;
     const cdScale = this.passives.fireMul * (this.rapidT > 0 ? 0.5 : 1);
     this.fireCd = (this.weapon === "charge" ? 0.45 : w.cooldown) * cdScale;
     const dmgMul = this.passives.dmgMul * (this.overloadT > 0 ? 2 : 1);
@@ -1325,7 +1351,7 @@ export class GameEngine {
     const ox = this.px + (this.facing > 0 ? PLAYER_W - 10 : 4);
     const oy = this.py + PLAYER_H * 0.42;
     const dir = this.facing;
-    const aim = this.aimShot(w.speed);
+    const aim = this.aimShot(w.speed * this.passives.bulletMul);
 
     if (this.weapon === "spread") {
       for (let i = -1; i <= 1; i++) {
@@ -1366,7 +1392,8 @@ export class GameEngine {
         const a = (i / 8) * Math.PI * 2;
         this.lasers.push({
           x: this.px + 20, y: this.py + 28, w: 14, h: 14,
-          vx: Math.cos(a) * w.speed, vy: Math.sin(a) * w.speed,
+          vx: Math.cos(a) * w.speed * this.passives.bulletMul,
+          vy: Math.sin(a) * w.speed * this.passives.bulletMul,
           life: 0.45, dmg: w.dmg * dmgMul, color: "#ff2bd6", fromPlayer: true, nova: true, pierce,
         });
       }
@@ -1616,9 +1643,11 @@ export class GameEngine {
         if (pl.kind === "goal") pl.active = true;
       }
       this.fx.bossDeath(this.boss.x + this.boss.w * 0.5, this.boss.y + this.boss.h * 0.5);
-      grantLevelChaos(this.save, this.level.id);
-      this.lastChaos = seedForLevel(this.level.id);
-      this.radio = formatRadio(chaosBeat(this.lastChaos, !!this.level.epic));
+      if (this.neonAmp > 0) {
+        this.neonAmp = 0;
+        this.applyPassives();
+        this.radio = formatRadio(neonBeat(false));
+      }
       gameAudio.play("goal", { volume: 0.8 });
       gameAudio.playMusic("battle");
     }
@@ -1913,15 +1942,25 @@ export class GameEngine {
       const r = { x: g.x, y: g.y + Math.sin(g.bob * 5) * 6, w: g.w, h: g.h };
       if (aabb(box, r)) {
         g.collected = true;
-        grantLevelChaos(this.save, this.level.id);
-        this.lastChaos = g.id;
         this.score += 250;
         this.powerPulse = 0.7;
         this.chromPulse = 0.5;
         this.vignetteBoost = 0.35;
         this.chaosEdge = 5;
-        this.radio = formatRadio(chaosBeat(g.id, !!this.level.epic));
-        this.fx.collect(g.x + 18, g.y + 18, CHAOS_META[g.id].color, true);
+        if (g.neon) {
+          this.neonAmp = opOfLevel(this.level.id).id;
+          this.applyPassives();
+          this.health = this.maxHealth;
+          this.stamina = this.maxStamina;
+          this.radio = formatRadio(neonBeat(true));
+          this.fx.collect(g.x + 26, g.y + 26, "#ff2bd6", true);
+        } else {
+          grantLevelChaos(this.save, this.level.id);
+          this.lastChaos = g.id;
+          this.applyPassives();
+          this.radio = formatRadio(chaosBeat(g.id, !!this.level.epic));
+          this.fx.collect(g.x + 18, g.y + 18, CHAOS_META[g.id].color, true);
+        }
         gameAudio.play("goal", { volume: 0.7, rate: 1.15 });
       }
     }
@@ -2525,36 +2564,75 @@ export class GameEngine {
 
   private drawChaosGem(
     ctx: CanvasRenderingContext2D,
-    g: { x: number; y: number; w: number; h: number; bob: number; id: ChaosId },
+    g: { x: number; y: number; w: number; h: number; bob: number; id: ChaosId; neon?: boolean },
   ) {
-    const col = CHAOS_META[g.id].color;
+    if (g.neon) {
+      this.drawNeonCrystal(ctx, g);
+      return;
+    }
+    const meta = CHAOS_META[g.id];
+    const col = meta.color;
+    const glow = meta.glow;
     const by = g.y + Math.sin(g.bob * 5 + this.time * 3) * 7;
     const cx = g.x + g.w / 2;
     const cy = by + g.h / 2;
     const pulse = 0.7 + Math.sin(this.time * 4) * 0.3;
     ctx.save();
-    ctx.shadowColor = col;
-    ctx.shadowBlur = 18 + pulse * 10;
+    ctx.shadowColor = glow;
+    ctx.shadowBlur = 18 + pulse * 12;
     ctx.translate(cx, cy);
-    ctx.rotate(Math.sin(this.time * 1.6) * 0.12);
-    ctx.beginPath();
-    ctx.moveTo(0, -18);
-    ctx.lineTo(14, 0);
-    ctx.lineTo(0, 18);
-    ctx.lineTo(-14, 0);
-    ctx.closePath();
-    ctx.fillStyle = col + "55";
+    ctx.rotate(Math.sin(this.time * 1.4) * 0.08);
+    this.traceHex(ctx, 16);
+    ctx.fillStyle = col;
     ctx.fill();
-    ctx.strokeStyle = col;
-    ctx.lineWidth = 3;
+    ctx.strokeStyle = glow;
+    ctx.lineWidth = 2.5;
     ctx.stroke();
+    this.traceHex(ctx, 7);
+    ctx.fillStyle = "#ffffffd0";
+    ctx.fill();
+    ctx.restore();
+  }
+
+  private traceHex(ctx: CanvasRenderingContext2D, r: number) {
     ctx.beginPath();
-    ctx.moveTo(0, -9);
-    ctx.lineTo(7, 0);
-    ctx.lineTo(0, 9);
-    ctx.lineTo(-7, 0);
+    for (let i = 0; i < 6; i++) {
+      const a = -Math.PI / 2 + (i * Math.PI) / 3;
+      const x = Math.cos(a) * r;
+      const y = Math.sin(a) * r;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
     ctx.closePath();
-    ctx.fillStyle = "#ffffffcc";
+  }
+
+  private drawNeonCrystal(
+    ctx: CanvasRenderingContext2D,
+    g: { x: number; y: number; w: number; h: number; bob: number },
+  ) {
+    const by = g.y + Math.sin(g.bob * 4 + this.time * 3) * 8;
+    const cx = g.x + g.w / 2;
+    const cy = by + g.h / 2;
+    const facets = ["#00f0ff", "#ffe14a", "#ff2bd6", "#7a5cff", "#39ff9a"];
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(this.time * 0.6);
+    ctx.shadowColor = "#ffffff";
+    ctx.shadowBlur = 22;
+    facets.forEach((col, i) => {
+      ctx.save();
+      ctx.rotate((i * Math.PI) / 5);
+      ctx.globalAlpha = 0.85;
+      this.traceHex(ctx, 22 - i * 2);
+      ctx.fillStyle = col + "55";
+      ctx.fill();
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+      ctx.restore();
+    });
+    this.traceHex(ctx, 8);
+    ctx.fillStyle = "#ffffffee";
     ctx.fill();
     ctx.restore();
   }

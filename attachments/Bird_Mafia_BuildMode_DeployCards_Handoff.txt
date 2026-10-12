@@ -1,0 +1,31 @@
+# Bird Mafia Madness — Op 1 Deploy Cards + Hex Nicknames Handoff
+# Drop into the existing Grok Build Mode chat.
+# Live game is assembled by Build Mode. This is the design + text delta.
+
+## What landed
+- Full set of Op 1 deploy card HTMLs (l1 through l10) in deploy_cards/.
+- Winner template locked: radio (Honey Bun mocking full-sentence entry), level name + scenery flavor, objective (seed name + power + how through), 3-line seed stack (seed-colored name / silver nickname / 5-7 word effect that wraps to 2 lines). No “Hunt”.
+- Left buff icon: hexagon frame around the matching power symbol (heart, shield, magnet, etc.).
+- Right seed icon: sharper, smaller diamond inside its circle, colored to the seed.
+- Deploy button left icon: simple cyan center dot + three signal waves each side.
+- Hex nickname + effect table in docs/Bird_Mafia_HexSeed_Nicknames.md.
+- Source board in docs/Bird_Mafia_Op1_DeployCard_Texts.md.
+
+## Honey Bun radio (full sentences, mocking tone)
+See the board. L10 refers to himself and sends them back to the van.
+
+## Seed stack
+Name (seed color, 1 line) / Nickname (silver, 1 line) / 5-7 word effect (wraps to exactly 2 lines).
+
+## Code notes for Build Mode
+- Update MissionBrief / radio pill / deploy overlay to pull these strings and match the card layout.
+- Honey Bun text from the radio section.
+- Level flavor from the scenery line.
+- Objective from the objective line (seed name + power + how through).
+- Seed stack renders the 3-line block using the nickname table (seed-colored name, silver nick).
+- Left icon = hexagon + buff symbol for that seed. Right icon = seed-colored diamond.
+- Deploy button left = center dot + signal waves.
+- Hex logic still follows the HexNeon handoff (9 permanent Hex, Neon Chaos conditional L10 amp).
+- Do not reopen van-part chain, boss gate, Op 1 structures, or entrance stills.
+
+Paste this and the zip contents into the existing Build Mode chat and ask it to wire the deploy cards.
