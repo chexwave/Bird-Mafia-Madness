@@ -21,6 +21,7 @@ import {
   type SaveData,
 } from "./progression";
 import { cageCheer, cagePartBeat, chaosBeat, collectBeat, formatRadio, neonBeat } from "./narrative";
+import { HEX_CARD } from "./deployCards";
 import { ParticleSystem } from "./particles";
 import { SEED_SIZE } from "./types";
 import type {
@@ -273,6 +274,8 @@ export class GameEngine {
     neon?: boolean;
   } | null = null;
   private neonAmp = 0;
+  private cageSlide = 0;
+  private donEnter = 0;
   private plateBuf: HTMLCanvasElement | null = null;
   private save: SaveData = loadSave();
   private passives = passivesFrom(loadSave(), false);
@@ -443,6 +446,8 @@ export class GameEngine {
     this.keepProgress = keepProgress;
     this.save = loadSave();
     this.neonAmp = 0;
+    this.cageSlide = 0;
+    this.donEnter = 0;
     this.applyPassives();
     this.resetLevel(!keepProgress);
     this.paused = false;
@@ -530,30 +535,8 @@ export class GameEngine {
       dead: false,
     }));
     this.ammoPickups = L.ammo.map((a) => ({ ...a, collected: false }));
-    this.powerSeeds = (L.seeds ?? []).map((s, i) => ({
-      ...s,
-      x: s.x + (s.w - SEED_SIZE) / 2,
-      y: s.y + (s.h - SEED_SIZE) / 2,
-      w: SEED_SIZE,
-      h: SEED_SIZE,
-      collected: false,
-      bob: i * 0.7,
-    }));
-    // Regular levels: guarantee the Operation's assigned power type appears
-    if (this.powerSeeds.length === 0 && !L.boss && L.introPower) {
-      const c = this.coins[Math.min(1, this.coins.length - 1)];
-      if (c) {
-        this.powerSeeds.push({
-          x: c.x - (SEED_SIZE - 28) / 2,
-          y: c.y - 40,
-          w: SEED_SIZE,
-          h: SEED_SIZE,
-          collected: false,
-          bob: 0.5,
-          kind: L.introPower,
-        });
-      }
-    }
+    // Power-surge diamonds (OVR, HOM, …) are not Hexes. The level only plants the Hex.
+    this.powerSeeds = [];
     this.placeChaosGem();
     // Boss arenas start dry unless inventory already has unlocks — those spawn in-fight
     this.homingBurst = 0;
@@ -1181,6 +1164,7 @@ export class GameEngine {
             this.coyote = 0;
             this.jumpBuf = 0;
             this.springLock = 0.65;
+            p.timer = 0.28;
             gameAudio.play("spring", { volume: 0.85, rate: 0.92 });
             this.fx.spring(this.px + PLAYER_W * 0.5, p.y);
           }
@@ -1573,10 +1557,15 @@ export class GameEngine {
           if (!l.nova && !l.pierce) l.life = 0;
         }
         for (const p of this.platforms) {
-          if (p.gone || (p.job !== "bridge" && p.job !== "cheer")) continue;
+          if (p.gone || (p.job !== "bridge" && p.job !== "cheer" && p.job !== "shoot")) continue;
           if (!aabb(l, p)) continue;
           if (!l.nova && !l.pierce) l.life = 0;
-          this.breakProp(p);
+          if (p.job === "shoot") {
+            const bridge = this.platforms.find((b) => b.job === "bridge");
+            if (bridge) this.breakProp(bridge);
+          } else {
+            this.breakProp(p);
+          }
           this.fx.hit(p.x + p.w * 0.5, p.y + 12, l.color);
         }
       } else if (aabb(l, this.playerBox())) {
@@ -1609,10 +1598,20 @@ export class GameEngine {
   }
 
   private updateSetpieces(dt: number) {
+    const want = this.level?.horde && this.bossGoalOpen ? 1 : 0;
+    this.cageSlide += (want - this.cageSlide) * Math.min(1, dt * 2.6);
+    const don = this.platforms.find((p) => p.job === "don" || p.id === "don");
+    if (don) {
+      const near = Math.abs(this.px + 24 - (don.x + don.w * 0.5)) < 820;
+      if (near || this.donEnter > 0.01) this.donEnter = Math.min(1, this.donEnter + dt * 0.42);
+    } else {
+      this.donEnter = 0;
+    }
     for (const p of this.platforms) {
+      if (p.kind === "spring" && (p.timer ?? 0) > 0) p.timer = Math.max(0, (p.timer ?? 0) - dt);
       if (p.job !== "bridge-go" || p.gone) continue;
       p.timer = (p.timer ?? 0) + dt;
-      if ((p.timer ?? 0) > 1.05) p.gone = true;
+      if ((p.timer ?? 0) > 1.35) p.gone = true;
     }
   }
 
@@ -2453,6 +2452,7 @@ export class GameEngine {
     ctx.stroke();
     this.drawSpriteSheet(ctx, this.imgs.props, 3, a.x, a.y + bob, a.w, a.h, false);
     ctx.restore();
+    this.drawHexTag(ctx, cx, cy + 22, "AMMO", "#00f0ff");
   }
 
   private drawPowerSeed(ctx: CanvasRenderingContext2D, s: PowerSeed) {
@@ -2576,6 +2576,14 @@ export class GameEngine {
     const by = g.y + Math.sin(g.bob * 5 + this.time * 3) * 7;
     const cx = g.x + g.w / 2;
     const cy = by + g.h / 2;
+    ctx.save();
+    ctx.fillStyle = "rgba(0,0,0,0.4)";
+    ctx.beginPath();
+    ctx.ellipse(cx, g.y + g.h + 8, 16, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = col + "88";
+    ctx.fillRect(cx - 11, g.y + g.h - 2, 22, 5);
+    ctx.restore();
     const pulse = 0.7 + Math.sin(this.time * 4) * 0.3;
     ctx.save();
     ctx.shadowColor = glow;
@@ -2592,6 +2600,7 @@ export class GameEngine {
     ctx.fillStyle = "#ffffffd0";
     ctx.fill();
     ctx.restore();
+    this.drawHexTag(ctx, cx, cy + 28, HEX_CARD[g.id].tag, col);
   }
 
   private traceHex(ctx: CanvasRenderingContext2D, r: number) {
@@ -2634,6 +2643,27 @@ export class GameEngine {
     this.traceHex(ctx, 8);
     ctx.fillStyle = "#ffffffee";
     ctx.fill();
+    ctx.restore();
+    this.drawHexTag(ctx, cx, cy + 34, "NEON", "#ff2bd6");
+  }
+
+  private drawHexTag(ctx: CanvasRenderingContext2D, cx: number, y: number, label: string, color: string) {
+    ctx.save();
+    ctx.font = "bold 12px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const tw = Math.max(36, ctx.measureText(label).width + 12);
+    ctx.fillStyle = "#0a0614ee";
+    ctx.beginPath();
+    ctx.roundRect(cx - tw / 2, y - 9, tw, 18, 6);
+    ctx.fill();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.fillStyle = color;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 8;
+    ctx.fillText(label, cx, y);
     ctx.restore();
   }
 
@@ -3709,33 +3739,14 @@ export class GameEngine {
         ctx.fillText("EXTRACT", cx, p.y - 8);
         ctx.restore();
       }
-      if (this.level.horde) this.drawCageBars(ctx, p.x - 16, p.y - 20, p.w + 36, p.h + 28, on);
+      if (this.level.horde) {
+        this.drawCageBars(ctx, p.x - 16, p.y - 20, p.w + 36, p.h + 28, this.cageSlide);
+        if (this.cageSlide < 0.15) this.drawShootMark(ctx, cx, p.y - 46, "SHOOT FLOCK");
+      }
       return;
     }
     if (p.kind === "spring") {
-      const bounce = 1 + Math.sin(this.time * 6 + p.x * 0.05) * 0.08;
-      const dy = (1 - bounce) * 6;
-      ctx.save();
-      ctx.shadowColor = "#ff2bd6";
-      ctx.shadowBlur = 12 + Math.sin(this.time * 5) * 4;
-      this.drawSpriteSheet(
-        ctx,
-        this.imgs.props,
-        1,
-        p.x - 4,
-        p.y - 8 + dy,
-        p.w + 8,
-        (p.h + 12) * bounce,
-        false,
-      );
-      // Pulse ring under spring
-      ctx.globalAlpha = 0.35 + Math.sin(this.time * 5) * 0.15;
-      ctx.strokeStyle = "#ff2bd6";
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.ellipse(p.x + p.w / 2, p.y + p.h, 18 + Math.sin(this.time * 4) * 3, 6, 0, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
+      this.drawSpringProp(ctx, p);
       return;
     }
     if (p.kind === "hazard") {
@@ -3794,6 +3805,7 @@ export class GameEngine {
     ctx.textAlign = "center";
     ctx.fillText("SHOOT", p.x + p.w * 0.5, p.y + p.h * 0.7);
     ctx.restore();
+    this.drawShootMark(ctx, p.x + p.w * 0.5, p.y - 28, "SHOOT");
   }
 
   private drawDropShaft(ctx: CanvasRenderingContext2D, p: Platform) {
@@ -3817,8 +3829,10 @@ export class GameEngine {
     y: number,
     w: number,
     h: number,
-    open: boolean,
+    slide: number,
   ) {
+    const open = slide > 0.85;
+    const gap = slide * w * 0.42;
     ctx.save();
     ctx.strokeStyle = open ? "#ffcc33" : "#ff2bd6";
     ctx.lineWidth = 4;
@@ -3826,11 +3840,15 @@ export class GameEngine {
     ctx.shadowBlur = 10;
     ctx.strokeRect(x, y, w, h);
     ctx.lineWidth = 2;
-    for (let i = 1; i < 5; i++) {
-      const bx = x + (w / 5) * i;
+    const mid = x + w * 0.5;
+    for (let i = 1; i <= 2; i++) {
+      const lx = mid - (w / 5) * i - gap;
+      const rx = mid + (w / 5) * i + gap;
       ctx.beginPath();
-      ctx.moveTo(bx, y);
-      ctx.lineTo(bx, y + h);
+      ctx.moveTo(lx, y);
+      ctx.lineTo(lx, y + h);
+      ctx.moveTo(rx, y);
+      ctx.lineTo(rx, y + h);
       ctx.stroke();
     }
     ctx.restore();
@@ -3838,27 +3856,61 @@ export class GameEngine {
 
   private drawCrumble(ctx: CanvasRenderingContext2D, p: Platform) {
     const k = Math.min(1, (p.timer ?? 0) / (p.crumble ?? 0.5));
+    const drop = k * k * 36;
     ctx.save();
-    ctx.fillStyle = "#6a3a28";
-    ctx.fillRect(p.x, p.y, p.w, p.h);
-    ctx.fillStyle = "#c47a45";
-    ctx.fillRect(p.x, p.y, p.w, 6);
-    ctx.strokeStyle = `rgba(20,8,4,${0.35 + k * 0.6})`;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(p.x + 8, p.y + 4);
-    ctx.lineTo(p.x + p.w * (0.3 + k * 0.4), p.y + p.h);
-    ctx.moveTo(p.x + p.w * 0.6, p.y);
-    ctx.lineTo(p.x + p.w * 0.4, p.y + p.h);
-    ctx.stroke();
+    ctx.translate(0, drop);
+    ctx.globalAlpha = 1 - k * 0.35;
+    const chunks = 3;
+    for (let i = 0; i < chunks; i++) {
+      const cw = p.w / chunks;
+      const tilt = (i - 1) * k * 0.35;
+      ctx.save();
+      ctx.translate(p.x + cw * (i + 0.5), p.y);
+      ctx.rotate(tilt);
+      ctx.fillStyle = "#6a3a28";
+      ctx.fillRect(-cw * 0.5, 0, cw - 2, p.h);
+      ctx.fillStyle = "#c47a45";
+      ctx.fillRect(-cw * 0.5, 0, cw - 2, 6);
+      ctx.restore();
+    }
     ctx.restore();
+    if (k > 0.05) {
+      ctx.save();
+      ctx.fillStyle = `rgba(180,120,70,${0.35 * (1 - k)})`;
+      for (let i = 0; i < 4; i++) {
+        const px = p.x + p.w * (0.2 + i * 0.2);
+        const py = p.y - 8 - k * (12 + i * 6);
+        ctx.beginPath();
+        ctx.ellipse(px, py, 8 + k * 10, 4, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
   }
 
   private drawShotBridge(ctx: CanvasRenderingContext2D, p: Platform) {
     const go = p.job === "bridge-go";
+    const t = go ? Math.min(1, (p.timer ?? 0) / 1.35) : 0;
     ctx.save();
+    ctx.translate(p.x + p.w, p.y + 16);
+    ctx.rotate(t * 0.42);
+    ctx.translate(-(p.x + p.w), -(p.y + 16));
+    ctx.translate(t * 70, t * t * 28);
     ctx.fillStyle = go ? "#ff4466" : "#1a3a55";
     ctx.fillRect(p.x, p.y, p.w, 16);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(p.x, p.y, p.w, 16);
+    ctx.clip();
+    ctx.strokeStyle = "rgba(180,230,255,0.35)";
+    ctx.lineWidth = 1;
+    for (let i = 0; i < p.w / 10; i++) {
+      ctx.beginPath();
+      ctx.moveTo(p.x + i * 10, p.y);
+      ctx.lineTo(p.x + i * 10 + 6, p.y + 16);
+      ctx.stroke();
+    }
+    ctx.restore();
     ctx.strokeStyle = "#00f0ff";
     ctx.lineWidth = 2;
     ctx.shadowColor = "#00f0ff";
@@ -3873,11 +3925,48 @@ export class GameEngine {
     ctx.moveTo(cx, cy - 22);
     ctx.lineTo(cx, cy + 22);
     ctx.stroke();
+    if (go) {
+      ctx.strokeStyle = "#ffcc33";
+      ctx.globalAlpha = 1 - t;
+      ctx.beginPath();
+      ctx.moveTo(p.x + 12, p.y);
+      ctx.lineTo(p.x + p.w * 0.4, p.y + 16);
+      ctx.moveTo(p.x + p.w * 0.6, p.y);
+      ctx.lineTo(p.x + p.w - 10, p.y + 16);
+      ctx.stroke();
+    }
+    ctx.restore();
+    if (!go) this.drawShootMark(ctx, p.x + p.w * 0.5, p.y - 36, "SHOOT");
+  }
+
+  private drawShootMark(ctx: CanvasRenderingContext2D, x: number, y: number, label: string) {
+    const pulse = 0.65 + Math.sin(this.time * 5) * 0.35;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.strokeStyle = "#ffcc33";
+    ctx.fillStyle = "#ffcc33";
+    ctx.lineWidth = 2;
+    ctx.shadowColor = "#ffcc33";
+    ctx.shadowBlur = 10 * pulse;
+    ctx.globalAlpha = 0.85;
+    ctx.beginPath();
+    ctx.arc(0, 0, 11, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(-16, 0);
+    ctx.lineTo(16, 0);
+    ctx.moveTo(0, -16);
+    ctx.lineTo(0, 16);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.font = "bold 13px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(label, 0, -24);
     ctx.restore();
   }
 
   private drawCheerCage(ctx: CanvasRenderingContext2D, p: Platform) {
-    this.drawCageBars(ctx, p.x, p.y, p.w, p.h, false);
+    this.drawCageBars(ctx, p.x, p.y, p.w, p.h, 0);
     ctx.save();
     ctx.fillStyle = "#ffcc33";
     ctx.font = "10px sans-serif";
@@ -3927,23 +4016,77 @@ export class GameEngine {
   }
 
   private drawDonPortal(ctx: CanvasRenderingContext2D, p: Platform) {
+    const t = this.donEnter * this.donEnter * (3 - 2 * this.donEnter);
     const cx = p.x + p.w * 0.5;
-    const bob = Math.sin(this.time * 3) * 4;
+    const from = p.x + p.w + 150;
+    const to = cx - 28;
+    const x = from + (to - from) * t;
+    const y = p.y - 86 + Math.sin(this.time * 2.2) * (1 - t) * 5;
     ctx.save();
-    ctx.fillStyle = "#140810";
+    ctx.fillStyle = `rgba(255,43,214,${0.18 * (1 - t * 0.65)})`;
     ctx.beginPath();
-    ctx.ellipse(cx, p.y + p.h * 0.55 + bob, 26, 34, 0, 0, Math.PI * 2);
+    ctx.ellipse(from - 20, p.y + 10, 70, 28, 0, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = "#1a1a1a";
-    ctx.fillRect(cx - 22, p.y + 8 + bob, 44, 8);
+    ctx.fillStyle = "rgba(8,4,16,0.45)";
+    ctx.beginPath();
+    ctx.ellipse(x + 36, p.y + p.h - 2, 26, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    this.drawDonFigure(ctx, x, y, t < 0.98);
+    if (t > 0.92) {
+      ctx.strokeStyle = "#ff2bd6";
+      ctx.globalAlpha = 0.55 + Math.sin(this.time * 4) * 0.2;
+      ctx.lineWidth = 2;
+      ctx.shadowColor = "#ff2bd6";
+      ctx.shadowBlur = 12;
+      ctx.strokeRect(p.x - 4, p.y - 8, p.w + 8, p.h + 8);
+    }
+    ctx.restore();
+  }
+
+  private drawDonFigure(ctx: CanvasRenderingContext2D, x: number, y: number, walking: boolean) {
+    const step = walking ? Math.sin(this.time * 11) * 5 : 0;
+    ctx.save();
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#120814";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x + 30, y + 78);
+    ctx.lineTo(x + 24 + step, y + 102);
+    ctx.moveTo(x + 48, y + 78);
+    ctx.lineTo(x + 54 - step, y + 102);
+    ctx.stroke();
+    ctx.fillStyle = "#1a1028";
+    ctx.beginPath();
+    ctx.moveTo(x + 16, y + 34);
+    ctx.lineTo(x + 62, y + 34);
+    ctx.lineTo(x + 70, y + 84);
+    ctx.lineTo(x + 10, y + 84);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "#4a2060";
+    ctx.fillRect(x + 32, y + 38, 14, 30);
+    ctx.fillStyle = "#141018";
+    ctx.beginPath();
+    ctx.ellipse(x + 40, y + 22, 18, 15, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#e8b15a";
+    ctx.beginPath();
+    ctx.moveTo(x + 54, y + 20);
+    ctx.lineTo(x + 72, y + 25);
+    ctx.lineTo(x + 54, y + 30);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = "#0a0a0a";
+    ctx.fillRect(x + 26, y + 16, 30, 7);
     ctx.fillStyle = "#00f0ff";
-    ctx.fillRect(cx - 10, p.y + 28 + bob, 6, 3);
-    ctx.fillRect(cx + 4, p.y + 28 + bob, 6, 3);
-    ctx.strokeStyle = "#ff2bd6";
-    ctx.lineWidth = 2;
-    ctx.shadowColor = "#ff2bd6";
-    ctx.shadowBlur = 12;
-    ctx.strokeRect(p.x - 6, p.y, p.w + 12, p.h);
+    ctx.fillRect(x + 28, y + 17, 10, 4);
+    ctx.fillRect(x + 42, y + 17, 10, 4);
+    ctx.fillStyle = "#e8b15a";
+    ctx.beginPath();
+    ctx.ellipse(x + 6, y + 58, 11, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#111";
+    ctx.fillRect(x - 2, y + 56, 16, 3);
     ctx.restore();
   }
 
@@ -3961,44 +4104,77 @@ export class GameEngine {
     ctx.restore();
   }
 
+  private drawSpringProp(ctx: CanvasRenderingContext2D, p: Platform) {
+    const squash = Math.min(1, (p.timer ?? 0) / 0.28);
+    const cx = p.x + p.w * 0.5;
+    const base = p.y + Math.min(p.h, 18);
+    const rest = 34;
+    const h = rest * (1 - squash * 0.62);
+    ctx.save();
+    ctx.fillStyle = "#1a1020";
+    ctx.beginPath();
+    ctx.roundRect(cx - 16, base - 4, 32, 8, 3);
+    ctx.fill();
+    ctx.strokeStyle = "#ff2bd6";
+    ctx.lineWidth = 3;
+    ctx.shadowColor = "#ff2bd6";
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    const turns = 4;
+    for (let i = 0; i <= turns * 8; i++) {
+      const u = i / (turns * 8);
+      const yy = base - 6 - u * h;
+      const xx = cx + Math.sin(u * turns * Math.PI * 2) * 11;
+      if (i === 0) ctx.moveTo(xx, yy);
+      else ctx.lineTo(xx, yy);
+    }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = "#ffe0f6";
+    ctx.fillRect(cx - 14, base - 8 - h, 28, 6);
+    if (squash > 0.05) {
+      ctx.globalAlpha = squash;
+      ctx.strokeStyle = "#ff2bd6";
+      ctx.beginPath();
+      ctx.ellipse(cx, base + 2, 16 + (1 - squash) * 10, 5, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
   private drawConveyorBelt(ctx: CanvasRenderingContext2D, p: Platform) {
     const { x, y, w } = p;
     const dir = Math.sign(p.vx ?? 80) || 1;
     const speed = Math.abs(p.vx ?? 80);
-    const pulse = 0.65 + Math.sin(this.time * 6) * 0.2;
-    const scroll = ((this.time * speed * 0.45) % 22) * dir;
-    const hh = 28;
-
+    const scroll = (this.time * speed * 0.35 * dir) % 16;
+    const hh = 26;
     ctx.save();
-    ctx.fillStyle = "rgba(0,0,0,0.4)";
-    ctx.fillRect(x + 4, y + hh, w - 8, 6);
-    const body = ctx.createLinearGradient(x, y, x, y + hh);
-    body.addColorStop(0, "#b8ff9a");
-    body.addColorStop(0.35, "#3dff6a");
-    body.addColorStop(1, "#0a3a18");
-    ctx.fillStyle = body;
+    ctx.fillStyle = "rgba(0,0,0,0.45)";
+    ctx.fillRect(x + 6, y + hh, w - 12, 5);
+    ctx.fillStyle = "#2a241c";
     ctx.beginPath();
-    ctx.roundRect(x, y, w, hh, 5);
+    ctx.roundRect(x, y, w, hh, 6);
+    ctx.fill();
+    ctx.fillStyle = "#6a5a40";
+    ctx.beginPath();
+    ctx.arc(x + 12, y + hh * 0.5, 8, 0, Math.PI * 2);
+    ctx.arc(x + w - 12, y + hh * 0.5, 8, 0, Math.PI * 2);
     ctx.fill();
     ctx.save();
     ctx.beginPath();
-    ctx.rect(x + 6, y + 6, w - 12, 16);
+    ctx.rect(x + 18, y + 5, w - 36, hh - 10);
     ctx.clip();
-    ctx.fillStyle = "rgba(10,40,16,0.45)";
-    for (let i = -2; i < w / 22 + 3; i++) {
-      const ax = x + i * 22 + scroll;
-      ctx.beginPath();
-      ctx.moveTo(ax, y + 8);
-      ctx.lineTo(ax + 10 * dir, y + 14);
-      ctx.lineTo(ax, y + 20);
-      ctx.closePath();
-      ctx.fill();
+    ctx.fillStyle = "#14110e";
+    ctx.fillRect(x + 18, y + 5, w - 36, hh - 10);
+    for (let i = -2; i < w / 16 + 3; i++) {
+      ctx.fillStyle = i % 2 === 0 ? "#3a3228" : "#1c1814";
+      ctx.fillRect(x + i * 16 + scroll, y + 5, 8, hh - 10);
     }
+    ctx.fillStyle = "rgba(255,200,120,0.28)";
+    ctx.fillRect(x + 18, y + 6, w - 36, 3);
     ctx.restore();
-    ctx.shadowColor = "#3dff6a";
-    ctx.shadowBlur = 12 * pulse;
-    ctx.strokeStyle = `rgba(180,255,160,${0.75 + pulse * 0.2})`;
-    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = "#c8a060";
+    ctx.lineWidth = 2;
     ctx.strokeRect(x + 0.5, y + 0.5, w - 1, hh - 1);
     ctx.restore();
   }
@@ -4064,8 +4240,23 @@ export class GameEngine {
         top0: "#ff80c0", top1: "#e04080", top2: "#a02050", top3: "#400820",
         edge: "#702040", rim: "#ff2bd6", rimGlow: "#ff4466", bolt: "#ffb0d0", stroke: "rgba(255,80,180,0.5)",
       },
+      cave: {
+        body0: "#142028", body1: "#0c1418", body2: "#06080c",
+        brickA: "rgba(20,40,48,0.7)", brickB: "rgba(0,0,0,0.45)", brickHi: "rgba(0,240,255,0.14)",
+        top0: "#1a3038", top1: "#102028", top2: "#0a181c", top3: "#060c10",
+        edge: "#0e3038", rim: "#00f0ff", rimGlow: "#00e5ff", bolt: "#7ef9ff", stroke: "rgba(0,240,255,0.4)",
+      },
+      hardpan: {
+        body0: "#3a342c", body1: "#241e18", body2: "#100c0a",
+        brickA: "rgba(70,60,48,0.65)", brickB: "rgba(20,16,12,0.55)", brickHi: "rgba(255,220,160,0.1)",
+        top0: "#6a6258", top1: "#4a443c", top2: "#2e2a24", top3: "#16120e",
+        edge: "#5a5044", rim: "#ffcc66", rimGlow: "#ff9f43", bolt: "#ffe0a0", stroke: "rgba(255,200,120,0.35)",
+      },
     };
-    const m = mats[theme] ?? mats.dunes!;
+    let themeKey: string = theme;
+    if (this.level?.operation === 1 && this.level.id === 2) themeKey = "cave";
+    if (this.level?.operation === 1 && this.level.id === 8) themeKey = "hardpan";
+    const m = mats[themeKey] ?? mats.dunes!;
     const form = p.form ?? (theme === "dunes" ? "mesa" : theme === "bridges" ? "deck" : theme === "spikes" ? "tooth" : theme === "storm" ? "wreck" : theme === "vertical" ? "girder" : theme === "hq" ? "panel" : theme === "boss" ? "hex" : "slab");
 
     // Visual body is TALLER than the hitbox so short ledges still read as buttes / pylons.
@@ -4319,69 +4510,53 @@ export class GameEngine {
     ctx.closePath();
   }
 
-  /** Magenta one-way — thick glass + large up arrows */
+  /** Metal grate. Bridges get a cyan rail. Other rooms take the ledge rim color. */
   private drawOnewayPlate(ctx: CanvasRenderingContext2D, p: Platform) {
     const { x, y, w, h } = p;
-    const pulse = 0.55 + Math.sin(this.time * 3.5 + x * 0.02) * 0.2;
-
-    ctx.fillStyle = "rgba(0,0,0,0.4)";
-    ctx.fillRect(x + 4, y + h, w - 6, 6);
-
-    // Thin glass catwalk — not a candy brick
+    const theme = this.level?.theme ?? "dunes";
+    const rail = theme === "bridges" || theme === "vertical" ? "#7ef9ff" : theme === "hq" || theme === "boss" ? "#ff2bd6" : "#ffcc66";
+    const deckH = Math.min(h, 14);
     ctx.save();
-    ctx.strokeStyle = "rgba(255,43,214,0.35)";
+    ctx.strokeStyle = rail + "55";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(x + w * 0.15, y + h + 18);
-    ctx.lineTo(x + 8, y + 4);
-    ctx.moveTo(x + w * 0.85, y + h + 18);
-    ctx.lineTo(x + w - 8, y + 4);
+    ctx.moveTo(x + w * 0.18, y + deckH + 22);
+    ctx.lineTo(x + 10, y + deckH);
+    ctx.moveTo(x + w * 0.82, y + deckH + 22);
+    ctx.lineTo(x + w - 10, y + deckH);
     ctx.stroke();
-    ctx.restore();
-
-    const g = ctx.createLinearGradient(x, y, x, y + 16);
-    g.addColorStop(0, "rgba(255,180,240,0.95)");
-    g.addColorStop(0.45, "rgba(255,43,214,0.75)");
-    g.addColorStop(1, "rgba(40,8,40,0.35)");
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.roundRect(x, y, w, Math.min(h, 16), 4);
-    ctx.fill();
-    ctx.strokeStyle = "rgba(255,200,250,0.8)";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
+    ctx.fillStyle = "#12161c";
+    ctx.fillRect(x, y, w, deckH);
     ctx.save();
-    ctx.shadowColor = "#ff2bd6";
-    ctx.shadowBlur = 14;
-    ctx.fillStyle = `rgba(255,160,240,${0.85 + pulse * 0.15})`;
-    ctx.fillRect(x + 1, y + 1, w - 2, 6);
-    ctx.restore();
-
-    const chevN = Math.max(1, Math.floor(w / 30));
-    for (let i = 0; i < chevN; i++) {
-      const cx = x + (w / (chevN + 1)) * (i + 1);
-      const cy = y + h * 0.58;
-      ctx.fillStyle = `rgba(255,200,250,${0.6 + pulse * 0.35})`;
+    ctx.beginPath();
+    ctx.rect(x + 2, y + 2, w - 4, deckH - 4);
+    ctx.clip();
+    ctx.strokeStyle = "#3a4450";
+    ctx.lineWidth = 2;
+    for (let i = -2; i < w / 10 + 2; i++) {
       ctx.beginPath();
-      ctx.moveTo(cx, cy - 8);
-      ctx.lineTo(cx + 8, cy + 5);
-      ctx.lineTo(cx - 8, cy + 5);
-      ctx.closePath();
-      ctx.fill();
-      ctx.globalAlpha = 0.4;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(cx + 6, cy + 9);
-      ctx.lineTo(cx - 6, cy + 9);
-      ctx.closePath();
-      ctx.fill();
-      ctx.globalAlpha = 1;
+      ctx.moveTo(x + i * 10, y);
+      ctx.lineTo(x + i * 10 + 8, y + deckH);
+      ctx.stroke();
     }
-
-    ctx.strokeStyle = `rgba(255,138,232,${0.75 + pulse * 0.2})`;
-    ctx.lineWidth = 2.5;
-    ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+    ctx.restore();
+    ctx.fillStyle = rail;
+    ctx.shadowColor = rail;
+    ctx.shadowBlur = 8;
+    ctx.fillRect(x, y, w, 3);
+    ctx.shadowBlur = 0;
+    const n = Math.max(1, Math.floor(w / 48));
+    ctx.fillStyle = rail;
+    for (let i = 0; i < n; i++) {
+      const cx = x + (w / (n + 1)) * (i + 1);
+      ctx.beginPath();
+      ctx.moveTo(cx, y + deckH * 0.35);
+      ctx.lineTo(cx + 5, y + deckH * 0.85);
+      ctx.lineTo(cx - 5, y + deckH * 0.85);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
   }
 
   /** Cyan moving rail — panel seams, big rivets, thrusters */

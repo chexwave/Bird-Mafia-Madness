@@ -151,6 +151,7 @@ export function GameApp() {
   const [showCliff, setShowCliff] = useState(false);
   const [canvasBox, setCanvasBox] = useState({ w: 960, h: 720, lw: 960, lh: 720 });
   const [briefOpen, setBriefOpen] = useState(false);
+  const [briefWipe, setBriefWipe] = useState(false);
   const [pauseWeapon, setPauseWeapon] = useState<WeaponId | null>(null);
 
   useEffect(() => {
@@ -222,6 +223,7 @@ export function GameApp() {
       setCharacter(ch);
       setLevelIdx(lvl);
       setSaveTick((n) => n + 1);
+      setBriefWipe(false);
       setBriefOpen(true);
       setScreen("playing");
     } catch (e) {
@@ -415,12 +417,17 @@ export function GameApp() {
         </FullOverlay>
       )}
       {screen === "playing" && briefOpen && CAMPAIGN[levelIdx] && (
-        <FullOverlay dim>
+        <FullOverlay flush bare wipe={briefWipe}>
           <MissionBrief
             level={CAMPAIGN[levelIdx]!}
             onGo={() => {
-              engineRef.current?.setPaused(false, true);
-              setBriefOpen(false);
+              if (briefWipe) return;
+              setBriefWipe(true);
+              window.setTimeout(() => {
+                engineRef.current?.setPaused(false, true);
+                setBriefOpen(false);
+                setBriefWipe(false);
+              }, 680);
             }}
           />
         </FullOverlay>
@@ -468,7 +475,8 @@ export function GameApp() {
         </FullOverlay>
       )}
       {screen === "dead" && (
-        <FullOverlay dim>
+        <FullOverlay veil>
+          <div className="death-flash" aria-hidden />
           <OverlayCard
             title={hud.lives > 0 ? "Downed!" : "Game Over"}
             body={
@@ -499,7 +507,7 @@ export function GameApp() {
         </FullOverlay>
       )}
       {screen === "win" && (
-        <FullOverlay dim>
+        <FullOverlay veil>
           <OverlayCard
             title={winCopy(CAMPAIGN[levelIdx] ?? CAMPAIGN[0]!, hud.lastChaos).title}
             body={`${winCopy(CAMPAIGN[levelIdx] ?? CAMPAIGN[0]!, hud.lastChaos).body}  Score ${hud.score.toLocaleString()} · Coins ${hud.coins}`}
@@ -549,16 +557,29 @@ function FullOverlay({
   children,
   dim,
   flush,
+  bare,
+  veil,
+  wipe,
 }: {
   children: React.ReactNode;
   dim?: boolean;
   flush?: boolean;
+  bare?: boolean;
+  veil?: boolean;
+  wipe?: boolean;
 }) {
+  const bg = bare || veil
+    ? "bg-transparent"
+    : dim
+      ? "bg-bg/75 backdrop-blur-sm"
+      : flush
+        ? "bg-bg"
+        : "bg-bg/95";
   return (
     <div
-      className={`absolute inset-0 z-40 overflow-y-auto ${
-        flush ? "p-0" : "flex items-center justify-center px-3 py-4"
-      } ${dim ? "bg-bg/75 backdrop-blur-sm" : flush ? "bg-bg" : "bg-bg/95"}`}
+      className={`absolute inset-0 z-40 ${wipe ? "brief-wipe" : "overflow-y-auto"} ${
+        flush || bare ? "p-0" : "flex items-center justify-center px-3 py-4"
+      } ${bg}`}
     >
       {children}
     </div>
@@ -845,23 +866,16 @@ function TitleScreen({
   onSkip: () => void;
   showCliff: boolean;
 }) {
-  if (!showCliff) {
-    return (
-      <button type="button" className="title-sting" onPointerUp={onSkip} aria-label="Continue">
-        <img src="/sprites/logo-sting.jpg?v=title3" alt="" />
-        <div className="sting-load">
-          <p className="sting-load-label">Loading</p>
-          <div className="sting-load-track">
-            <div className="sting-load-bar" />
-          </div>
-        </div>
-      </button>
-    );
-  }
+  const [stingGone, setStingGone] = useState(false);
+  useEffect(() => {
+    if (!showCliff) return;
+    const t = window.setTimeout(() => setStingGone(true), 760);
+    return () => window.clearTimeout(t);
+  }, [showCliff]);
 
   return (
     <div className="title-stage cliff">
-      <picture>
+      <picture className={showCliff ? "cliff-rise" : "cliff-wait"}>
         <source
           media="(max-aspect-ratio: 4/5)"
           srcSet="/sprites/title-hero-portrait.jpg?v=title3"
@@ -872,21 +886,39 @@ function TitleScreen({
           className="title-hero"
         />
       </picture>
-      <div className="title-content">
-        <div className="title-bottom">
-          <button
-            type="button"
-            onClick={onPlay}
-            disabled={loading}
-            className="title-cta stagger-item"
-          >
-            <Play className="title-cta-icon" aria-hidden />
-            {loading ? "Loading…" : "Drop In"}
-          </button>
-          {error && <p className="title-error stagger-item">{error}</p>}
-          <p className="title-hint stagger-item">Tap Drop In to unlock audio</p>
+      {showCliff && (
+        <div className="title-content">
+          <div className="title-bottom">
+            <button
+              type="button"
+              onClick={onPlay}
+              disabled={loading}
+              className="title-cta stagger-item"
+            >
+              <Play className="title-cta-icon" aria-hidden />
+              {loading ? "Loading…" : "Drop In"}
+            </button>
+            {error && <p className="title-error stagger-item">{error}</p>}
+            <p className="title-hint stagger-item">Tap Drop In to unlock audio</p>
+          </div>
         </div>
-      </div>
+      )}
+      {!stingGone && (
+        <button
+          type="button"
+          className={`title-sting ${showCliff ? "sting-leave" : ""}`}
+          onPointerUp={onSkip}
+          aria-label="Continue"
+        >
+          <img src="/sprites/logo-sting.jpg?v=title3" alt="" />
+          <div className="sting-load">
+            <p className="sting-load-label">{showCliff ? "Canyon" : "Loading"}</p>
+            <div className="sting-load-track">
+              <div className="sting-load-bar" />
+            </div>
+          </div>
+        </button>
+      )}
     </div>
   );
 }
@@ -1324,7 +1356,10 @@ function MissionBrief({
   const mark: SeedMark = boss ? "neon" : hex!.mark;
 
   return (
-    <div className="deploy-card">
+    <div className="brief-stage">
+      {plate && <img className="brief-still" src={plate} alt="" />}
+      <div className="brief-dock">
+        <div className="deploy-card">
       <div className="deploy-radio">
         <div className="deploy-radio-top">
           <span className="deploy-radio-mark" aria-hidden>
@@ -1369,6 +1404,8 @@ function MissionBrief({
           <path d="M14 4 L22 10 L14 16" stroke="#00f0ff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" fill="none" />
         </svg>
       </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -1385,7 +1422,7 @@ function OverlayCard({
   children?: ReactNode;
 }) {
   return (
-    <div className="w-full max-w-sm rounded-2xl border border-border bg-surface p-5 text-center shadow-[0_0_40px_#00f0ff33]">
+    <div className="result-card w-full max-w-sm rounded-2xl border border-border bg-surface/95 p-5 text-center shadow-[0_0_40px_#00f0ff33]">
       <h3 className="mb-2 text-2xl font-black">{title}</h3>
       <p className="mb-3 text-sm text-muted">{body}</p>
       {children}

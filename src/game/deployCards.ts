@@ -16,6 +16,8 @@ export type HexCard = {
   nick: string;
   effect: string;
   short: string;
+  /** Chip drawn on the in-world Hex. */
+  tag: string;
   mark: SeedMark;
 };
 
@@ -25,54 +27,63 @@ export const HEX_CARD: Record<ChaosId, HexCard> = {
     nick: "Soul Stabilizer",
     effect: "Permanently adds five max health points.",
     short: "extra health",
+    tag: "HP",
     mark: "heart",
   },
   amber: {
     nick: "Blaster Buff",
     effect: "Raises damage so shots hit harder.",
     short: "a damage boost",
+    tag: "DMG",
     mark: "blast",
   },
   chartreuse: {
     nick: "Mag Multiplier",
     effect: "Increases max ammo for longer fights.",
     short: "more max ammo",
+    tag: "MAG",
     mark: "ammo",
   },
   lime: {
     nick: "Flux Fixer",
     effect: "Extends magnet range for closer pickups.",
     short: "wider magnet range",
+    tag: "FLX",
     mark: "magnet",
   },
   viridian: {
     nick: "Armor Amplifier",
     effect: "Reduces incoming damage from bird hits.",
     short: "damage reduction",
+    tag: "ARM",
     mark: "armor",
   },
   cyan: {
     nick: "Fuel Efficiency",
     effect: "Leans stamina drain for farther runs.",
     short: "a stamina lean",
+    tag: "FUEL",
     mark: "fuel",
   },
   azure: {
     nick: "Tenacity Tuning",
     effect: "Boosts max stamina for longer chases.",
     short: "max stamina",
+    tag: "STM",
     mark: "stamina",
   },
   indigo: {
     nick: "Ammo Augment",
     effect: "Speeds bullet travel to the flock.",
     short: "faster bullets",
+    tag: "SPD",
     mark: "bullet",
   },
   fuchsia: {
     nick: "Force-Field Fortify",
     effect: "Extends shield time so it holds longer.",
     short: "longer shield time",
+    tag: "SHLD",
     mark: "shield",
   },
 };

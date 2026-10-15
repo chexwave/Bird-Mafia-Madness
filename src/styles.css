@@ -796,3 +796,78 @@
   box-shadow: 0 0 18px #00f0ff55, inset 0 0 12px #00f0ff22;
   cursor: pointer;
 }
+
+.title-stage .title-sting {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  transition: transform 0.72s ease, opacity 0.72s ease;
+}
+.title-sting.sting-leave {
+  transform: translateY(14%) scale(0.94);
+  opacity: 0;
+  pointer-events: none;
+}
+.cliff-rise {
+  animation: cliff-rise 0.85s ease both;
+}
+@keyframes cliff-rise {
+  from { transform: translateY(7%); }
+  to { transform: none; }
+}
+.brief-stage {
+  position: absolute;
+  inset: 0;
+  background: #070414;
+}
+.brief-still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+.brief-dock {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  max-height: 68%;
+  padding: 0 8px max(8px, env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, transparent, #070414ee 28%);
+  animation: card-up 0.42s ease both;
+}
+.brief-dock .deploy-card {
+  max-height: 100%;
+  width: min(22.5rem, 100%);
+  box-shadow: 0 -12px 40px #00000088;
+}
+@keyframes card-up {
+  from { transform: translateY(108%); }
+  to { transform: none; }
+}
+.brief-wipe {
+  animation: brief-wipe 0.68s ease forwards;
+  pointer-events: none;
+}
+@keyframes brief-wipe {
+  to { clip-path: inset(0 0 100% 0); opacity: 0.2; }
+}
+.death-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 40%, transparent 10%, #ff204477 62%, #3a0610cc 100%);
+  animation: death-fade 0.75s ease forwards;
+}
+@keyframes death-fade {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.result-card {
+  animation: card-up 0.38s ease both;
+}
