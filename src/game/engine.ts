@@ -1,3 +1,4 @@
+import { asset } from "./asset";
 import { gameAudio } from "./audio";
 import { CAMPAIGN } from "./campaign";
 import { input } from "./input";
@@ -130,7 +131,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
     if (!src.startsWith("blob:")) img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
     img.onerror = reject;
-    img.src = src;
+    img.src = src.startsWith("/sprites") ? asset(src) : src;
   });
 }
 

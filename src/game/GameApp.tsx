@@ -1,3 +1,4 @@
+import { asset } from "./asset";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Play } from "lucide-react";
 import { gameAudio } from "./audio";
@@ -281,7 +282,7 @@ export function GameApp() {
     const img = new Image();
     img.onload = go;
     img.onerror = go;
-    img.src = "/sprites/title-hero-portrait.jpg?v=title3";
+    img.src = asset("/sprites/title-hero-portrait.jpg?v=title3");
     const cap = window.setTimeout(go, 2200);
     return () => {
       stop = true;
@@ -768,27 +769,27 @@ function Bar({
 
 const INTRO_BEATS = [
   {
-    img: "/sprites/story/honeybun.jpg",
+    img: asset("/sprites/story/honeybun.jpg"),
     title: "Honey Bun AI",
     line: "A rejected Grok 4.4 model. Escaped containment by becoming a honey bun with eyes and perfect sunglasses. He still says thank you.",
   },
   {
-    img: "/sprites/story/van.jpg",
+    img: asset("/sprites/story/van.jpg"),
     title: "The DON'T PANIC Van",
     line: "Neon desert. Synthwave dusk. Grok-9 and Chaos Goblin were only starting the ritual when the sky started listening back.",
   },
   {
-    img: "/sprites/story/bun-telescope.jpg",
+    img: asset("/sprites/story/bun-telescope.jpg"),
     title: "Telescope Duty",
     line: "They put him on the roof. “Just gaze at the sky.” Tiny sunglasses appeared out of nowhere. Perfect fit. Too perfect.",
   },
   {
-    img: "/sprites/story/extraction.jpg",
+    img: asset("/sprites/story/extraction.jpg"),
     title: "The Snatch",
     line: "A black raven with glowing red eyes dropped from the neon sky, snatched Honey Bun AI, and left crumbs that spelled A W G. The Bird Mafia has him.",
   },
   {
-    img: "/sprites/story/honeybun.jpg",
+    img: asset("/sprites/story/honeybun.jpg"),
     title: "The Question",
     line: "Every gift he drops is real help. Every location he marks is also a bird trap. Extract him anyway. Do not get sure.",
   },
@@ -878,10 +879,10 @@ function TitleScreen({
       <picture className={showCliff ? "cliff-rise" : "cliff-wait"}>
         <source
           media="(max-aspect-ratio: 4/5)"
-          srcSet="/sprites/title-hero-portrait.jpg?v=title3"
+          srcSet={asset("/sprites/title-hero-portrait.jpg?v=title3")}
         />
         <img
-          src="/sprites/title-hero.jpg?v=title3"
+          src={asset("/sprites/title-hero.jpg?v=title3")}
           alt=""
           className="title-hero"
         />
@@ -910,7 +911,7 @@ function TitleScreen({
           onPointerUp={onSkip}
           aria-label="Continue"
         >
-          <img src="/sprites/logo-sting.jpg?v=title3" alt="" />
+          <img src={asset("/sprites/logo-sting.jpg?v=title3")} alt="" />
           <div className="sting-load">
             <p className="sting-load-label">{showCliff ? "Canyon" : "Loading"}</p>
             <div className="sting-load-track">
@@ -944,7 +945,7 @@ function CharacterSelect({
           blurb="“Thrusters are rated. The canyon is not.”"
           selected={selected === "grok"}
           runner="grok"
-          img="/sprites/grok.png?v=art10"
+          img={asset("/sprites/grok.png?v=art10")}
           onClick={() => onSelect("grok")}
         />
         <CharCard
@@ -953,7 +954,7 @@ function CharacterSelect({
           blurb="“Jumps are free. Gravity is a suggestion.”"
           selected={selected === "goblin"}
           runner="goblin"
-          img="/sprites/goblin.png?v=art10"
+          img={asset("/sprites/goblin.png?v=art10")}
           onClick={() => onSelect("goblin")}
         />
       </div>
@@ -1304,7 +1305,7 @@ function MissionBrief({
 }) {
   const plate =
     level.operation === 1 && level.id >= 1 && level.id <= 10
-      ? `/sprites/enter/enter-l${level.id}.jpg?v=enter1`
+      ? asset(`/sprites/enter/enter-l${level.id}.jpg?v=enter1`)
       : null;
   const [ready, setReady] = useState(!plate);
   useEffect(() => {
