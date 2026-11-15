@@ -282,7 +282,7 @@ export function GameApp() {
     const img = new Image();
     img.onload = go;
     img.onerror = go;
-    img.src = asset("/sprites/title-hero-portrait.jpg?v=title3");
+    img.src = asset("/sprites/title-hero-portrait.jpg?v=title4");
     const cap = window.setTimeout(go, 2200);
     return () => {
       stop = true;
@@ -876,17 +876,11 @@ function TitleScreen({
 
   return (
     <div className="title-stage cliff">
-      <picture className={showCliff ? "cliff-rise" : "cliff-wait"}>
-        <source
-          media="(max-aspect-ratio: 4/5)"
-          srcSet={asset("/sprites/title-hero-portrait.jpg?v=title3")}
-        />
-        <img
-          src={asset("/sprites/title-hero.jpg?v=title3")}
-          alt=""
-          className="title-hero"
-        />
-      </picture>
+      <img
+        src={asset("/sprites/title-hero-portrait.jpg?v=title4")}
+        alt=""
+        className="title-hero"
+      />
       {showCliff && (
         <div className="title-content">
           <div className="title-bottom">
@@ -911,7 +905,7 @@ function TitleScreen({
           onPointerUp={onSkip}
           aria-label="Continue"
         >
-          <img src={asset("/sprites/logo-sting.jpg?v=title3")} alt="" />
+          <img src={asset("/sprites/logo-sting.jpg?v=title4")} alt="" />
           <div className="sting-load">
             <p className="sting-load-label">{showCliff ? "Canyon" : "Loading"}</p>
             <div className="sting-load-track">
@@ -945,7 +939,7 @@ function CharacterSelect({
           blurb="“Thrusters are rated. The canyon is not.”"
           selected={selected === "grok"}
           runner="grok"
-          img={asset("/sprites/grok.png?v=art10")}
+          img={asset("/sprites/grok.png?v=art11")}
           onClick={() => onSelect("grok")}
         />
         <CharCard
@@ -954,7 +948,7 @@ function CharacterSelect({
           blurb="“Jumps are free. Gravity is a suggestion.”"
           selected={selected === "goblin"}
           runner="goblin"
-          img={asset("/sprites/goblin.png?v=art10")}
+          img={asset("/sprites/goblin.png?v=art11")}
           onClick={() => onSelect("goblin")}
         />
       </div>
@@ -1305,7 +1299,7 @@ function MissionBrief({
 }) {
   const plate =
     level.operation === 1 && level.id >= 1 && level.id <= 10
-      ? asset(`/sprites/enter/enter-l${level.id}.jpg?v=enter1`)
+      ? asset(`/sprites/enter/enter-l${level.id}.jpg?v=enter2`)
       : null;
   const [ready, setReady] = useState(!plate);
   useEffect(() => {

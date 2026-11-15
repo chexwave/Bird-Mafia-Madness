@@ -378,7 +378,7 @@ export class GameEngine {
 
   async load() {
     const loadHero = (src: string) =>
-      fetch(src, { cache: "no-store" })
+      fetch(asset(src), { cache: "no-store" })
         .then((r) => {
           if (!r.ok) throw new Error(String(r.status));
           return r.blob();
@@ -387,7 +387,7 @@ export class GameEngine {
           const url = URL.createObjectURL(blob);
           return loadImage(url).finally(() => URL.revokeObjectURL(url));
         })
-        .catch(() => loadImage(src).catch(() => null));
+        .catch(() => loadImage(asset(src)).catch(() => null));
     const [
       grokIdle, grokRun, grokJump, grokAttack, grokHurt,
       goblinIdle, goblinRun, goblinJump, goblinAttack, goblinHurt,
