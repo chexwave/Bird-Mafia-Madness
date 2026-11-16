@@ -394,7 +394,7 @@ export class GameEngine {
       bird, boss, props
     ] = await Promise.all([
       loadHero("/sprites/characters/grok-idle.png?v=hero13"),
-      loadHero("/sprites/characters/grok-run.png?v=hero7"),
+      loadHero("/sprites/characters/grok-run.png?v=hero8"),
       loadHero("/sprites/characters/grok-jump.png?v=jump3"),
       loadHero("/sprites/characters/grok-attack.png?v=hero6"),
       loadHero("/sprites/characters/grok-hurt.png?v=hero6"),
